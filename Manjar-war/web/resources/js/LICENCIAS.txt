@@ -1,0 +1,15 @@
+Código de terceros incluido en esta carpeta
+===========================================
+
+qrcode.js  -  "QR Code Generator for JavaScript" (qrcode-generator 1.4.4)
+Copyright (c) 2009 Kazuhiko Arase
+http://www.d-project.com/
+Licencia MIT: https://opensource.org/licenses/MIT
+
+Se permite usar, copiar, modificar y distribuir este software, siempre que se
+conserve este aviso de derechos de autor y el texto de la licencia. El software
+se entrega "tal cual", sin garantía de ningún tipo.
+
+"QR Code" es una marca registrada de DENSO WAVE INCORPORATED.
+
+mj-negocio.js y mj-qr.js son código propio del proyecto Manjar.

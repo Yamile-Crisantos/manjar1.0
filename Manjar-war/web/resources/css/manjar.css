@@ -5,7 +5,7 @@
 
    Paleta (la misma de la presentación del proyecto):
      crema #FFFAF2 · café oscuro #2E2521 · terracota #CC4E27
-   Tipografías: Playfair Display (títulos) y Montserrat (texto),
+   Tipografías: Playfair Display (títulos), Montserrat (texto) y Nunito (estilo "cálido"),
    empacadas en resources/fonts, así que funcionan sin internet.
    Para cambiar los colores basta con editar las variables de abajo.
 
@@ -14,6 +14,8 @@
      2. Encabezado y navegación     6. Acceso y registro
      3. Piezas reutilizables        7. Administración (formularios, tablas, diálogos)
      4. Mensajes, pie y pantallas pequeñas
+     (antes del 4: registro de negocio, "Mi negocio" y página del QR)
+     8. Al final: vista de comensal (el menú vestido con la marca del negocio) y estilos del menú
    ========================================================== */
 
 /* ---------- 1. Fuentes, variables y base ---------- */
@@ -34,6 +36,22 @@
 }
 
 @font-face {
+    font-family: "Nunito";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:nunito-400.woff2']}") format("woff2");
+}
+
+@font-face {
+    font-family: "Nunito";
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:nunito-800.woff2']}") format("woff2");
+}
+
+@font-face {
     font-family: "Playfair Display";
     font-weight: 700;
     font-style: normal;
@@ -51,6 +69,7 @@
     --mj-border-strong: #d6c6b4;
     --mj-tint: #f7ece0;
     --mj-accent: #cc4e27;
+    --mj-accent-claro: #f2a283;   /* el acento aclarado, para textos sobre fondo oscuro */
     --mj-primary: #c44a24;
     --mj-primary-dark: #a33a19;
     --mj-ok: #3d6b4b;
@@ -142,7 +161,7 @@ body.manjar {
 }
 
 .manjar a {
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 .manjar-muted {
@@ -241,7 +260,7 @@ body.manjar {
 .manjar .ui-menubar .ui-menuitem.ui-menuitem-active > .ui-menuitem-link {
     background: var(--mj-tint);
     border-color: transparent;
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 /* Opciones "Próximamente" */
@@ -285,7 +304,7 @@ body.manjar {
 
 .manjar a.manjar-login-sec:hover {
     background: var(--mj-tint);
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 .manjar a.manjar-link-suave {
@@ -376,7 +395,7 @@ body.manjar {
 
 .manjar a.manjar-btn.manjar-btn-sec:hover {
     background: var(--mj-tint);
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 .manjar-actions {
@@ -565,7 +584,7 @@ body.manjar {
 }
 
 .manjar .mj-banner .mj-eyebrow {
-    color: #f2a283;
+    color: var(--mj-accent-claro);
 }
 
 .manjar .mj-banner .mj-lead,
@@ -583,7 +602,7 @@ body.manjar {
 }
 
 .manjar .mj-banner a:not(.manjar-btn) {
-    color: #ffc7ad;
+    color: var(--mj-accent-claro);
 }
 
 .manjar .mj-banner a.manjar-btn.manjar-btn-sec {
@@ -597,56 +616,215 @@ body.manjar {
     color: #fff;
 }
 
-/* Tarjetas de negocios */
-.mj-negocios {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
+/* Página de inicio: Manjar como servicio que se contrata */
+.mj-banner.mj-hero {
+    align-items: center;
+    padding: 34px 36px;
 }
 
-.mj-negocio {
+.mj-hero-texto {
+    flex: 1 1 340px;
+}
+
+.manjar .mj-hero h1 {
+    font-size: 34px;
+}
+
+.mj-hero .manjar-actions {
+    margin-top: 24px;
+}
+
+.mj-hero-muestra {
+    flex: 0 1 270px;
+}
+
+/* Dibujo de ejemplo de un menú personalizado (sin datos reales) */
+.mj-muestra {
+    padding: 16px 18px 14px;
+    border-left: 6px solid var(--mj-accent);
+    border-radius: 6px 12px 12px 6px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+.mj-muestra strong {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mj-muestra small {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-muestra-linea {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 0;
+    border-top: 1px solid var(--mj-border);
+}
+
+.mj-esqueleto {
+    display: block;
+    height: 8px;
+    border-radius: 8px;
+    background: var(--mj-border);
+}
+
+.mj-esqueleto.largo {
+    flex: 1;
+}
+
+.mj-esqueleto.precio {
+    width: 38px;
+    background: var(--mj-accent);
+}
+
+.mj-muestra-colores {
+    display: flex;
+    gap: 7px;
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--mj-border);
+}
+
+.mj-muestra-colores i {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.mj-modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.mj-modulo {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px;
+    gap: 6px;
+    padding: 16px 18px 14px;
     background: var(--mj-card);
     border: 1px solid var(--mj-border);
     border-radius: var(--mj-radius);
     box-shadow: var(--mj-shadow);
-    transition: box-shadow .15s, border-color .15s;
 }
 
-.mj-negocio:hover {
-    border-color: var(--mj-border-strong);
-    box-shadow: var(--mj-shadow-hover);
+.mj-modulo.pronto {
+    background: transparent;
+    box-shadow: none;
 }
 
-.manjar .mj-negocio-top h3 {
+.manjar .mj-modulo h3 {
     margin: 0;
     font-family: var(--mj-font-title);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
 }
 
-.mj-negocio-top p {
-    margin: 4px 0 0;
+.mj-modulo p {
+    flex: 1;
+    margin: 0;
     color: var(--mj-muted);
     font-size: 13.5px;
 }
 
-.mj-negocio-foot {
+.mj-modulo-pie {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    margin-top: 4px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
 }
 
-.mj-negocio-foot .manjar-btn {
-    margin-left: auto;
+.mj-pasos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: paso;
+}
+
+.mj-pasos li {
+    position: relative;
+    padding: 16px 18px 16px 62px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    counter-increment: paso;
+}
+
+.mj-pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    top: 15px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+    font-family: var(--mj-font-title);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: lining-nums;
+}
+
+.mj-pasos strong {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mj-pasos span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.manjar .mj-pasos a {
+    text-decoration: none;
+}
+
+.manjar .mj-pasos a:hover {
+    text-decoration: underline;
+}
+
+.mj-banner.mj-cierre {
+    align-items: center;
+    margin-top: 30px;
+}
+
+.manjar .mj-cierre h2 {
+    margin: 0;
+    color: var(--mj-on-dark);
 }
 
 /* Menú de un negocio */
+.manjar .mj-rest-lema {
+    margin: 10px 0 0;
+    color: var(--mj-on-dark);
+    font-size: 16px;
+    font-style: italic;
+}
+
 .mj-rest-dir {
     margin: 8px 0 0;
     font-size: 14px;
@@ -689,7 +867,7 @@ body.manjar {
 .mj-catnav a:hover {
     border-color: var(--mj-accent);
     background: var(--mj-tint);
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 .manjar .mj-platos + .mj-titulo-seccion,
@@ -745,7 +923,7 @@ body.manjar {
 }
 
 .mj-precio {
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
     font-family: var(--mj-font-title);
     font-size: 17px;
     font-weight: 700;
@@ -840,7 +1018,7 @@ body.manjar {
 }
 
 .manjar a.mj-accion:hover strong {
-    color: var(--mj-primary-dark);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
 .mj-accion > span {
@@ -1234,6 +1412,336 @@ body.manjar .ui-dialog .ui-dialog-content {
     padding: 14px 18px 16px;
 }
 
+/* ---------- Registro de negocio y "Mi negocio" ---------- */
+.mj-auth.ancho {
+    max-width: 580px;
+}
+
+.mj-grupo {
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+}
+
+.mj-grupo legend {
+    margin-bottom: 10px;
+    padding: 0;
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mj-ayuda {
+    display: block;
+    margin-top: 4px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-edicion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 22px;
+    align-items: start;
+}
+
+.mj-edicion .mj-panel {
+    margin-bottom: 0;
+}
+
+.mj-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 13px 5px 5px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.mj-swatch i {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+}
+
+.mj-swatch:hover {
+    border-color: var(--mj-ink);
+}
+
+.mj-swatch[aria-checked="true"] {
+    border-color: var(--mj-ink);
+    box-shadow: 0 0 0 1px var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-swatch:focus-visible {
+    outline: 2px solid var(--mj-ink);
+    outline-offset: 2px;
+}
+
+.mj-contador {
+    margin-top: 2px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+    text-align: right;
+}
+
+/* Vista previa del menú (usa las variables de color del tema elegido) */
+.mj-previa {
+    padding: 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-cream);
+    position: sticky;
+    top: 16px;
+}
+
+.mj-previa-titulo {
+    margin: 0 0 10px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.mj-previa-banner {
+    padding: 14px 16px;
+    border-left: 5px solid var(--mj-accent);
+    border-radius: 5px 10px 10px 5px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+}
+
+.mj-previa-banner small {
+    display: block;
+    color: var(--mj-accent-claro);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.mj-previa-banner strong {
+    display: block;
+    overflow-wrap: anywhere;
+    font-family: var(--mj-font-title);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.mj-previa-banner em {
+    display: block;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+    color: var(--mj-on-dark-muted);
+    font-size: 13px;
+}
+
+.mj-previa-banner em:empty {
+    display: none;
+}
+
+.mj-previa-plato {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-previa-plato .mj-esqueleto.precio {
+    background: var(--mj-primary);
+}
+
+.mj-previa-boton {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--mj-primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.mj-previa-nota {
+    margin: 10px 0 0;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+/* Página del código QR */
+.mj-qr-pagina {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.mj-qr-hoja {
+    padding: 22px 20px;
+    border: 1px solid var(--mj-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: var(--mj-shadow);
+    text-align: center;
+}
+
+.mj-qr-hoja canvas {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.mj-qr-nombre {
+    margin: 0 0 4px;
+    font-family: var(--mj-font-title);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.mj-qr-leyenda {
+    margin: 0 0 8px;
+    color: var(--mj-muted);
+    font-size: 14px;
+}
+
+.mj-qr-enlace {
+    margin: 8px 0 0;
+    color: var(--mj-muted);
+    font-size: 11.5px;
+    word-break: break-all;
+}
+
+.mj-qr-controles .manjar-field {
+    margin-bottom: 14px;
+}
+
+.mj-qr-controles input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    font: inherit;
+}
+
+.mj-qr-controles label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mj-boton {
+    display: inline-block;
+    padding: 9px 18px;
+    border: 1px solid var(--mj-primary);
+    border-radius: 8px;
+    background: var(--mj-primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mj-boton:hover {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.mj-boton.sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.mj-boton.sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+/* Primeros pasos del dueño que acaba de registrar su negocio */
+.mj-primeros {
+    margin: 22px 0 0;
+    padding: 18px 20px 20px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.manjar .mj-primeros h2 {
+    margin: 0 0 4px;
+}
+
+.mj-primeros p {
+    margin: 0 0 14px;
+    color: var(--mj-muted);
+}
+
+.mj-primeros .mj-pasos li {
+    box-shadow: none;
+    background: var(--mj-cream);
+}
+
+@media print {
+    .manjar-header,
+    .manjar-nav,
+    .manjar-footer,
+    .manjar-crumbs,
+    .manjar .ui-growl,
+    .mj-qr-controles,
+    .mj-qr-pagina ~ *,
+    .mj-pagina-cab {
+        display: none !important;
+    }
+    body.manjar {
+        background: #fff;
+    }
+    .manjar-main {
+        padding: 0;
+    }
+    .mj-qr-pagina {
+        display: block;
+    }
+    .mj-qr-hoja {
+        border: 0;
+        box-shadow: none;
+        padding: 40px 0 0;
+    }
+    .mj-qr-hoja canvas {
+        max-width: 420px;
+    }
+    .mj-qr-nombre {
+        font-size: 34px;
+    }
+    .mj-qr-leyenda {
+        font-size: 18px;
+    }
+}
+
 /* ---------- 4. Mensajes, pie y pantallas pequeñas ---------- */
 
 /* Mensajes emergentes: abajo a la derecha, para no tapar el encabezado */
@@ -1312,11 +1820,21 @@ body.manjar .ui-dialog .ui-dialog-content {
     .manjar-spacer {
         display: none;
     }
-    .mj-negocios {
+    .mj-banner.mj-hero {
+        padding: 24px 20px;
+    }
+    .manjar .mj-hero h1 {
+        font-size: 26px;
+    }
+    .mj-hero-muestra {
+        flex-basis: 100%;
+    }
+    .mj-edicion,
+    .mj-qr-pagina {
         grid-template-columns: 1fr;
     }
-    .mj-negocio-foot .manjar-btn {
-        margin-left: 0;
+    .mj-previa {
+        position: static;
     }
     .mj-auth-form {
         padding: 20px 18px;
@@ -1324,5 +1842,418 @@ body.manjar .ui-dialog .ui-dialog-content {
     .manjar .ui-growl {
         right: 12px;
         bottom: 12px;
+    }
+}
+
+/* ==========================================================
+   8. Vista de comensal y estilos del menú
+   El comensal (quien escanea el QR) ve el menú vestido con la marca del negocio.
+   Las clases mj-diseno-*, mj-tipo-*, mj-esq-* y mj-fondo-* se ponen en el body (o en la
+   vista previa de "Mi negocio") y solo cambian variables, así que sirven en los dos lugares.
+   Los colores del acento (--mj-accent, --mj-dark, --mj-tint, --mj-link...) los pone el servidor.
+   ========================================================== */
+
+/* Tipografía */
+.mj-tipo-moderna {
+    --mj-font-title: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+
+.mj-tipo-calida {
+    --mj-font: "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --mj-font-title: "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+
+.mj-tipo-moderna h1,
+.mj-tipo-moderna h2,
+.mj-tipo-moderna .mj-precio,
+.mj-tipo-calida h1,
+.mj-tipo-calida h2,
+.mj-tipo-calida .mj-precio {
+    font-variant-numeric: normal;
+    font-feature-settings: normal;
+}
+
+.mj-tipo-calida h1,
+.mj-tipo-calida h2,
+.mj-tipo-calida .manjar-brand-name,
+.mj-tipo-calida .mj-precio {
+    font-weight: 800;
+}
+
+.mj-tipo-moderna h1,
+.mj-tipo-moderna .manjar-brand-name {
+    font-weight: 600;
+}
+
+/* Esquinas rectas */
+.mj-esq-rectas {
+    --mj-radius: 2px;
+}
+
+.mj-esq-rectas .mj-banner,
+.mj-esq-rectas .mj-previa-banner,
+.mj-esq-rectas .mj-catnav a,
+.mj-esq-rectas .manjar-btn,
+.mj-esq-rectas .manjar-badge,
+.mj-esq-rectas .mj-chip,
+.mj-esq-rectas .mj-cta,
+.mj-esq-rectas .mj-previa-boton {
+    border-radius: 2px;
+}
+
+/* Fondo oscuro */
+.mj-fondo-oscuro {
+    --mj-cream: #1d1a18;
+    --mj-card: #2a2522;
+    --mj-ink: #f4ece3;
+    --mj-muted: #b9ab9e;
+    --mj-border: #3e3732;
+    --mj-border-strong: #5a5048;
+    --mj-ok: #8fd0a1;
+    --mj-ok-bg: #243a2c;
+    --mj-off: #f0a595;
+    --mj-off-bg: #4a2620;
+    --mj-warn: #f2c46d;
+    --mj-warn-bg: #46341a;
+    --mj-shadow: none;
+    --mj-shadow-hover: none;
+    color-scheme: dark;
+}
+
+.mj-fondo-oscuro .mj-swatch,
+.mj-fondo-oscuro .manjar-btn.manjar-btn-sec {
+    background: var(--mj-card);
+}
+
+/* Diseño "lista": una carta clásica, sin recuadros */
+.mj-diseno-lista .mj-platos {
+    display: block;
+    max-width: 640px;
+}
+
+.mj-diseno-lista .mj-plato,
+.mj-diseno-lista .mj-previa-plato {
+    padding: 11px 0;
+    border: 0;
+    border-bottom: 1px dashed var(--mj-border-strong);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.mj-diseno-lista .mj-plato:last-child {
+    border-bottom: 0;
+}
+
+/* Encabezado con la marca del negocio */
+.mj-comensal .manjar-brand-name {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 20px;
+    letter-spacing: .06em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.mj-comensal .manjar-header-inner > a {
+    min-width: 0;
+    max-width: 70%;
+}
+
+.mj-comensal-nav {
+    background: var(--mj-card);
+}
+
+.mj-comensal-menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin: 0;
+    padding: 6px 0 6px 0;
+}
+
+.mj-comensal-menu a {
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--mj-radius);
+    color: var(--mj-ink);
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.mj-comensal-menu a:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.mj-comensal-menu .mj-espacio {
+    flex: 1 1 auto;
+}
+
+.mj-comensal-menu a.mj-cta {
+    border-color: var(--mj-primary);
+    background: var(--mj-primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.mj-comensal-menu a.mj-cta:hover {
+    border-color: var(--mj-primary-dark);
+    background: var(--mj-primary-dark);
+    color: #fff;
+}
+
+.mj-comensal-menu a.mj-cta.mj-cta-sec {
+    background: transparent;
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.mj-comensal-menu a.mj-cta.mj-cta-sec:hover {
+    background: var(--mj-tint);
+}
+
+/* Barra para el personal que ve su menú como lo ve el cliente */
+.mj-vistaprevia {
+    background: #2e2521;
+    color: #fff4e8;
+    font-size: 13.5px;
+}
+
+.mj-vistaprevia-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 18px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 7px 16px;
+    box-sizing: border-box;
+}
+
+.mj-vistaprevia-inner span {
+    margin-right: auto;
+    color: #d2c3b5;
+}
+
+.manjar .mj-vistaprevia a {
+    color: #fff4e8;
+    font-weight: 600;
+}
+
+/* Aviso del día, horario y contacto */
+.mj-aviso-dia {
+    margin-top: 14px;
+    padding: 11px 16px;
+    border: 1px solid var(--mj-accent);
+    border-left-width: 5px;
+    border-radius: var(--mj-radius);
+    background: var(--mj-tint);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mj-contacto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 18px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.mj-horario {
+    color: var(--mj-muted);
+    overflow-wrap: anywhere;
+}
+
+.mj-horario b {
+    margin-right: 4px;
+    color: var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-contacto-enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.manjar .mj-chip {
+    display: inline-block;
+    padding: 4px 14px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.manjar .mj-chip:hover {
+    border-color: var(--mj-accent);
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+/* "Mi negocio": secciones y selectores de estilo */
+.mj-seccion {
+    margin: 22px 0 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--mj-border);
+}
+
+.manjar .mj-seccion h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.mj-seccion-ayuda {
+    margin: 2px 0 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-width: 120px;
+    padding: 8px 14px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mj-opcion small {
+    color: var(--mj-muted);
+    font-size: 12px;
+}
+
+.mj-opcion:hover {
+    border-color: var(--mj-ink);
+}
+
+.mj-opcion[aria-checked="true"] {
+    border-color: var(--mj-ink);
+    box-shadow: 0 0 0 1px var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-opcion:focus-visible {
+    outline: 2px solid var(--mj-ink);
+    outline-offset: 2px;
+}
+
+/* Cada opción de tipografía se muestra con su propia letra */
+.mj-opcion.mj-tipo-clasica,
+.mj-opcion.mj-tipo-moderna,
+.mj-opcion.mj-tipo-calida {
+    font-family: var(--mj-font-title);
+}
+
+.mj-opcion.mj-tipo-clasica small,
+.mj-opcion.mj-tipo-moderna small,
+.mj-opcion.mj-tipo-calida small {
+    font-family: var(--mj-font);
+}
+
+.mj-dos-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+}
+
+/* Vista previa: aviso, platillos y contacto de ejemplo */
+.mj-previa {
+    color: var(--mj-ink);
+    font-family: var(--mj-font);
+}
+
+.mj-previa .mj-aviso-dia {
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.mj-previa .mj-aviso-dia:empty {
+    display: none;
+}
+
+.mj-previa .mj-contacto {
+    margin-top: 8px;
+    font-size: 12.5px;
+}
+
+.mj-previa .mj-contacto:empty {
+    display: none;
+}
+
+.mj-previa-plato b {
+    display: block;
+    font-size: 14px;
+}
+
+.mj-previa-plato span.mj-previa-desc {
+    display: block;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-previa-plato .mj-previa-precio {
+    color: var(--mj-link, var(--mj-primary-dark));
+    font-family: var(--mj-font-title);
+    font-weight: 700;
+}
+
+.mj-previa-banner strong {
+    font-family: var(--mj-font-title);
+}
+
+@media (max-width: 700px) {
+    .mj-dos-col {
+        grid-template-columns: 1fr;
+    }
+    .mj-comensal-menu {
+        gap: 2px;
+    }
+    .mj-comensal-menu a {
+        padding: 6px 8px;
+        font-size: 13.5px;
+    }
+    .mj-comensal-menu .mj-espacio {
+        display: none;
+    }
+    .mj-comensal-menu a.mj-cta {
+        margin-left: auto;
+    }
+    .mj-comensal .manjar-brand-name {
+        font-size: 17px;
+    }
+    .mj-contacto {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media print {
+    .mj-vistaprevia {
+        display: none;
     }
 }

@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Código QR · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Mi menú"/>
+                    <ui:param name="actual" value="Código QR"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <h:outputScript library="js" name="qrcode.js"/>
+                <h:outputScript library="js" name="mj-qr.js"/>
+
+                <div class="mj-pagina-cab">
+                    <div>
+                        <h1>Código QR de tu menú</h1>
+                        <p class="mj-lead">Imprímelo y ponlo en tus mesas o en la entrada. Al escanearlo, tus clientes ven
+                            tu menú del día con precios y disponibilidad, sin instalar ninguna aplicación.</p>
+                    </div>
+                </div>
+
+                <div id="mj-qr-datos" data-ruta="#{qrBean.rutaMenu}" data-codigo="#{qrBean.codigo}"></div>
+
+                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty qrBean.codigo}">
+                    Tu cuenta todavía no tiene un negocio asignado.
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="mj-qr-pagina" rendered="#{not empty qrBean.codigo}">
+
+                    <div class="mj-qr-hoja">
+                        <p class="mj-qr-nombre"><h:outputText value="#{sesion.establecimientoNombre}"/></p>
+                        <p class="mj-qr-leyenda">Escanea para ver nuestro menú del día</p>
+                        <canvas id="mj-qr" width="280" height="280" aria-label="Código QR del menú"></canvas>
+                        <p class="mj-qr-enlace" id="mj-qr-enlace"></p>
+                    </div>
+
+                    <div class="mj-qr-controles">
+                        <div class="mj-panel">
+                            <div class="manjar-field">
+                                <label for="mj-servidor">Dirección del servidor</label>
+                                <input type="text" id="mj-servidor" autocomplete="off" spellcheck="false"/>
+                                <span class="mj-ayuda">Es la dirección desde la que tus clientes abren Manjar. El QR lleva esta dirección más la de tu menú.</span>
+                            </div>
+                            <p id="mj-qr-aviso" class="manjar-aviso warn" style="display:none"></p>
+                            <p id="mj-qr-local" class="manjar-aviso warn" style="display:none">
+                                Esta dirección es de tu propia computadora (localhost): el QR solo funcionará en ella.
+                                Para probarlo con un celular conectado a la misma red, escribe aquí la dirección de tu
+                                computadora, por ejemplo <code>http://192.168.1.20:8080</code>.
+                            </p>
+                            <div class="manjar-actions">
+                                <button type="button" class="mj-boton" onclick="mjDescargarQr()">Descargar imagen (PNG)</button>
+                                <button type="button" class="mj-boton sec" onclick="mjImprimirQr()">Imprimir</button>
+                                <a id="mj-qr-abrir" class="manjar-btn manjar-btn-sec" href="#" target="_blank" rel="noopener">Abrir el menú</a>
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

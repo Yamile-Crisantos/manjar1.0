@@ -1,0 +1,205 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Mi negocio · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Mi menú"/>
+                    <ui:param name="actual" value="Mi negocio"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <h:outputScript library="js" name="mj-negocio.js"/>
+
+                <div class="mj-pagina-cab">
+                    <div>
+                        <h1>Mi negocio</h1>
+                        <p class="mj-lead">Personaliza cómo ven tu menú tus clientes cuando escanean tu código QR: colores, estilo, contacto y avisos.</p>
+                    </div>
+                </div>
+
+                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{not negocioBean.cargado}">
+                    Tu cuenta todavía no tiene un negocio asignado.
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="mj-edicion" rendered="#{negocioBean.cargado}">
+
+                    <div class="mj-panel">
+                        <h:form id="formNegocio" styleClass="manjar-form">
+
+                            <div class="manjar-field">
+                                <p:outputLabel for="nombre" value="Nombre del negocio"/>
+                                <p:inputText id="nombre" value="#{negocioBean.datos.nombre}" maxlength="255"
+                                             required="true" requiredMessage="Escribe el nombre de tu negocio."/>
+                            </div>
+                            <div class="manjar-field">
+                                <p:outputLabel for="direccion" value="Dirección"/>
+                                <p:inputText id="direccion" value="#{negocioBean.datos.direccion}" maxlength="255"/>
+                            </div>
+                            <div class="manjar-field">
+                                <p:outputLabel for="lema" value="Lema"/>
+                                <p:inputText id="lema" value="#{negocioBean.datos.lema}" maxlength="120"
+                                             placeholder="Comida casera, hecha cada día"/>
+                                <div class="mj-contador" data-de="formNegocio:lema" data-max="120">0 / 120</div>
+                            </div>
+
+                            <div class="mj-seccion">
+                                <h2>Cómo se ve</h2>
+                                <p class="mj-seccion-ayuda">Lo que elijas aquí lo ven tus clientes al abrir tu menú.</p>
+                            </div>
+
+                            <div class="manjar-field">
+                                <label>Color</label>
+                                <h:inputHidden id="color" value="#{negocioBean.datos.color}"/>
+                                <div class="mj-swatches" role="radiogroup" aria-label="Color de tu menú">
+                                    <ui:repeat value="#{temasBean.lista}" var="t">
+                                        <button type="button" class="mj-swatch" role="radio"
+                                                aria-checked="#{t.hex eq negocioBean.datos.color ? 'true' : 'false'}"
+                                                data-hex="#{t.hex}" data-oscuro="#{t.oscuro}" data-suave="#{t.suave}"
+                                                data-claro="#{t.claro}" data-profundo="#{t.profundo}" data-suave-oscuro="#{t.suaveOscuro}"
+                                                onclick="mjElegirColor(this)"><i style="background:#{t.hex}"></i>#{t.nombre}</button>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+
+                            <div class="manjar-field">
+                                <label>Diseño de los platillos</label>
+                                <h:inputHidden id="diseno" value="#{negocioBean.datos.diseno}"/>
+                                <div class="mj-opciones" role="radiogroup" aria-label="Diseño de los platillos">
+                                    <ui:repeat value="#{temasBean.disenos}" var="o">
+                                        <button type="button" class="mj-opcion" role="radio"
+                                                aria-checked="#{o.valor eq negocioBean.datos.diseno ? 'true' : 'false'}"
+                                                data-grupo="diseno" data-valor="#{o.valor}"
+                                                onclick="mjElegirOpcion(this)">#{o.nombre}<small>#{o.descripcion}</small></button>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+
+                            <div class="manjar-field">
+                                <label>Tipografía</label>
+                                <h:inputHidden id="tipografia" value="#{negocioBean.datos.tipografia}"/>
+                                <div class="mj-opciones" role="radiogroup" aria-label="Tipografía">
+                                    <ui:repeat value="#{temasBean.tipografias}" var="o">
+                                        <button type="button" class="mj-opcion mj-tipo-#{o.valor}" role="radio"
+                                                aria-checked="#{o.valor eq negocioBean.datos.tipografia ? 'true' : 'false'}"
+                                                data-grupo="tipografia" data-valor="#{o.valor}"
+                                                onclick="mjElegirOpcion(this)">#{o.nombre}<small>#{o.descripcion}</small></button>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+
+                            <div class="manjar-field">
+                                <label>Esquinas</label>
+                                <h:inputHidden id="esquinas" value="#{negocioBean.datos.esquinas}"/>
+                                <div class="mj-opciones" role="radiogroup" aria-label="Esquinas">
+                                    <ui:repeat value="#{temasBean.esquinas}" var="o">
+                                        <button type="button" class="mj-opcion" role="radio"
+                                                aria-checked="#{o.valor eq negocioBean.datos.esquinas ? 'true' : 'false'}"
+                                                data-grupo="esquinas" data-valor="#{o.valor}"
+                                                onclick="mjElegirOpcion(this)">#{o.nombre}<small>#{o.descripcion}</small></button>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+
+                            <div class="manjar-field">
+                                <label>Fondo</label>
+                                <h:inputHidden id="fondo" value="#{negocioBean.datos.fondo}"/>
+                                <div class="mj-opciones" role="radiogroup" aria-label="Fondo">
+                                    <ui:repeat value="#{temasBean.fondos}" var="o">
+                                        <button type="button" class="mj-opcion" role="radio"
+                                                aria-checked="#{o.valor eq negocioBean.datos.fondo ? 'true' : 'false'}"
+                                                data-grupo="fondo" data-valor="#{o.valor}"
+                                                onclick="mjElegirOpcion(this)">#{o.nombre}<small>#{o.descripcion}</small></button>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+
+                            <div class="mj-seccion">
+                                <h2>Aviso del día</h2>
+                                <p class="mj-seccion-ayuda">Un mensaje destacado arriba de tu menú. Déjalo vacío para quitarlo.</p>
+                            </div>
+                            <div class="manjar-field">
+                                <p:inputText id="aviso" value="#{negocioBean.datos.aviso}" maxlength="160"
+                                             placeholder="Hoy 2x1 en aguas frescas"/>
+                                <div class="mj-contador" data-de="formNegocio:aviso" data-max="160">0 / 160</div>
+                            </div>
+
+                            <div class="mj-seccion">
+                                <h2>Contacto y horario</h2>
+                                <p class="mj-seccion-ayuda">Lo que llenes aparece en tu menú. Lo que dejes vacío no se muestra.</p>
+                            </div>
+                            <div class="mj-dos-col">
+                                <div class="manjar-field">
+                                    <p:outputLabel for="telefono" value="Teléfono"/>
+                                    <p:inputText id="telefono" value="#{negocioBean.datos.telefono}" maxlength="20"
+                                                 placeholder="951 123 4567"/>
+                                </div>
+                                <div class="manjar-field">
+                                    <p:outputLabel for="whatsapp" value="WhatsApp"/>
+                                    <p:inputText id="whatsapp" value="#{negocioBean.datos.whatsapp}" maxlength="20"
+                                                 placeholder="951 123 4567"/>
+                                </div>
+                                <div class="manjar-field">
+                                    <p:outputLabel for="instagram" value="Instagram (usuario)"/>
+                                    <p:inputText id="instagram" value="#{negocioBean.datos.instagram}" maxlength="60"
+                                                 placeholder="fondalupe"/>
+                                </div>
+                                <div class="manjar-field">
+                                    <p:outputLabel for="facebook" value="Facebook (nombre de la página)"/>
+                                    <p:inputText id="facebook" value="#{negocioBean.datos.facebook}" maxlength="100"
+                                                 placeholder="fondalupe.oaxaca"/>
+                                </div>
+                            </div>
+                            <div class="manjar-field">
+                                <p:outputLabel for="horario" value="Horario"/>
+                                <p:inputText id="horario" value="#{negocioBean.datos.horario}" maxlength="255"
+                                             placeholder="Lunes a sábado de 8:00 a 17:00"/>
+                            </div>
+
+                            <div class="manjar-form-actions">
+                                <p:commandButton value="Guardar cambios" action="#{negocioBean.guardar}" ajax="false"/>
+                                <p:button value="Ver mi menú" outcome="/vistas/menu" styleClass="manjar-btn-sec"/>
+                            </div>
+                        </h:form>
+                    </div>
+
+                    <aside id="mj-previa" class="mj-previa #{negocioBean.datos.clases}" style="#{negocioBean.datos.estiloTema}">
+                        <p class="mj-previa-titulo">Vista previa</p>
+                        <div class="mj-previa-banner">
+                            <small>Menú del día</small>
+                            <strong id="mj-prev-nombre"><h:outputText value="#{negocioBean.datos.nombre}"/></strong>
+                            <em id="mj-prev-lema"><h:outputText value="#{negocioBean.datos.lema}"/></em>
+                        </div>
+                        <div id="mj-prev-aviso" class="mj-aviso-dia"><h:outputText value="#{negocioBean.datos.aviso}"/></div>
+                        <div class="mj-previa-platos">
+                            <div class="mj-previa-plato"><div><b>Orden de tacos</b><span class="mj-previa-desc">Con piña y cebolla</span></div><span class="mj-previa-precio">$65.00</span></div>
+                            <div class="mj-previa-plato"><div><b>Agua de jamaica</b><span class="mj-previa-desc">Vaso grande</span></div><span class="mj-previa-precio">$22.00</span></div>
+                        </div>
+                        <div id="mj-prev-contacto" class="mj-contacto">
+                            <span id="mj-prev-horario" class="mj-horario"></span>
+                            <span class="mj-contacto-enlaces">
+                                <span class="mj-chip" id="mj-prev-telefono">Llamar</span>
+                                <span class="mj-chip" id="mj-prev-whatsapp">WhatsApp</span>
+                                <span class="mj-chip" id="mj-prev-instagram">Instagram</span>
+                                <span class="mj-chip" id="mj-prev-facebook">Facebook</span>
+                            </span>
+                        </div>
+                        <span class="mj-previa-boton">Apartar platillos</span>
+                        <p class="mj-previa-nota">Los platillos de ejemplo son solo ilustrativos: tu menú real muestra los que agregues.</p>
+                    </aside>
+                </h:panelGroup>
+
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

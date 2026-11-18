@@ -2,10 +2,9 @@ package controlador;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import logicaneg.MEstablecimiento;
 import logicaneg.MPlatillo;
 import logicaneg.MUsuario;
 
@@ -22,22 +21,35 @@ public class PanelBean {
     @EJB
     private MUsuario mUsuario;
 
+    @EJB
+    private MEstablecimiento mEstablecimiento;
+
     @Inject
     private SesionBean sesion;
 
     /** Viene de ?acceso=denegado cuando el filtro rechazó una vista. */
     private String acceso;
 
+    private Long totalPlatillos;
+    private Long platillosDisponibles;
+
     public boolean isAccesoDenegado() {
         return "denegado".equals(acceso);
     }
 
     public long getTotalPlatillos() {
-        return sesion.getEstablecimientoId() == null ? 0 : mPlatillo.contar(sesion.getEstablecimientoId());
+        if (totalPlatillos == null) {
+            totalPlatillos = sesion.getEstablecimientoId() == null ? 0L : mPlatillo.contar(sesion.getEstablecimientoId());
+        }
+        return totalPlatillos;
     }
 
     public long getPlatillosDisponibles() {
-        return sesion.getEstablecimientoId() == null ? 0 : mPlatillo.contarDisponibles(sesion.getEstablecimientoId());
+        if (platillosDisponibles == null) {
+            platillosDisponibles = sesion.getEstablecimientoId() == null
+                    ? 0L : mPlatillo.contarDisponibles(sesion.getEstablecimientoId());
+        }
+        return platillosDisponibles;
     }
 
     public long getPlatillosAgotados() {
@@ -48,14 +60,18 @@ public class PanelBean {
         return sesion.getEstablecimientoId() == null ? 0 : mUsuario.contarPersonalActivo(sesion.getEstablecimientoId());
     }
 
-    /** Dirección pública del menú del negocio (para el código QR). */
+    /** true si el dueño todavía no ha cargado ningún platillo: se le muestran los primeros pasos. */
+    public boolean isNegocioSinMenu() {
+        return sesion.isDueno() && sesion.getEstablecimientoId() != null && getTotalPlatillos() == 0;
+    }
+
+    /** Dirección pública del menú del negocio (la que lleva el código QR). */
     public String getEnlaceMenu() {
         if (sesion.getEstablecimientoId() == null) {
             return "";
         }
-        HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        return req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
-                + req.getContextPath() + "/vistas/menu.xhtml?e=" + sesion.getEstablecimientoId();
+        String codigo = mEstablecimiento.codigoQR(sesion.getEstablecimientoId());
+        return codigo == null ? "" : Enlaces.menuCompleto(codigo);
     }
 
     public String getAcceso() {

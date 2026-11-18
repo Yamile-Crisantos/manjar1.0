@@ -7,6 +7,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import logicaneg.Constantes;
+import logicaneg.MEstablecimiento;
 import modelo.Usuario;
 
 /**
@@ -37,6 +38,10 @@ public class SesionBean implements Serializable {
     private Integer establecimientoId;
     private String establecimientoNombre;
 
+    /** Último menú público que vio este visitante o cliente (para volver a él desde "Apartados"). */
+    private String ultimoMenuCodigo;
+    private String ultimoMenuNombre;
+
     // ------------------------------------------------------------------
     // Acciones
     // ------------------------------------------------------------------
@@ -64,10 +69,36 @@ public class SesionBean implements Serializable {
         // Mejora pendiente (seguridad): renovar el id de sesión al iniciar sesión.
     }
 
+    /** El dueño cambió el nombre de su negocio: se refleja en el encabezado sin volver a iniciar sesión. */
+    public void actualizarNombreNegocio(String nuevoNombre) {
+        if (establecimientoId != null) {
+            this.establecimientoNombre = nuevoNombre;
+        }
+    }
+
+    /** Recuerda el último menú que se consultó con un código de QR. */
+    public void recordarMenu(String codigo, String nombre) {
+        this.ultimoMenuCodigo = codigo;
+        this.ultimoMenuNombre = nombre;
+    }
+
     /** Cierra la sesión y regresa al inicio. */
     public String cerrar() {
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         ec.invalidateSession();
+        return "/vistas/inicio?faces-redirect=true";
+    }
+
+    /**
+     * Cierra la sesión del comensal y lo regresa al menú del negocio que estaba viendo
+     * (solo si el código tiene el formato correcto; si no, al inicio).
+     */
+    public String cerrarAlMenu(String codigo) {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        ec.invalidateSession();
+        if (MEstablecimiento.codigoConFormato(codigo)) {
+            return "/vistas/menu?faces-redirect=true&q=" + codigo;
+        }
         return "/vistas/inicio?faces-redirect=true";
     }
 
@@ -141,5 +172,18 @@ public class SesionBean implements Serializable {
 
     public String getEstablecimientoNombre() {
         return establecimientoNombre;
+    }
+
+    public String getUltimoMenuCodigo() {
+        return ultimoMenuCodigo;
+    }
+
+    public String getUltimoMenuNombre() {
+        return ultimoMenuNombre;
+    }
+
+    /** true si ya se consultó el menú de algún negocio en esta sesión. */
+    public boolean isMenuReciente() {
+        return ultimoMenuCodigo != null && !ultimoMenuCodigo.isEmpty();
     }
 }

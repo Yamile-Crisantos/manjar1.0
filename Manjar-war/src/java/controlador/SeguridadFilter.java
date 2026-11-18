@@ -33,9 +33,9 @@ import logicaneg.Constantes;
  * Con sesión sin rol  -> redirige al panel con aviso.
  *
  * Además:
- *  - El personal de un negocio (dueño, gerente, mesero) no usa la página de
- *    inicio del portal: si la abre, va directo a su panel.
- *  - Quien ya inició sesión no necesita ver acceso ni registro: va al panel.
+ *  - La página de inicio presenta Manjar a quien aún no lo usa: quien ya inició
+ *    sesión (de cualquier rol) va directo a su panel.
+ *  - Quien ya inició sesión tampoco necesita ver acceso, registro ni "Registra tu negocio": va al panel.
  *
  * El rol se lee de la HttpSession (lo escribe SesionBean al iniciar sesión).
  */
@@ -46,18 +46,18 @@ public class SeguridadFilter implements Filter {
             "/vistas/inicio.xhtml",
             "/vistas/menu.xhtml",
             "/vistas/acceso.xhtml",
-            "/vistas/registro.xhtml"));
+            "/vistas/registro.xhtml",
+            "/vistas/registro-negocio.xhtml"));
 
     private static final Map<String, Set<Integer>> PERMISOS = new HashMap<>();
-
-    /** Quienes trabajan en un negocio. */
-    private static final Set<Integer> PERSONAL = roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE, Constantes.ROL_MESERO);
 
     static {
         Set<Integer> todos = roles(Constantes.ROL_CLIENTE, Constantes.ROL_DUENO, Constantes.ROL_GERENTE, Constantes.ROL_MESERO);
         PERMISOS.put("/vistas/panel.xhtml", todos);
         PERMISOS.put("/vistas/apartar.xhtml", roles(Constantes.ROL_CLIENTE));
         PERMISOS.put("/vistas/platillos.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE));
+        PERMISOS.put("/vistas/negocio.xhtml", roles(Constantes.ROL_DUENO));
+        PERMISOS.put("/vistas/qr.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE));
         PERMISOS.put("/vistas/personal.xhtml", roles(Constantes.ROL_DUENO));
         PERMISOS.put("/vistas/comandas.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE, Constantes.ROL_MESERO));
         PERMISOS.put("/vistas/caja.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE));
@@ -90,7 +90,7 @@ public class SeguridadFilter implements Filter {
         HttpSession sesion = req.getSession(false);
         Integer rol = sesion == null ? null : (Integer) sesion.getAttribute(SesionBean.ATTR_ROL);
 
-        if (rol != null && esPaginaDePortal(ruta, req, rol)) {
+        if (rol != null && esPaginaDePortal(ruta, req)) {
             redirigir(req, resp, "/vistas/panel.xhtml");
             return;
         }
@@ -112,18 +112,18 @@ public class SeguridadFilter implements Filter {
     }
 
     /**
-     * true si alguien con sesión abre una página que no le sirve:
-     * el inicio del portal (si es personal de un negocio) o acceso/registro (cualquiera).
+     * true si alguien con sesión abre una página que ya no le sirve: la presentación de
+     * Manjar (inicio), el acceso, el registro de cliente o el registro de un negocio.
      * Solo se redirigen las consultas GET; un envío de formulario sigue su curso.
      */
-    private boolean esPaginaDePortal(String ruta, HttpServletRequest req, Integer rol) {
+    private boolean esPaginaDePortal(String ruta, HttpServletRequest req) {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             return false;
         }
-        if ("/vistas/inicio.xhtml".equals(ruta)) {
-            return PERSONAL.contains(rol);
-        }
-        return "/vistas/acceso.xhtml".equals(ruta) || "/vistas/registro.xhtml".equals(ruta);
+        return "/vistas/inicio.xhtml".equals(ruta)
+                || "/vistas/acceso.xhtml".equals(ruta)
+                || "/vistas/registro.xhtml".equals(ruta)
+                || "/vistas/registro-negocio.xhtml".equals(ruta);
     }
 
     /** Ruta dentro de la aplicación, en minúsculas y sin el prefijo /faces si existiera. */
@@ -136,12 +136,12 @@ public class SeguridadFilter implements Filter {
         return ruta;
     }
 
-    /** Vista a la que hay que volver después de iniciar sesión, p. ej. /vistas/apartar?e=3 */
+    /** Vista a la que hay que volver después de iniciar sesión, p. ej. /vistas/apartar?q=fonda-lupe-7k3m2q */
     private String destino(HttpServletRequest req, String ruta) {
         String vista = ruta.endsWith(".xhtml") ? ruta.substring(0, ruta.length() - ".xhtml".length()) : ruta;
-        String e = req.getParameter("e");
-        if (e != null && e.matches("[0-9]{1,9}")) {
-            return vista + "?e=" + e;
+        String q = req.getParameter("q");
+        if (q != null && q.length() <= 60 && q.matches("[a-z0-9]+(-[a-z0-9]+)*")) {
+            return vista + "?q=" + q;
         }
         return vista;
     }

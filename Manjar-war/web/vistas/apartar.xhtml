@@ -7,7 +7,17 @@
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
-            <ui:define name="titulo">Apartar · Manjar</ui:define>
+            <ui:define name="metadata">
+                <f:metadata>
+                    <f:viewParam name="q" value="#{menuPublicoBean.codigo}"/>
+                    <f:viewAction action="#{menuPublicoBean.recordar}"/>
+                </f:metadata>
+            </ui:define>
+
+            <!-- Con la marca del negocio donde se va a apartar -->
+            <ui:param name="comensal" value="#{menuPublicoBean.marca != null}"/>
+
+            <ui:define name="titulo">#{menuPublicoBean.marca != null ? menuPublicoBean.marca.nombre : 'Manjar'} · Apartar</ui:define>
 
             <ui:define name="ruta">
                 <ui:include src="/plantillas/migas.xhtml">
@@ -17,11 +27,19 @@
 
             <ui:define name="contenido">
                 <h1>Apartar platillos</h1>
-                <p class="mj-lead">Hola, #{sesion.nombre}. Aquí podrás elegir tus platillos, pagar el anticipo y recibir tu comprobante.</p>
+                <p class="mj-lead">Hola, <h:outputText value="#{sesion.nombre}"/>. Aquí podrás elegir tus platillos, pagar el anticipo y recibir tu comprobante.</p>
+                <h:panelGroup layout="block" styleClass="mj-nota" rendered="#{menuPublicoBean.establecimiento != null}">
+                    Negocio: <strong><h:outputText value="#{menuPublicoBean.establecimiento.nombre}"/></strong>
+                </h:panelGroup>
                 <div class="mj-pronto">
                     <strong>Módulo en construcción</strong>
                     <span>Muy pronto podrás apartar desde aquí.</span>
-                    <h:link value="Volver al menú" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"/>
+                    <h:link value="Volver al menú" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"
+                            rendered="#{not empty menuPublicoBean.codigoVigente}">
+                        <f:param name="q" value="#{menuPublicoBean.codigoVigente}"/>
+                    </h:link>
+                    <h:link value="Volver a mi panel" outcome="/vistas/panel" styleClass="manjar-btn manjar-btn-sec"
+                            rendered="#{empty menuPublicoBean.codigoVigente}"/>
                 </div>
             </ui:define>
 

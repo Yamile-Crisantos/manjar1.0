@@ -82,6 +82,14 @@ public class RegistroBean implements Serializable {
         this.confirmacion = confirmacion;
     }
 
+    /**
+     * true si el visitante venía del menú de un negocio para apartar platillos: en ese caso
+     * la pantalla se muestra con la marca del negocio y sin enlaces del servicio Manjar.
+     */
+    public boolean isParaApartar() {
+        return destino != null && destino.startsWith("/vistas/apartar");
+    }
+
     public String getDestino() {
         return destino;
     }

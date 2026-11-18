@@ -14,7 +14,10 @@
                 </f:metadata>
             </ui:define>
 
-            <ui:define name="titulo">Crear cuenta · Manjar</ui:define>
+            <!-- Si el visitante viene del menú de un negocio para apartar, se ve con la marca de ese negocio -->
+            <ui:param name="comensal" value="#{registroBean.paraApartar and menuPublicoBean.marca != null}"/>
+
+            <ui:define name="titulo">Crear cuenta de cliente · #{registroBean.paraApartar and menuPublicoBean.marca != null ? menuPublicoBean.marca.nombre : 'Manjar'}</ui:define>
 
             <ui:define name="ruta">
                 <ui:include src="/plantillas/migas.xhtml">
@@ -27,6 +30,7 @@
 
                     <div class="mj-auth-form">
                         <h1>Crear cuenta</h1>
+                        <p class="manjar-muted">Cuenta de cliente: para apartar platillos y dar seguimiento a tus pedidos.</p>
 
                         <h:form id="formRegistro" styleClass="manjar-form">
                             <div class="manjar-field">
@@ -62,6 +66,10 @@
                                 <f:param name="destino" value="#{registroBean.destino}" disable="#{empty registroBean.destino}"/>
                             </h:link>
                         </p>
+                        <h:panelGroup layout="block" styleClass="mj-pie-form" rendered="#{not (registroBean.paraApartar and menuPublicoBean.marca != null)}">
+                            ¿Tienes un negocio?
+                            <h:link value="Registra tu negocio" outcome="/vistas/registro-negocio"/>
+                        </h:panelGroup>
                     </div>
                 </div>
             </ui:define>

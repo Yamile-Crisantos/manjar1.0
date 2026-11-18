@@ -11,14 +11,14 @@
                   <ui:param name="padre" value="Administración"/>   (opcional)
                   <ui:param name="actual" value="Personal"/>
               </ui:include>
-            El primer paso es "Mi panel" para el personal del negocio e "Inicio" para el resto.
+            El primer paso es "Mi panel" si ya iniciaste sesión e "Inicio" si eres visitante.
         -->
         <ui:composition>
-            <ui:fragment rendered="#{actual ne 'Inicio' and not (sesion.personal and actual eq 'Mi panel')}">
+            <ui:fragment rendered="#{actual ne 'Inicio' and not (sesion.autenticado and actual eq 'Mi panel')}">
             <ol class="mj-crumbs">
                 <li>
-                    <h:link outcome="#{sesion.personal ? '/vistas/panel' : '/vistas/inicio'}"
-                            value="#{sesion.personal ? 'Mi panel' : 'Inicio'}"/>
+                    <h:link outcome="#{sesion.autenticado ? '/vistas/panel' : '/vistas/inicio'}"
+                            value="#{sesion.autenticado ? 'Mi panel' : 'Inicio'}"/>
                 </li>
                 <ui:fragment rendered="#{not empty padre}">
                     <li>#{padre}</li>

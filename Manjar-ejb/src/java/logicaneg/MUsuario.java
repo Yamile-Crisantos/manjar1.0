@@ -15,6 +15,7 @@ import modelo.Usuario;
 /**
  * Lógica de cuentas: HU-01 (registro y autenticación de cliente),
  * HU-02 (alta de cuentas de personal) y HU-03 (inicio de sesión de mesero).
+ * También crea la cuenta del dueño cuando un negocio nuevo se registra en Manjar.
  *
  * Todos los métodos que reciben el id del establecimiento lo usan para
  * comprobar que el usuario pertenece a ESE negocio (aislamiento multi-tenant).
@@ -63,14 +64,26 @@ public class MUsuario {
     // HU-01: registro del cliente (portal público)
     // ------------------------------------------------------------------
     public Usuario registrarCliente(String nombre, String correo, String clave) throws ReglaNegocioException {
+        // El cliente no pertenece a ningún negocio: establecimientoid queda en NULL
+        return crearCuenta(nombre, correo, clave, Constantes.ROL_CLIENTE);
+    }
+
+    // ------------------------------------------------------------------
+    // Alta del dueño al registrar su negocio (la usa MEstablecimiento.registrarNegocio,
+    // dentro de la misma transacción: si algo falla, no queda ninguna de las dos cosas)
+    // ------------------------------------------------------------------
+    public Usuario registrarDueno(String nombre, String correo, String clave) throws ReglaNegocioException {
+        return crearCuenta(nombre, correo, clave, Constantes.ROL_DUENO);
+    }
+
+    private Usuario crearCuenta(String nombre, String correo, String clave, int rol) throws ReglaNegocioException {
         validarDatosCuenta(nombre, correo, clave);
         Usuario u = new Usuario();
         u.setNombre(nombre.trim());
         u.setCorreo(normalizarCorreo(correo));
         u.setContrasenahash(ClaveUtil.generarHash(clave));
-        u.setRol(Constantes.ROL_CLIENTE);
+        u.setRol(rol);
         u.setEstado(Constantes.ESTADO_ACTIVO);
-        // El cliente no pertenece a ningún negocio: establecimientoid queda en NULL
         usuarioFacade.create(u);
         em.flush();
         return u;

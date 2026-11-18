@@ -4,11 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import logicaneg.MEstablecimiento;
 import logicaneg.MPlatillo;
 import logicaneg.ReglaNegocioException;
 import modelo.Categoria;
@@ -29,6 +28,9 @@ public class PlatillosBean implements Serializable {
 
     @EJB
     private MPlatillo mPlatillo;
+
+    @EJB
+    private MEstablecimiento mEstablecimiento;
 
     @Inject
     private SesionBean sesion;
@@ -154,9 +156,11 @@ public class PlatillosBean implements Serializable {
     // ------------------------------------------------------------------
     /** Enlace público del menú: es el que se convierte en código QR (HU-06). */
     public String getEnlaceMenu() {
-        HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        return req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
-                + req.getContextPath() + "/vistas/menu.xhtml?e=" + sesion.getEstablecimientoId();
+        if (sesion.getEstablecimientoId() == null) {
+            return "";
+        }
+        String codigo = mEstablecimiento.codigoQR(sesion.getEstablecimientoId());
+        return codigo == null ? "" : Enlaces.menuCompleto(codigo);
     }
 
     public List<Platillo> getPlatillos() {
