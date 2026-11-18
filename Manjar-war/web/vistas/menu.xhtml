@@ -2,24 +2,96 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <!-- Importante: el f:metadata se escribe aquí, dentro de la zona "metadata" de la plantilla -->
+            <ui:define name="metadata">
+                <f:metadata>
+                    <f:viewParam name="e" value="#{menuPublicoBean.establecimientoId}"/>
+                </f:metadata>
+            </ui:define>
 
             <ui:define name="titulo">Menú · Manjar</ui:define>
 
             <ui:define name="ruta">
-                <p:breadCrumb homeDisplay="text">
-                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    <p:menuitem value="Menú" outcome="/vistas/menu"/>
-                </p:breadCrumb>
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Menú"/>
+                </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
-                <h1>Menú</h1>
-                <p>Aquí se administrarán los platillos y su disponibilidad.</p>
-                <div class="manjar-soon">Módulo en construcción</div>
+
+                <!-- Menú de un negocio -->
+                <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimiento != null}">
+                    <div class="mj-banner mj-rest">
+                        <div class="mj-rest-info">
+                            <p class="mj-eyebrow">Menú del día</p>
+                            <h1>#{menuPublicoBean.establecimiento.nombre}</h1>
+                            <p class="mj-rest-dir">#{menuPublicoBean.establecimiento.direccion}</p>
+                            <p class="mj-rest-dir">#{menuPublicoBean.platillosDisponibles} disponibles<h:outputText value=" · #{menuPublicoBean.platillosAgotados} agotados" rendered="#{menuPublicoBean.platillosAgotados gt 0}"/></p>
+                        </div>
+                        <div class="mj-rest-acciones">
+                            <h:link value="Apartar platillos" outcome="/vistas/apartar" styleClass="manjar-btn"
+                                    rendered="#{not sesion.personal}">
+                                <f:param name="e" value="#{menuPublicoBean.establecimiento.id}"/>
+                            </h:link>
+                            <h:link value="Ver otros negocios" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"
+                                    rendered="#{not sesion.personal}"/>
+                            <h:link value="Administrar platillos" outcome="/vistas/platillos" styleClass="manjar-btn manjar-btn-sec"
+                                    rendered="#{sesion.administra}"/>
+                        </div>
+                    </div>
+
+                    <h:panelGroup layout="block" rendered="#{empty menuPublicoBean.grupos}" styleClass="mj-vacio">
+                        Este negocio todavía no ha publicado su menú.
+                    </h:panelGroup>
+
+                    <nav class="mj-catnav" aria-label="Categorías">
+                        <ui:repeat value="#{menuPublicoBean.grupos}" var="g">
+                            <a href="##{g.ancla}">#{g.categoria}</a>
+                        </ui:repeat>
+                    </nav>
+
+                    <ui:repeat value="#{menuPublicoBean.grupos}" var="g">
+                        <h2 id="#{g.ancla}" class="mj-titulo-seccion">#{g.categoria}</h2>
+                        <div class="mj-platos">
+                            <ui:repeat value="#{g.platillos}" var="pl">
+                                <article class="mj-plato #{pl.estado == 1 ? '' : 'agotado'}">
+                                    <div class="mj-plato-top">
+                                        <h3>#{pl.nombre}</h3>
+                                        <span class="mj-precio">$<h:outputText value="#{pl.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                    </div>
+                                    <p>#{pl.descripcion}</p>
+                                    <h:panelGroup layout="block" styleClass="mj-plato-pie" rendered="#{pl.estado != 1 or menuPublicoBean.ultimasPorciones(pl)}">
+                                        <h:outputText value="Agotado" styleClass="manjar-badge off" rendered="#{pl.estado != 1}"/>
+                                        <h:outputText value="Últimas porciones" styleClass="manjar-badge aviso"
+                                                      rendered="#{pl.estado == 1 and menuPublicoBean.ultimasPorciones(pl)}"/>
+                                    </h:panelGroup>
+                                </article>
+                            </ui:repeat>
+                        </div>
+                    </ui:repeat>
+                </h:panelGroup>
+
+                <!-- El personal sin negocio asignado -->
+                <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimiento == null and sesion.personal}"
+                              styleClass="mj-vacio">
+                    Tu cuenta todavía no tiene un negocio asignado. Pide al dueño que revise tu cuenta.
+                </h:panelGroup>
+
+                <!-- Visitantes y clientes: lista de negocios -->
+                <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimiento == null and not sesion.personal}">
+                    <h1>Menús</h1>
+                    <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimientoId != null}" styleClass="manjar-aviso warn">
+                        No encontramos ese negocio. Elige uno de la lista.
+                    </h:panelGroup>
+                    <p class="manjar-muted mj-sub">Elige un negocio para ver su menú del día.</p>
+                    <ui:include src="/plantillas/negocios.xhtml"/>
+                </h:panelGroup>
+
             </ui:define>
 
         </ui:composition>

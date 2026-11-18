@@ -2,24 +2,26 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
             <ui:define name="titulo">Caja · Manjar</ui:define>
 
             <ui:define name="ruta">
-                <p:breadCrumb homeDisplay="text">
-                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    <p:menuitem value="Caja" outcome="/vistas/caja"/>
-                </p:breadCrumb>
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Caja"/>
+                </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
-                <h1>Control de caja</h1>
-                <p>Aquí se cobrarán las cuentas y se llevará el control del efectivo.</p>
-                <div class="manjar-soon">Módulo en construcción</div>
+                <h1>Caja</h1>
+                <p class="mj-lead">Aquí se cobrarán las cuentas y se llevará el control de efectivo.</p>
+                <div class="mj-pronto">
+                    <strong>Módulo en construcción</strong>
+                    <span>Pronto podrás cobrar cuentas y cerrar la caja del día.</span>
+                    <h:link value="Volver a mi panel" outcome="/vistas/panel" styleClass="manjar-btn manjar-btn-sec"/>
+                </div>
             </ui:define>
 
         </ui:composition>

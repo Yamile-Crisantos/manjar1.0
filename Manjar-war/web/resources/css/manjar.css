@@ -1,65 +1,165 @@
 /* ==========================================================
-   Manjar · estilos globales
-   Se carga desde plantilla.xhtml DESPUÉS del tema de PrimeFaces
+   Manjar · estilos globales (diseño minimalista)
+   Se carga desde plantilla.xhtml DESPUÉS del tema de PrimeFaces,
+   por eso puede sobrescribirlo.
+
+   Paleta (la misma de la presentación del proyecto):
+     crema #FFFAF2 · café oscuro #2E2521 · terracota #CC4E27
+   Tipografías: Playfair Display (títulos) y Montserrat (texto),
+   empacadas en resources/fonts, así que funcionan sin internet.
+   Para cambiar los colores basta con editar las variables de abajo.
+
+   Organización:
+     1. Fuentes, variables y base   5. Páginas: inicio, menú, panel
+     2. Encabezado y navegación     6. Acceso y registro
+     3. Piezas reutilizables        7. Administración (formularios, tablas, diálogos)
+     4. Mensajes, pie y pantallas pequeñas
    ========================================================== */
 
-:root {
-    --mj-bg: #faf6f1;
-    --mj-surface: #ffffff;
-    --mj-ink: #2a2118;
-    --mj-muted: #6b5d50;
-    --mj-border: #e7dccf;
-    --mj-header: #2a2118;
-    --mj-primary: #b8410f;
-    --mj-primary-dark: #8f300a;
-    --mj-gold: #f2b544;
-    --mj-tint: #f6e7dc;
-    --mj-radius: 12px;
-    --mj-shadow: 0 1px 2px rgba(42, 33, 24, .08), 0 8px 20px rgba(42, 33, 24, .07);
-    --mj-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-    --mj-font-title: Georgia, "Times New Roman", serif;
+/* ---------- 1. Fuentes, variables y base ---------- */
+@font-face {
+    font-family: "Montserrat";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:montserrat-400.woff2']}") format("woff2");
 }
 
-/* ---------- Base ---------- */
+@font-face {
+    font-family: "Montserrat";
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:montserrat-600.woff2']}") format("woff2");
+}
+
+@font-face {
+    font-family: "Playfair Display";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:playfair-display-700.woff2']}") format("woff2");
+}
+
+:root {
+    --mj-cream: #fffaf2;
+    --mj-card: #ffffff;
+    --mj-dark: #2e2521;
+    --mj-ink: #2e2521;
+    --mj-muted: #7d6e64;
+    --mj-border: #eadfd2;
+    --mj-border-strong: #d6c6b4;
+    --mj-tint: #f7ece0;
+    --mj-accent: #cc4e27;
+    --mj-primary: #c44a24;
+    --mj-primary-dark: #a33a19;
+    --mj-ok: #3d6b4b;
+    --mj-ok-bg: #e8f1ea;
+    --mj-off: #a23b27;
+    --mj-off-bg: #f8e6e1;
+    --mj-warn: #8a5a00;
+    --mj-warn-bg: #fcf0d4;
+    --mj-on-dark: #fff4e8;
+    --mj-on-dark-muted: #d2c3b5;
+    --mj-radius: 10px;
+    --mj-shadow: 0 1px 2px rgba(46, 37, 33, .05), 0 6px 16px rgba(46, 37, 33, .05);
+    --mj-shadow-hover: 0 2px 4px rgba(46, 37, 33, .07), 0 10px 24px rgba(46, 37, 33, .09);
+    --mj-font: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --mj-font-title: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
 body.manjar {
     margin: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--mj-bg);
+    background: var(--mj-cream);
     color: var(--mj-ink);
     font-family: var(--mj-font);
-    font-size: 16px;
-    line-height: 1.55;
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 /* El tema de PrimeFaces fuerza su propia fuente en los componentes */
-.manjar .ui-widget {
+.manjar .ui-widget,
+.manjar .ui-widget input,
+.manjar .ui-widget textarea,
+.manjar .ui-widget button {
     font-family: var(--mj-font);
+    font-size: 14px;
+}
+
+.manjar strong,
+.manjar b {
+    font-weight: 600;
 }
 
 .manjar h1,
 .manjar h2,
 .manjar h3 {
-    font-family: var(--mj-font-title);
     color: var(--mj-ink);
     line-height: 1.2;
 }
 
-.manjar a {
-    color: var(--mj-primary);
+/* Playfair usa por defecto números "de antiguo estilo" (el 5 y el 1 bajan de la línea): se piden alineados */
+.manjar h1,
+.manjar h2,
+.manjar .mj-precio,
+.manjar-stat b {
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
 }
 
-/* ---------- Encabezado (marca) ---------- */
+/* Título de página: serif en mayúsculas con la barrita de acento de la presentación */
+.manjar h1 {
+    margin: 0 0 8px;
+    font-family: var(--mj-font-title);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+}
+
+.manjar h1::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 4px;
+    margin-top: 12px;
+    border-radius: 4px;
+    background: var(--mj-accent);
+}
+
+.manjar h2 {
+    font-family: var(--mj-font-title);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.manjar h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.manjar a {
+    color: var(--mj-primary-dark);
+}
+
+.manjar-muted {
+    color: var(--mj-muted);
+}
+
+/* ---------- 2. Encabezado y navegación ---------- */
 .manjar-header {
-    background: var(--mj-header);
-    border-bottom: 4px solid var(--mj-gold);
+    background: var(--mj-dark);
 }
 
 .manjar-header-inner {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 0 16px;
+    box-sizing: border-box;
+    min-height: 52px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -68,51 +168,45 @@ body.manjar {
 }
 
 .manjar a.manjar-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
     padding: 12px 0;
     text-decoration: none;
-    color: #fff;
-}
-
-.manjar-brand-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--mj-gold);
-    color: var(--mj-header);
-    font-family: var(--mj-font-title);
-    font-weight: 700;
-    font-size: 20px;
+    color: var(--mj-on-dark);
 }
 
 .manjar-brand-name {
     font-family: var(--mj-font-title);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: .5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
 }
 
-.manjar-tagline {
-    color: #cdbfb0;
+/* Quién tiene la sesión (esquina del encabezado) */
+.manjar-context-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: var(--mj-on-dark);
+    line-height: 1.3;
     font-size: 14px;
 }
 
-/* ---------- Barra de navegación (PrimeFaces Menubar) ---------- */
+.manjar-context-text small {
+    color: var(--mj-on-dark-muted);
+    font-size: 12.5px;
+}
+
+/* Barra de navegación (PrimeFaces Menubar) */
 .manjar-nav {
-    background: var(--mj-surface);
     border-bottom: 1px solid var(--mj-border);
-    box-shadow: 0 2px 6px rgba(42, 33, 24, .05);
+    background: var(--mj-card);
 }
 
 .manjar-nav-inner {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 0 16px 0 4px;   /* el texto de la barra queda alineado con el contenido */
+    box-sizing: border-box;
 }
 
 .manjar-nav form {
@@ -123,143 +217,146 @@ body.manjar {
 .manjar .ui-menubar.manjar-menubar {
     background: transparent;
     border: 0;
-    padding: 4px 0;
+    padding: 3px 0;
     font-size: 15px;
 }
 
 .manjar .ui-menubar .ui-menuitem-link {
+    display: block;
     color: var(--mj-ink);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: var(--mj-radius);
+    padding: 7px 12px;
     text-decoration: none;
 }
 
 .manjar .ui-menubar .ui-menuitem-text {
+    float: none;
     color: inherit;
 }
 
-/* Al pasar el mouse */
 .manjar .ui-menubar .ui-menuitem-link:hover,
 .manjar .ui-menubar .ui-menuitem-link.ui-state-hover,
 .manjar .ui-menubar .ui-menuitem.ui-menuitem-active > .ui-menuitem-link {
     background: var(--mj-tint);
     border-color: transparent;
-    color: var(--mj-ink);
+    color: var(--mj-primary-dark);
 }
 
-/* Submenús desplegables (reemplazan el fondo gris del tema) */
+/* Opciones "Próximamente" */
+.manjar .ui-menubar .ui-state-disabled,
+.manjar .ui-menubar .ui-menuitem-link.ui-state-disabled {
+    opacity: .5;
+}
+
+/* Submenús desplegables */
 .manjar .ui-menubar .ui-menu-child {
-    background: var(--mj-surface);
+    background: var(--mj-card);
     border: 1px solid var(--mj-border);
-    border-radius: 10px;
+    border-radius: var(--mj-radius);
     box-shadow: var(--mj-shadow);
-    padding: 6px;
+    padding: 4px;
+    min-width: 200px;
 }
 
-/* Botón "Iniciar sesión" (a la derecha de la barra) */
+/* Enlaces y botones a la derecha de la barra (Iniciar sesión, Cerrar sesión...) */
 .manjar a.manjar-login {
     display: inline-block;
-    padding: 7px 16px;
-    border-radius: 999px;
+    padding: 6px 14px;
+    border: 1px solid var(--mj-primary);
+    border-radius: 8px;
     background: var(--mj-primary);
     color: #fff;
     font-weight: 600;
     text-decoration: none;
+    margin-left: 6px;
 }
 
 .manjar a.manjar-login:hover {
     background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.manjar a.manjar-login-sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.manjar a.manjar-login-sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-primary-dark);
+}
+
+.manjar a.manjar-link-suave {
+    display: inline-block;
+    padding: 6px 10px;
+    color: var(--mj-ink);
+    text-decoration: none;
+}
+
+.manjar a.manjar-link-suave:hover {
+    color: var(--mj-primary);
+    text-decoration: underline;
 }
 
 /* ---------- Cuerpo ---------- */
 .manjar-main {
     flex: 1;
     width: 100%;
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 0 16px 32px;
+    padding: 0 16px 40px;
     box-sizing: border-box;
 }
 
 .manjar-crumbs {
-    padding: 16px 0 8px;
+    padding: 14px 0 14px;
 }
 
-/* Breadcrumb de PrimeFaces sin el degradado del tema */
-.manjar-crumbs .ui-breadcrumb {
-    background: transparent;
-    border: 0;
+.manjar-crumbs:empty {
+    padding: 8px 0;
+}
+
+/* Ruta de navegación (migas de pan) */
+.mj-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
     padding: 0;
+    list-style: none;
+    font-size: 14px;
+    color: var(--mj-muted);
 }
 
-.manjar-crumbs .ui-breadcrumb .ui-menuitem-link {
-    color: var(--mj-primary);
+.mj-crumbs li + li::before {
+    content: "/";
+    margin: 0 8px;
+    color: var(--mj-border-strong);
+}
+
+.mj-crumbs a {
+    color: var(--mj-muted);
     text-decoration: none;
 }
 
-.manjar-crumbs .ui-breadcrumb .ui-menuitem-link:hover {
+.mj-crumbs a:hover {
+    color: var(--mj-primary);
     text-decoration: underline;
 }
 
-.manjar-content {
-    background: var(--mj-surface);
-    border: 1px solid var(--mj-border);
-    border-radius: var(--mj-radius);
-    box-shadow: var(--mj-shadow);
-    padding: 24px 28px 32px;
+.mj-crumbs li.actual {
+    color: var(--mj-ink);
 }
 
-.manjar-content h1:first-child {
-    margin-top: 0;
-}
+/* ---------- 3. Piezas reutilizables ---------- */
 
-/* ---------- Inicio: hero + tarjetas ---------- */
-.manjar-hero {
-    padding: 8px 0 20px;
-    border-bottom: 1px solid var(--mj-border);
-    margin-bottom: 24px;
-}
-
-.manjar-hero h1 {
-    margin: 0 0 8px;
-    font-size: 36px;
-}
-
-.manjar-hero p {
-    margin: 0;
-    max-width: 60ch;
-    color: var(--mj-muted);
-    font-size: 18px;
-}
-
-.manjar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.manjar-card {
-    background: var(--mj-bg);
-    border: 1px solid var(--mj-border);
-    border-top: 4px solid var(--mj-primary);
-    border-radius: var(--mj-radius);
-    padding: 16px 18px 20px;
-}
-
-.manjar-card h3 {
-    margin: 0 0 6px;
-}
-
-.manjar-card p {
-    margin: 0 0 14px;
-    color: var(--mj-muted);
-}
-
+/* Botones propios (enlaces h:link) */
 .manjar a.manjar-btn {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 9px 18px;
+    border: 1px solid var(--mj-primary);
     border-radius: 8px;
     background: var(--mj-primary);
     color: #fff;
@@ -269,37 +366,963 @@ body.manjar {
 
 .manjar a.manjar-btn:hover {
     background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
 }
 
-/* ---------- Módulos en construcción ---------- */
-.manjar-soon {
+.manjar a.manjar-btn.manjar-btn-sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.manjar a.manjar-btn.manjar-btn-sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-primary-dark);
+}
+
+.manjar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+/* Etiquetas de estado */
+.manjar .manjar-badge {
     display: inline-block;
-    margin-top: 8px;
-    padding: 10px 16px;
-    border: 2px dashed var(--mj-border);
-    border-radius: 8px;
+    padding: 1px 10px;
+    border-radius: 999px;
+    background: var(--mj-tint);
     color: var(--mj-muted);
+    font-size: 12.5px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-/* ---------- Pie ---------- */
-.manjar-footer {
-    padding: 18px 16px;
-    background: var(--mj-header);
-    color: #cdbfb0;
-    text-align: center;
+.manjar .manjar-badge.ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.manjar .manjar-badge.off {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.manjar .manjar-badge.aviso {
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+}
+
+/* Datos cortos en texto simple */
+.manjar .mj-chip {
+    color: var(--mj-muted);
     font-size: 14px;
 }
 
-/* ---------- Pantallas pequeñas ---------- */
+.manjar .mj-chip.ok {
+    color: var(--mj-ok);
+}
+
+.manjar .mj-chip.off {
+    color: var(--mj-off);
+}
+
+/* Avisos */
+.manjar-aviso {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.manjar-aviso.warn {
+    background: var(--mj-warn-bg);
+    border-color: #ecd596;
+}
+
+/* Nota corta de una línea */
+.mj-nota {
+    margin: 16px 0 0;
+    font-size: 14px;
+}
+
+.mj-vacio {
+    padding: 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    color: var(--mj-muted);
+}
+
+/* Textos de apoyo */
+.mj-eyebrow {
+    margin: 0 0 4px;
+    color: var(--mj-accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.mj-lead {
+    margin: 4px 0 0;
+    max-width: 64ch;
+    color: var(--mj-muted);
+}
+
+.manjar .mj-titulo-seccion {
+    margin: 30px 0 12px;
+}
+
+.mj-sub {
+    margin: 0 0 14px;
+}
+
+/* Cabecera de las páginas de administración */
+.mj-pagina-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 20px;
+    margin-bottom: 16px;
+}
+
+.mj-pagina-cab h1 {
+    margin: 0;
+}
+
+/* Cuadro simple con borde */
+.mj-panel,
+.mj-herramientas {
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+}
+
+.mj-herramientas {
+    padding: 10px 14px;
+}
+
+/* Caja con un dato para copiar (enlace del menú) */
+.mj-linkbox {
+    margin: 22px 0 14px;
+    padding: 12px 16px 12px 18px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-linkbox strong,
+.mj-linkbox code,
+.mj-linkbox span {
+    display: block;
+}
+
+.mj-linkbox code {
+    margin: 4px 0;
+    color: var(--mj-ink);
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.mj-linkbox .manjar-muted {
+    font-size: 14px;
+}
+
+/* ---------- 5. Páginas ---------- */
+
+/* Banner de las páginas públicas (inicio y menú de un negocio): bloque oscuro liso con la barra terracota,
+   como los bloques de la presentación */
+.mj-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px 28px;
+    margin-top: 4px;
+    padding: 28px 32px;
+    border-left: 6px solid var(--mj-accent);
+    border-radius: 6px 14px 14px 6px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+}
+
+.mj-banner > div {
+    min-width: 0;
+}
+
+.manjar .mj-banner h1 {
+    margin: 0;
+    color: var(--mj-on-dark);
+}
+
+.manjar .mj-banner .mj-eyebrow {
+    color: #f2a283;
+}
+
+.manjar .mj-banner .mj-lead,
+.manjar .mj-banner .mj-rest-dir {
+    color: var(--mj-on-dark-muted);
+}
+
+.manjar .mj-banner .mj-lead {
+    margin: 14px 0 0;
+}
+
+.manjar .mj-banner .mj-nota {
+    margin: 12px 0 0;
+    color: var(--mj-on-dark-muted);
+}
+
+.manjar .mj-banner a:not(.manjar-btn) {
+    color: #ffc7ad;
+}
+
+.manjar .mj-banner a.manjar-btn.manjar-btn-sec {
+    border-color: rgba(255, 244, 232, .5);
+    color: var(--mj-on-dark);
+}
+
+.manjar .mj-banner a.manjar-btn.manjar-btn-sec:hover {
+    background: rgba(255, 244, 232, .12);
+    border-color: var(--mj-on-dark);
+    color: #fff;
+}
+
+/* Tarjetas de negocios */
+.mj-negocios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.mj-negocio {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    transition: box-shadow .15s, border-color .15s;
+}
+
+.mj-negocio:hover {
+    border-color: var(--mj-border-strong);
+    box-shadow: var(--mj-shadow-hover);
+}
+
+.manjar .mj-negocio-top h3 {
+    margin: 0;
+    font-family: var(--mj-font-title);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.mj-negocio-top p {
+    margin: 4px 0 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-negocio-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.mj-negocio-foot .manjar-btn {
+    margin-left: auto;
+}
+
+/* Menú de un negocio */
+.mj-rest-dir {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.mj-rest-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Menú de un negocio: categorías y platillos */
+.mj-catnav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 10px 0;
+    overflow-x: auto;
+    background: var(--mj-cream);
+}
+
+.mj-catnav:empty {
+    display: none;
+}
+
+.mj-catnav a {
+    flex: none;
+    padding: 5px 16px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    color: var(--mj-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mj-catnav a:hover {
+    border-color: var(--mj-accent);
+    background: var(--mj-tint);
+    color: var(--mj-primary-dark);
+}
+
+.manjar .mj-platos + .mj-titulo-seccion,
+.manjar .mj-catnav + .mj-titulo-seccion {
+    margin-top: 18px;
+}
+
+.manjar h2[id^="cat-"] {
+    scroll-margin-top: 60px;
+}
+
+.mj-platos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.mj-plato {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-plato.agotado {
+    background: transparent;
+    box-shadow: none;
+}
+
+.mj-plato.agotado h3,
+.mj-plato.agotado .mj-precio {
+    color: var(--mj-muted);
+}
+
+.mj-plato.agotado h3 {
+    text-decoration: line-through;
+}
+
+.mj-plato-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.manjar .mj-plato h3 {
+    margin: 0;
+    font-size: 15.5px;
+}
+
+.mj-precio {
+    color: var(--mj-primary-dark);
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.mj-plato p {
+    flex: 1;
+    margin: 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-plato p:empty {
+    display: none;
+}
+
+.mj-plato-pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+/* Panel */
+.manjar-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.manjar-stat {
+    padding: 14px 18px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    box-shadow: var(--mj-shadow);
+}
+
+.manjar-stat b {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--mj-ink);
+}
+
+.manjar-stat span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.manjar-stat.ok b {
+    color: var(--mj-ok);
+}
+
+.manjar-stat.off b {
+    color: var(--mj-off);
+}
+
+.mj-acciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.manjar a.mj-accion {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 16px 18px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    box-shadow: var(--mj-shadow);
+    color: var(--mj-ink);
+    text-decoration: none;
+    transition: box-shadow .15s, border-color .15s;
+}
+
+.manjar a.mj-accion:hover {
+    border-color: var(--mj-accent);
+    box-shadow: var(--mj-shadow-hover);
+}
+
+.mj-accion strong {
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.manjar a.mj-accion:hover strong {
+    color: var(--mj-primary-dark);
+}
+
+.mj-accion > span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+/* Módulos en construcción */
+.mj-pronto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 20px;
+    padding: 20px 24px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-pronto strong {
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mj-pronto > span {
+    margin-bottom: 8px;
+    color: var(--mj-muted);
+}
+
+/* ---------- 6. Acceso y registro ---------- */
+.mj-auth {
+    max-width: 440px;
+    margin: 8px auto 0;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    background: var(--mj-card);
+}
+
+.mj-auth-form {
+    padding: 24px 26px 22px;
+}
+
+.mj-auth-form h1 {
+    margin: 0 0 14px;
+}
+
+.mj-pie-form {
+    margin: 16px 0 0;
+    color: var(--mj-muted);
+}
+
+.mj-auth .manjar-row {
+    grid-template-columns: 1fr;
+}
+
+/* Formularios */
+.manjar-form .manjar-field {
+    margin-bottom: 12px;
+}
+
+.manjar-form label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.manjar-form .ui-inputfield,
+.manjar-form .ui-inputtextarea,
+.manjar-form .ui-selectonemenu {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.manjar-form .ui-inputfield {
+    padding: 8px 10px;
+}
+
+.manjar-form .ui-spinner {
+    display: block;
+}
+
+.manjar-form .ui-spinner-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 28px;
+    text-align: left;
+}
+
+.manjar-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+}
+
+.manjar-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.manjar-form-actions.fin {
+    justify-content: flex-end;
+}
+
+/* Cuentas de prueba (solo en desarrollo) */
+.manjar-hint {
+    margin-top: 20px;
+    padding: 10px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-tint);
+    font-size: 14px;
+}
+
+.manjar-hint strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.manjar-hint code {
+    padding: 0 4px;
+    background: var(--mj-card);
+    border-radius: 3px;
+}
+
+.mj-rapido {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.mj-rapido button {
+    padding: 3px 10px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.mj-rapido button:hover {
+    border-color: var(--mj-primary);
+    color: var(--mj-primary);
+}
+
+/* ---------- 7. Administración ---------- */
+.manjar-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0;
+}
+
+.mj-herramientas.manjar-toolbar {
+    margin: 0 0 14px;
+}
+
+.manjar-toolbar .ui-inputfield {
+    width: 220px;
+}
+
+.manjar-spacer {
+    flex: 1;
+}
+
+.manjar-num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.manjar-acciones {
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Ajustes a componentes de PrimeFaces 5.0 (tema "aristo") */
+
+/* Botones p:commandButton */
+.manjar .ui-button.ui-state-default {
+    background: var(--mj-primary);
+    border: 1px solid var(--mj-primary);
+    color: #fff;
+    border-radius: 8px;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.manjar .ui-button.ui-state-default .ui-button-text {
+    color: #fff;
+}
+
+.manjar .ui-button.ui-state-hover,
+.manjar .ui-button.ui-state-focus {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+    color: #fff;
+}
+
+.manjar .ui-button.ui-state-active {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.manjar .ui-button.ui-state-disabled {
+    opacity: .5;
+}
+
+/* Variante secundaria: styleClass="manjar-btn-sec" */
+.manjar .ui-button.ui-state-default.manjar-btn-sec {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-sec .ui-button-text {
+    color: var(--mj-ink);
+}
+
+.manjar .ui-button.manjar-btn-sec.ui-state-hover {
+    background: var(--mj-tint);
+    border-color: var(--mj-primary);
+}
+
+/* Variante de cuidado: styleClass="manjar-btn-peligro" */
+.manjar .ui-button.ui-state-default.manjar-btn-peligro {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-peligro .ui-button-text {
+    color: var(--mj-off);
+}
+
+.manjar .ui-button.manjar-btn-peligro.ui-state-hover {
+    background: var(--mj-off-bg);
+    border-color: var(--mj-off);
+}
+
+/* Iconos de los botones: blancos en los principales, oscuros en los demás */
+.manjar .ui-button.ui-state-default .ui-icon {
+    filter: brightness(0) invert(1);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-sec .ui-icon,
+.manjar .ui-button.ui-state-default.manjar-btn-peligro .ui-icon {
+    filter: brightness(0);
+    opacity: .7;
+}
+
+/* Botones de iconos dentro de la tabla */
+.manjar .ui-datatable .ui-button.ui-button-icon-only {
+    width: 32px;
+    height: 32px;
+    margin: 0 2px;
+}
+
+/* Campos de texto: borde fino y sin el sombreado interior del tema */
+.manjar .ui-inputfield {
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: #fff;
+    box-shadow: none;
+}
+
+/* Lista desplegable (p:selectOneMenu): PrimeFaces le fija un ancho en línea, por eso !important */
+.manjar .ui-selectonemenu {
+    display: block;
+    width: 100% !important;
+    box-sizing: border-box;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: #fff;
+    box-shadow: none;
+}
+
+.manjar .ui-selectonemenu .ui-selectonemenu-label.ui-inputfield {
+    width: calc(100% - 34px) !important;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.manjar .ui-selectonemenu .ui-selectonemenu-trigger {
+    background: var(--mj-tint);
+    border: 0;
+    border-left: 1px solid var(--mj-border);
+    border-radius: 0 5px 5px 0;
+}
+
+.manjar .ui-inputfield.ui-state-focus,
+.manjar .ui-selectonemenu.ui-state-focus {
+    border-color: var(--mj-primary);
+    box-shadow: 0 0 0 3px rgba(204, 78, 39, .15);
+}
+
+.manjar .ui-inputfield.ui-state-error,
+.manjar .ui-selectonemenu.ui-state-error {
+    border-color: var(--mj-off);
+}
+
+/* Tabla de datos */
+.manjar .ui-datatable {
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    overflow: hidden;
+    box-shadow: var(--mj-shadow);
+}
+
+.manjar .ui-datatable thead th.ui-state-default {
+    background: var(--mj-tint);
+    border-color: var(--mj-border);
+    color: var(--mj-ink);
+    text-shadow: none;
+}
+
+.manjar .ui-datatable tbody tr.ui-widget-content {
+    border-color: var(--mj-border);
+}
+
+.manjar .ui-datatable tbody tr.ui-datatable-even,
+.manjar .ui-datatable tbody tr.ui-datatable-odd {
+    background: var(--mj-card);
+}
+
+.manjar .ui-datatable tbody tr.ui-widget-content:hover {
+    background: var(--mj-cream);
+}
+
+.manjar .ui-datatable .ui-paginator.ui-state-default,
+.manjar .ui-paginator.ui-widget-header {
+    background: var(--mj-tint);
+    border-color: var(--mj-border);
+}
+
+.manjar .ui-paginator .ui-paginator-page.ui-state-active {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+    color: #fff;
+}
+
+/* Casillas de verificación */
+.manjar .ui-chkbox .ui-chkbox-box.ui-state-active {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+}
+
+.manjar .ui-chkbox .ui-chkbox-box .ui-icon {
+    filter: brightness(0) invert(1);
+}
+
+.manjar .ui-chkbox-label {
+    margin-left: 6px;
+}
+
+/* Fondo oscurecido detrás de los diálogos */
+body.manjar .ui-widget-overlay {
+    background: var(--mj-dark);
+    opacity: .5;
+}
+
+/* Diálogos */
+body.manjar .ui-dialog {
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow-hover);
+    overflow: hidden;
+}
+
+body.manjar .ui-dialog .ui-dialog-titlebar {
+    background: var(--mj-dark);
+    border: 0;
+    color: var(--mj-on-dark);
+}
+
+body.manjar .ui-dialog .ui-dialog-title {
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+body.manjar .ui-dialog .ui-dialog-content {
+    padding: 14px 18px 16px;
+}
+
+/* ---------- 4. Mensajes, pie y pantallas pequeñas ---------- */
+
+/* Mensajes emergentes: abajo a la derecha, para no tapar el encabezado */
+.manjar .ui-growl {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    width: 340px;
+    max-width: calc(100vw - 40px);
+}
+
+.manjar .ui-growl-item-container {
+    border-radius: var(--mj-radius);
+    border: 1px solid var(--mj-border-strong);
+    border-left: 4px solid var(--mj-border-strong);
+    background: var(--mj-card);
+    background-image: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    opacity: 1;
+    color: var(--mj-ink);
+}
+
+.manjar .ui-growl-item-container.ui-growl-info {
+    border-left-color: var(--mj-ok);
+}
+
+.manjar .ui-growl-item-container.ui-growl-warn {
+    border-left-color: #d9b45a;
+}
+
+.manjar .ui-growl-item-container.ui-growl-error,
+.manjar .ui-growl-item-container.ui-growl-fatal {
+    border-left-color: var(--mj-off);
+}
+
+.manjar .ui-growl-item-container .ui-growl-title,
+.manjar .ui-growl-item-container .ui-growl-message,
+.manjar .ui-growl-item-container .ui-growl-message p {
+    color: var(--mj-ink);
+    text-shadow: none;
+}
+
+.manjar .ui-growl-item-container .ui-growl-icon-close {
+    filter: invert(1);
+}
+
+.manjar .ui-growl-item-container .ui-growl-image {
+    display: none;
+}
+
+.manjar .ui-growl-item-container .ui-growl-message {
+    margin-left: 0;
+    padding: 4px 28px 4px 4px;
+}
+
+.manjar-footer {
+    padding: 18px 16px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark-muted);
+    text-align: center;
+    font-size: 12.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
 @media (max-width: 700px) {
-    .manjar-content {
-        padding: 18px 16px 24px;
+    .manjar h1 {
+        font-size: 24px;
     }
-    .manjar-hero h1 {
-        font-size: 28px;
+    .mj-banner {
+        padding: 22px 20px;
     }
-    .manjar-tagline {
+    .manjar-row {
+        grid-template-columns: 1fr;
+    }
+    .manjar-spacer {
         display: none;
+    }
+    .mj-negocios {
+        grid-template-columns: 1fr;
+    }
+    .mj-negocio-foot .manjar-btn {
+        margin-left: 0;
+    }
+    .mj-auth-form {
+        padding: 20px 18px;
+    }
+    .manjar .ui-growl {
+        right: 12px;
+        bottom: 12px;
     }
 }

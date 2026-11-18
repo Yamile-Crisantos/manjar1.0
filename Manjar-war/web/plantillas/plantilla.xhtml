@@ -6,6 +6,10 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
 
+    <!-- Las páginas que reciben parámetros en la URL (?e=1) los declaran en la zona "metadata",
+         escribiendo ahí mismo su propio f:metadata (así lo exige JSF para que el parámetro llegue). -->
+    <ui:insert name="metadata"/>
+
     <h:head>
         <f:facet name="first">
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -19,62 +23,82 @@
 
     <h:body styleClass="manjar">
 
-        <!-- ENCABEZADO (marca) -->
+        <!-- Mensajes (éxito, avisos, errores) de cualquier página -->
+        <p:growl id="growl" autoUpdate="true" life="4500"/>
+
+        <!-- ENCABEZADO: marca + quién tiene la sesión.
+             La marca lleva al panel si eres personal del negocio, y al inicio si eres cliente o visitante. -->
         <header class="manjar-header">
             <div class="manjar-header-inner">
-                <h:link outcome="/vistas/inicio" styleClass="manjar-brand">
-                    <span class="manjar-brand-mark">M</span>
+                <h:link outcome="#{sesion.personal ? '/vistas/panel' : '/vistas/inicio'}" styleClass="manjar-brand">
                     <span class="manjar-brand-name">Manjar</span>
                 </h:link>
-                <span class="manjar-tagline">Gestión para fondas y restaurantes</span>
+
+                <h:panelGroup layout="block" styleClass="manjar-context" rendered="#{sesion.autenticado}">
+                    <span class="manjar-context-text">
+                        <strong>#{sesion.nombre}</strong>
+                        <small>#{sesion.rolNombre}<h:outputText value=" · #{sesion.establecimientoNombre}" rendered="#{not empty sesion.establecimientoNombre}"/></small>
+                    </span>
+                </h:panelGroup>
             </div>
         </header>
 
-        <!-- MENÚ DE NAVEGACIÓN (PrimeFaces): se escribe una sola vez, aquí -->
+        <!-- MENÚ DE NAVEGACIÓN (PrimeFaces): se escribe una sola vez, aquí.
+             Cada opción se muestra solo a los roles que la necesitan (rendered).
+             El facet "options" coloca su contenido a la derecha de la barra.
+             No se escriben comentarios dentro de <p:menubar>: PrimeFaces falla con ellos. -->
         <nav class="manjar-nav" aria-label="Menú principal">
             <div class="manjar-nav-inner">
                 <h:form id="formMenu">
                     <p:menubar styleClass="manjar-menubar">
 
-                        <p:menuitem value="Inicio" icon="ui-icon-home" outcome="/vistas/inicio"/>
+                        <p:menuitem value="Mi panel" outcome="/vistas/panel" rendered="#{sesion.personal}"/>
+                        <p:menuitem value="Inicio" outcome="/vistas/inicio" rendered="#{not sesion.personal}"/>
 
-                        <p:submenu label="Menú" icon="ui-icon-document">
-                            <p:menuitem value="Platillos y disponibilidad" outcome="/vistas/menu"/>
-                            <p:menuitem value="Menú público (QR)" disabled="true" title="Próximamente"/>
+                        <p:menuitem value="Menús" outcome="/vistas/menu" rendered="#{not sesion.personal}"/>
+
+                        <p:submenu label="Mi menú" rendered="#{sesion.personal}">
+                            <p:menuitem value="Ver menú público" outcome="/vistas/menu"/>
+                            <p:menuitem value="Administrar platillos" outcome="/vistas/platillos" rendered="#{sesion.administra}"/>
                         </p:submenu>
 
-                        <p:submenu label="Comandas" icon="ui-icon-clipboard">
+                        <p:submenu label="Comandas" rendered="#{sesion.personal}">
                             <p:menuitem value="Comandas del mesero" outcome="/vistas/comandas"/>
                             <p:menuitem value="Pantalla de cocina" disabled="true" title="Próximamente"/>
                         </p:submenu>
 
-                        <p:submenu label="Caja" icon="ui-icon-cart">
-                            <p:menuitem value="Control de caja" outcome="/vistas/caja"/>
-                        </p:submenu>
+                        <p:menuitem value="Caja" outcome="/vistas/caja" rendered="#{sesion.administra}"/>
 
-                        <p:menuitem value="Apartados" icon="ui-icon-calendar" disabled="true" title="Próximamente"/>
+                        <p:menuitem value="Apartados" outcome="/vistas/apartar"
+                                    rendered="#{not sesion.autenticado or sesion.cliente}"/>
 
-                        <p:submenu label="Administración" icon="ui-icon-gear">
-                            <p:menuitem value="Sucursales y roles" disabled="true" title="Próximamente"/>
+                        <p:submenu label="Administración" rendered="#{sesion.dueno}">
+                            <p:menuitem value="Personal" outcome="/vistas/personal"/>
+                            <p:menuitem value="Sucursales" disabled="true" title="Próximamente"/>
                             <p:menuitem value="Reportes" disabled="true" title="Próximamente"/>
                         </p:submenu>
 
                         <f:facet name="options">
-                            <h:link value="Iniciar sesión" outcome="/vistas/acceso" styleClass="manjar-login"/>
+                            <h:panelGroup>
+                                <h:link value="Crear cuenta" outcome="/vistas/registro" styleClass="manjar-link-suave"
+                                        rendered="#{not sesion.autenticado}"/>
+                                <h:link value="Iniciar sesión" outcome="/vistas/acceso" styleClass="manjar-login"
+                                        rendered="#{not sesion.autenticado}"/>
+                                <h:link value="Mi panel" outcome="/vistas/panel" styleClass="manjar-link-suave"
+                                        rendered="#{sesion.cliente}"/>
+                                <p:commandLink value="Cerrar sesión" action="#{sesion.cerrar}" ajax="false"
+                                               styleClass="manjar-login manjar-login-sec" rendered="#{sesion.autenticado}"/>
+                            </h:panelGroup>
                         </f:facet>
                     </p:menubar>
                 </h:form>
             </div>
         </nav>
 
-        <!-- CUERPO: ruta (breadcrumb) + contenido de cada página -->
+        <!-- CUERPO: ruta (migas de pan) + contenido de cada página -->
         <main class="manjar-main">
             <nav class="manjar-crumbs" aria-label="Ruta de navegación">
-                <ui:insert name="ruta">
-                    <p:breadCrumb homeDisplay="text">
-                        <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    </p:breadCrumb>
-                </ui:insert>
+                <ui:insert name="ruta"/>
             </nav>
 
             <section class="manjar-content">
@@ -82,9 +106,7 @@
             </section>
         </main>
 
-        <footer class="manjar-footer">
-            Manjar · Gestión para fondas y restaurantes · 2026
-        </footer>
+        <footer class="manjar-footer">Manjar · 2026</footer>
 
     </h:body>
 </html>

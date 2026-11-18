@@ -2,24 +2,26 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
             <ui:define name="titulo">Comandas · Manjar</ui:define>
 
             <ui:define name="ruta">
-                <p:breadCrumb homeDisplay="text">
-                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    <p:menuitem value="Comandas" outcome="/vistas/comandas"/>
-                </p:breadCrumb>
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Comandas"/>
+                </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
                 <h1>Comandas</h1>
-                <p>Aquí el mesero registrará los pedidos de cada mesa.</p>
-                <div class="manjar-soon">Módulo en construcción</div>
+                <p class="mj-lead">Aquí el mesero registrará los pedidos de cada mesa.</p>
+                <div class="mj-pronto">
+                    <strong>Módulo en construcción</strong>
+                    <span>Pronto podrás tomar pedidos por mesa y verlos en cocina.</span>
+                    <h:link value="Volver a mi panel" outcome="/vistas/panel" styleClass="manjar-btn manjar-btn-sec"/>
+                </div>
             </ui:define>
 
         </ui:composition>

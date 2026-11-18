@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <!-- Tarjetas con los negocios de Manjar (las usan inicio.xhtml y menu.xhtml) -->
+        <ui:composition>
+            <h:panelGroup layout="block" rendered="#{empty menuPublicoBean.negocios}" styleClass="mj-vacio">
+                Todavía no hay negocios registrados.
+            </h:panelGroup>
+            <div class="mj-negocios">
+                <ui:repeat value="#{menuPublicoBean.negocios}" var="n">
+                    <article class="mj-negocio">
+                        <div class="mj-negocio-top">
+                            <h3>#{n.nombre}</h3>
+                            <p>#{n.direccion}</p>
+                        </div>
+                        <div class="mj-negocio-foot">
+                            <span class="mj-chip">#{menuPublicoBean.disponiblesDe(n)} de #{menuPublicoBean.totalDe(n)} disponibles</span>
+                            <h:link value="Ver menú" outcome="/vistas/menu" styleClass="manjar-btn">
+                                <f:param name="e" value="#{n.id}"/>
+                            </h:link>
+                        </div>
+                    </article>
+                </ui:repeat>
+            </div>
+        </ui:composition>
+    </body>
+</html>
