@@ -5,6 +5,9 @@
 package modelo;
 
 import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -56,6 +59,26 @@ public class Comanda implements Serializable {
     private Usuario meseroid;
     @OneToMany(mappedBy = "comandaid")
     private List<Movimientocaja> movimientocajaList;
+
+    /** Sucursal donde se tomó la comanda (de ahí sale el aislamiento por negocio). */
+    @JoinColumn(name = "ESTABLECIMIENTOID", referencedColumnName = "ID")
+    @ManyToOne
+    private Establecimiento establecimientoid;
+
+    /** MESA o LLEVAR. */
+    @Size(max = 10)
+    @Column(name = "TIPO")
+    private String tipo;
+
+    /** Cuándo se registró (orden de llegada a cocina). */
+    @Column(name = "FECHAHORA")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechahora;
+
+    /** Cuándo se cobró en caja; null = todavía sin cobrar. */
+    @Column(name = "FECHACOBRO")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechacobro;
 
     public Comanda() {
     }
@@ -112,6 +135,38 @@ public class Comanda implements Serializable {
 
     public void setMovimientocajaList(List<Movimientocaja> movimientocajaList) {
         this.movimientocajaList = movimientocajaList;
+    }
+
+    public Establecimiento getEstablecimientoid() {
+        return establecimientoid;
+    }
+
+    public void setEstablecimientoid(Establecimiento establecimientoid) {
+        this.establecimientoid = establecimientoid;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public Date getFechahora() {
+        return fechahora;
+    }
+
+    public void setFechahora(Date fechahora) {
+        this.fechahora = fechahora;
+    }
+
+    public Date getFechacobro() {
+        return fechacobro;
+    }
+
+    public void setFechacobro(Date fechacobro) {
+        this.fechacobro = fechacobro;
     }
 
     @Override

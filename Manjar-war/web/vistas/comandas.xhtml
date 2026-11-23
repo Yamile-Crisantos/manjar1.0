@@ -2,7 +2,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
@@ -10,18 +12,191 @@
 
             <ui:define name="ruta">
                 <ui:include src="/plantillas/migas.xhtml">
-                    <ui:param name="actual" value="Comandas"/>
+                    <ui:param name="padre" value="Comandas"/>
+                    <ui:param name="actual" value="Registro de comandas"/>
                 </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
-                <h1>Comandas</h1>
-                <p class="mj-lead">Aquí el mesero registrará los pedidos de cada mesa.</p>
-                <div class="mj-pronto">
-                    <strong>Módulo en construcción</strong>
-                    <span>Pronto podrás tomar pedidos por mesa y verlos en cocina.</span>
-                    <h:link value="Volver a mi panel" outcome="/vistas/panel" styleClass="manjar-btn manjar-btn-sec"/>
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
+                        <h1>Comandas</h1>
+                        <p class="mj-lead">
+                            Toma el pedido de una mesa o para llevar y mándalo directo a cocina.
+                            Aquí mismo ves en qué estado va cada comanda.
+                        </p>
+                    </div>
+                    <h:link value="Pantalla de cocina" outcome="/vistas/cocina" styleClass="manjar-btn manjar-btn-sec"/>
                 </div>
+
+                <!-- Actualización automática: renueva las comandas y las porciones que quedan, sin tocar el pedido que se está armando -->
+                <h:form id="formSondeo">
+                    <p:poll interval="6" listener="#{comandasBean.refrescar}" process="@this"
+                            update=":panelActivas :panelCarta"/>
+                </h:form>
+
+                <div class="mj-op-cols">
+
+                    <!-- ============ Nueva comanda ============ -->
+                    <section class="mj-op-col">
+                        <h2 class="mj-op-titulo">Nueva comanda</h2>
+
+                        <h:form id="formPedido" styleClass="manjar-form mj-panel">
+                            <div class="mj-tipo">
+                                <p:selectOneButton id="tipo" value="#{comandasBean.tipo}">
+                                    <f:selectItem itemLabel="Mesa" itemValue="MESA"/>
+                                    <f:selectItem itemLabel="Para llevar" itemValue="LLEVAR"/>
+                                    <p:ajax process="@form" update="etiquetaMesa mesa"/>
+                                </p:selectOneButton>
+                            </div>
+                            <div class="manjar-field">
+                                <p:outputLabel id="etiquetaMesa" for="mesa"
+                                               value="#{comandasBean.llevar ? 'Nombre de quien recoge (opcional)' : 'Mesa'}"/>
+                                <p:inputText id="mesa" value="#{comandasBean.mesa}" maxlength="50"
+                                             placeholder="#{comandasBean.llevar ? 'Ana' : 'Por ejemplo: 4 o Terraza 2'}"/>
+                            </div>
+
+                            <h:panelGroup id="panelCarrito" layout="block" styleClass="mj-carrito">
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty comandasBean.carrito}">
+                                    Aún no hay platillos. Elige de la lista de abajo con el botón +.
+                                </h:panelGroup>
+                                <ui:repeat var="l" value="#{comandasBean.carrito}">
+                                    <div class="mj-linea">
+                                        <div class="mj-linea-cab">
+                                            <strong><h:outputText value="#{l.nombre}"/></strong>
+                                            <span class="mj-linea-sub">$<h:outputText value="#{l.subtotal}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                        </div>
+                                        <div class="mj-linea-ctl">
+                                            <p:commandButton icon="ui-icon-minus" title="Quitar una" styleClass="manjar-btn-sec"
+                                                             action="#{comandasBean.menos(l)}" process="@this" update=":formPedido:panelCarrito"/>
+                                            <span class="mj-cant"><h:outputText value="#{l.cantidad}"/></span>
+                                            <p:commandButton icon="ui-icon-plus" title="Agregar una" styleClass="manjar-btn-sec"
+                                                             action="#{comandasBean.mas(l)}" process="@this" update=":formPedido:panelCarrito"/>
+                                            <p:inputText value="#{l.nota}" maxlength="120" placeholder="Indicación para cocina (opcional)"
+                                                         styleClass="mj-nota-linea">
+                                                <p:ajax event="change" process="@this"/>
+                                            </p:inputText>
+                                            <p:commandButton icon="ui-icon-trash" title="Quitar del pedido" styleClass="manjar-btn-peligro"
+                                                             action="#{comandasBean.quitar(l)}" process="@this" update=":formPedido:panelCarrito"/>
+                                        </div>
+                                    </div>
+                                </ui:repeat>
+                                <h:panelGroup layout="block" styleClass="mj-total" rendered="#{not empty comandasBean.carrito}">
+                                    <span>#{comandasBean.porcionesCarrito} porciones</span>
+                                    <strong>Total: $<h:outputText value="#{comandasBean.totalCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <div class="manjar-form-actions">
+                                <p:commandButton id="enviar" value="Enviar a cocina" action="#{comandasBean.enviar}"
+                                                 process="@form" update=":formPedido :panelActivas :panelCarta"/>
+                            </div>
+                        </h:form>
+
+                        <h:panelGroup id="panelCarta" layout="block" styleClass="mj-carta">
+                            <h:form id="formCarta">
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty comandasBean.grupos}">
+                                    No hay platillos disponibles. Revisa el menú o las porciones del día.
+                                </h:panelGroup>
+                                <ui:repeat var="g" value="#{comandasBean.grupos}">
+                                    <h3 class="mj-carta-cat"><h:outputText value="#{g.categoria}"/></h3>
+                                    <ui:repeat var="it" value="#{g.items}">
+                                        <div class="mj-carta-item">
+                                            <div class="mj-carta-txt">
+                                                <strong><h:outputText value="#{it.nombre}"/></strong>
+                                                <span class="manjar-muted">
+                                                    $<h:outputText value="#{it.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                                                    <h:outputText value=" · quedan #{it.restante}" rendered="#{it.conControl}"/>
+                                                </span>
+                                            </div>
+                                            <p:commandButton icon="ui-icon-plus" title="Agregar #{it.nombre}"
+                                                             action="#{comandasBean.agregar(it.id)}" process="@this"
+                                                             update=":formPedido:panelCarrito"/>
+                                        </div>
+                                    </ui:repeat>
+                                </ui:repeat>
+                            </h:form>
+                        </h:panelGroup>
+                    </section>
+
+                    <!-- ============ Estado de las comandas ============ -->
+                    <section class="mj-op-col">
+                        <h2 class="mj-op-titulo">Estado de las comandas</h2>
+
+                        <h:panelGroup id="panelActivas" layout="block">
+                            <h:form id="formActivas">
+                                <h:panelGroup layout="block" styleClass="mj-filtro" rendered="#{comandasBean.puedeFiltrar}">
+                                    <p:selectBooleanCheckbox value="#{comandasBean.soloMias}" itemLabel="Solo las que yo registré">
+                                        <p:ajax listener="#{comandasBean.refrescar}" update=":panelActivas"/>
+                                    </p:selectBooleanCheckbox>
+                                </h:panelGroup>
+
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty comandasBean.activas}">
+                                    No hay comandas en curso.
+                                </h:panelGroup>
+
+                                <ui:repeat var="c" value="#{comandasBean.activas}">
+                                    <article class="mj-ticket estado-#{c.estado}">
+                                        <header class="mj-ticket-cab">
+                                            <div>
+                                                <strong>#{c.id}</strong>
+                                                <h:outputText value=" · #{c.etiqueta}"/>
+                                            </div>
+                                            <span class="mj-estado e-#{c.estado}">#{c.estadoTexto}</span>
+                                        </header>
+                                        <ul class="mj-ticket-lineas">
+                                            <ui:repeat var="l" value="#{c.lineas}">
+                                                <li>
+                                                    <b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/>
+                                                    <em class="mj-ticket-nota"><h:outputText value=" — #{l.nota}" rendered="#{not empty l.nota}"/></em>
+                                                </li>
+                                            </ui:repeat>
+                                        </ul>
+                                        <footer class="mj-ticket-pie">
+                                            <span class="manjar-muted">
+                                                hace #{c.minutosEspera} min · <h:outputText value="#{c.meseroNombre}"/>
+                                            </span>
+                                            <span>
+                                                <h:outputText value="Cobrada " styleClass="manjar-badge ok" rendered="#{c.cobrada}"/>
+                                                <strong>$<h:outputText value="#{c.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                            </span>
+                                        </footer>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Entregada en la mesa" rendered="#{c.lista}"
+                                                             action="#{comandasBean.entregar(c.id)}" process="@this" update=":panelActivas"/>
+                                            <p:commandButton value="Cancelar" styleClass="manjar-btn-peligro"
+                                                             rendered="#{comandasBean.puedeCancelar(c)}"
+                                                             action="#{comandasBean.cancelar(c.id)}" process="@this"
+                                                             update=":panelActivas :panelCarta">
+                                                <p:confirm header="Cancelar comanda" icon="ui-icon-alert"
+                                                           message="¿Cancelar la comanda #{c.id}? Las porciones regresarán al menú."/>
+                                            </p:commandButton>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+
+                                <h:panelGroup layout="block" rendered="#{not empty comandasBean.terminadas}">
+                                    <h3 class="mj-op-sub">Terminadas hoy</h3>
+                                    <ui:repeat var="c" value="#{comandasBean.terminadas}">
+                                        <div class="mj-terminada">
+                                            <span><b>#{c.id}</b> · <h:outputText value="#{c.etiqueta}"/></span>
+                                            <span class="mj-estado e-#{c.estado}">#{c.estadoTexto}</span>
+                                            <span class="manjar-muted">$<h:outputText value="#{c.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                        </div>
+                                    </ui:repeat>
+                                </h:panelGroup>
+                            </h:form>
+                        </h:panelGroup>
+                    </section>
+                </div>
+
+                <h:form id="formConfirmar">
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes"/>
+                        <p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no manjar-btn-sec"/>
+                    </p:confirmDialog>
+                </h:form>
             </ui:define>
 
         </ui:composition>

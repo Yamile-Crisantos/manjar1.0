@@ -18,134 +18,13 @@
 --   Estado: 1 = activo, 0 = inactivo
 --   Platillo.Estado: 1 = disponible, 0 = agotado
 --
--- Estructura: solo agrega (si faltan) las columnas de personalización de la tabla
--- establecimiento (color, estilo, contacto y aviso), igual que migracion_personalizacion.sql.
+-- No modifica la estructura de las tablas.
 -- ==========================================================
 
 USE manjar;
 SET NAMES utf8mb4;
 SET @sql_safe_anterior = @@SQL_SAFE_UPDATES;
 SET SQL_SAFE_UPDATES = 0;
-
--- ---------- 0) Columnas de personalización (si todavía no existen) ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'ColorMenu');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `ColorMenu` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `DIRECCION`',
-    'SELECT ''ColorMenu ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Lema ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Lema');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Lema` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `ColorMenu`',
-    'SELECT ''Lema ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna DisenoMenu ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'DisenoMenu');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `DisenoMenu` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Lema`',
-    'SELECT ''DisenoMenu ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Tipografia ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Tipografia');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Tipografia` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `DisenoMenu`',
-    'SELECT ''Tipografia ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Esquinas ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Esquinas');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Esquinas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Tipografia`',
-    'SELECT ''Esquinas ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna FondoMenu ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'FondoMenu');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `FondoMenu` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Esquinas`',
-    'SELECT ''FondoMenu ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Telefono ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Telefono');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `FondoMenu`',
-    'SELECT ''Telefono ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Whatsapp ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Whatsapp');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Whatsapp` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Telefono`',
-    'SELECT ''Whatsapp ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Horario ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Horario');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Horario` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Whatsapp`',
-    'SELECT ''Horario ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Instagram ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Instagram');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Instagram` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Horario`',
-    'SELECT ''Instagram ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Facebook ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Facebook');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Facebook` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Instagram`',
-    'SELECT ''Facebook ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
-
--- ---------- Columna Aviso ----------
-SET @existe = (SELECT COUNT(*) FROM information_schema.COLUMNS
-               WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'establecimiento' AND COLUMN_NAME = 'Aviso');
-SET @sql = IF(@existe = 0,
-    'ALTER TABLE `establecimiento` ADD COLUMN `Aviso` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `Facebook`',
-    'SELECT ''Aviso ya existe: sin cambios'' AS aviso');
-PREPARE paso FROM @sql;
-EXECUTE paso;
-DEALLOCATE PREPARE paso;
 
 -- ---------- 1) Cuentas ----------
 INSERT INTO usuario (Nombre, Correo, Contrasenahash, Rol, Estado)
@@ -169,6 +48,10 @@ SELECT 'Ana López', 'cliente@manjar.test', '65000:5e6f708192a3b4c5d6e7f80112233
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE Correo = 'cliente@manjar.test');
 
 INSERT INTO usuario (Nombre, Correo, Contrasenahash, Rol, Estado)
+SELECT 'Beto Cliente', 'cliente2@manjar.test', '65000:8192a3b4c5d6e7f80112233445566a7b:ce506061ca85e698c56e68d5cdb5f1c6a79ced9befbafb3a3492c817e6456a98', 1, 1 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE Correo = 'cliente2@manjar.test');
+
+INSERT INTO usuario (Nombre, Correo, Contrasenahash, Rol, Estado)
 SELECT 'Mario Gómez', 'dueno2@manjar.test', '65000:6f708192a3b4c5d6e7f8011223344556:82e1f307eb33b84038f21922af2d3d10e8ff43e050c71c5585dd2b9602774fb5', 2, 1 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE Correo = 'dueno2@manjar.test');
 
@@ -187,44 +70,9 @@ SELECT 'Taquería El Güero', 'taqueria-guero', 'SYS-0002', 'Calle Morelos 45, C
 WHERE u.Correo = 'dueno2@manjar.test'
 AND NOT EXISTS (SELECT 1 FROM establecimiento WHERE Nombre = 'Taquería El Güero');
 
--- Código de QR (el menú público se abre con /vistas/menu.xhtml?q=<código>) y personalización de cada negocio.
--- Se reemplaza el código si no tenía, tenía el formato anterior o lo generó la migración (menu-...).
-UPDATE establecimiento SET CodigoQR = 'fonda-lupe-7k3m2q'
-WHERE Nombre = 'Fonda Doña Lupe'
-AND (CodigoQR IS NULL OR CodigoQR = '' OR CodigoQR NOT REGEXP '^[a-z0-9]+(-[a-z0-9]+)*$' OR CodigoQR LIKE 'menu-%');
-
-UPDATE establecimiento SET CodigoQR = 'taqueria-guero-4x9h5t'
-WHERE Nombre = 'Taquería El Güero'
-AND (CodigoQR IS NULL OR CodigoQR = '' OR CodigoQR NOT REGEXP '^[a-z0-9]+(-[a-z0-9]+)*$' OR CodigoQR LIKE 'menu-%');
-
--- Color, lema, estilo, contacto y aviso (solo si el negocio todavía no los ha personalizado)
-UPDATE establecimiento SET ColorMenu = '#C44A24', Lema = 'Comida casera, hecha cada día'
-WHERE Nombre = 'Fonda Doña Lupe' AND Lema IS NULL;
-
-UPDATE establecimiento SET ColorMenu = '#4F6B3A', Lema = 'Tacos recién hechos, a cualquier hora'
-WHERE Nombre = 'Taquería El Güero' AND Lema IS NULL;
-
-UPDATE establecimiento SET Whatsapp = '951 123 4567', Instagram = 'fondalupe',
-    Horario = 'Lunes a sábado de 8:00 a 17:00', Aviso = 'Hoy: caldo de res y agua de jamaica'
-WHERE Nombre = 'Fonda Doña Lupe'
-AND Telefono IS NULL AND Whatsapp IS NULL AND Horario IS NULL AND Instagram IS NULL AND Facebook IS NULL AND Aviso IS NULL;
-
-UPDATE establecimiento SET Telefono = '951 987 6543', Facebook = 'taqueriaelguero.oaxaca',
-    Horario = 'Todos los días de 18:00 a 02:00'
-WHERE Nombre = 'Taquería El Güero'
-AND Telefono IS NULL AND Whatsapp IS NULL AND Horario IS NULL AND Instagram IS NULL AND Facebook IS NULL AND Aviso IS NULL;
-
--- La taquería muestra el estilo "lista, moderna, esquinas rectas, fondo oscuro" (solo si sigue con el estilo predeterminado)
-UPDATE establecimiento SET DisenoMenu = 'lista', Tipografia = 'moderna', Esquinas = 'rectas', FondoMenu = 'oscuro'
-WHERE Nombre = 'Taquería El Güero'
-AND (DisenoMenu IS NULL OR DisenoMenu = 'tarjetas') AND (Tipografia IS NULL OR Tipografia = 'clasica')
-AND (Esquinas IS NULL OR Esquinas = 'redondas') AND (FondoMenu IS NULL OR FondoMenu = 'claro');
-
--- Estilo predeterminado para los demás negocios que todavía no lo tengan
-UPDATE establecimiento SET DisenoMenu = 'tarjetas' WHERE DisenoMenu IS NULL OR DisenoMenu = '';
-UPDATE establecimiento SET Tipografia = 'clasica' WHERE Tipografia IS NULL OR Tipografia = '';
-UPDATE establecimiento SET Esquinas = 'redondas' WHERE Esquinas IS NULL OR Esquinas = '';
-UPDATE establecimiento SET FondoMenu = 'claro' WHERE FondoMenu IS NULL OR FondoMenu = '';
+-- Enlace relativo del menú público de cada negocio de prueba (lo que lleva el código QR)
+UPDATE establecimiento SET CodigoQR = CONCAT('/vistas/menu.xhtml?e=', ID)
+WHERE CodigoQR IS NULL AND Nombre IN ('Fonda Doña Lupe', 'Taquería El Güero');
 
 -- ---------- 3) Personal ligado a su negocio ----------
 UPDATE usuario SET ESTABLECIMIENTOID = (SELECT ID FROM establecimiento WHERE Nombre = 'Fonda Doña Lupe')
@@ -354,7 +202,7 @@ AND NOT EXISTS (SELECT 1 FROM platillo p WHERE p.ESTABLECIMIENTOID = c.ESTABLECI
 
 SET SQL_SAFE_UPDATES = @sql_safe_anterior;
 
--- Revisión rápida (con la base vacía antes de ejecutar: 7 cuentas, 2 negocios y 13 platillos):
+-- Revisión rápida (con la base vacía antes de ejecutar: 8 cuentas, 2 negocios y 13 platillos):
 SELECT (SELECT COUNT(*) FROM usuario WHERE Correo LIKE '%@manjar.test') AS cuentas_prueba,
        (SELECT COUNT(*) FROM establecimiento) AS negocios,
        (SELECT COUNT(*) FROM platillo) AS platillos;

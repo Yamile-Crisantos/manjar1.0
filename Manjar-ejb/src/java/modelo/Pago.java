@@ -70,6 +70,11 @@ public class Pago implements Serializable {
     @ManyToOne(optional = false)
     private Apartado apartadoid;
 
+    /** Quién confirmó que el pago se recibió. */
+    @JoinColumn(name = "REGISTRADOPORID", referencedColumnName = "ID")
+    @ManyToOne
+    private Usuario registradoporid;
+
     public Pago() {
     }
 
@@ -137,6 +142,14 @@ public class Pago implements Serializable {
 
     public void setApartadoid(Apartado apartadoid) {
         this.apartadoid = apartadoid;
+    }
+
+    public Usuario getRegistradoporid() {
+        return registradoporid;
+    }
+
+    public void setRegistradoporid(Usuario registradoporid) {
+        this.registradoporid = registradoporid;
     }
 
     @Override

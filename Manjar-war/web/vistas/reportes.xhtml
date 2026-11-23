@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="metadata">
+                <f:metadata>
+                    <f:viewParam name="s" value="#{reportesBean.s}"/>
+                    <f:viewParam name="desde" value="#{reportesBean.desdeParam}"/>
+                    <f:viewParam name="hasta" value="#{reportesBean.hastaParam}"/>
+                    <f:event type="preRenderView" listener="#{reportesBean.iniciar}"/>
+                </f:metadata>
+            </ui:define>
+
+            <ui:define name="titulo">Reportes · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Administración"/>
+                    <ui:param name="actual" value="Reportes"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">Ventas y rentabilidad</p>
+                        <h1>Reportes</h1>
+                        <p class="mj-lead">
+                            Mira cuánto vendiste en una sucursal por periodo, por platillo y por mesero, y qué platillos
+                            te dejan más ganancia para decidir mejor tu menú.
+                            <h:link value="Ver todas las sucursales juntas" outcome="/vistas/consolidado"/>
+                        </p>
+                    </div>
+                </div>
+
+                <h:form id="formFiltros" styleClass="manjar-form mj-panel mj-filtros">
+                    <div class="manjar-row">
+                        <div class="manjar-field">
+                            <p:outputLabel for="sucursal" value="Sucursal"/>
+                            <p:selectOneMenu id="sucursal" value="#{reportesBean.sucursalId}">
+                                <f:selectItems value="#{reportesBean.opcionesSucursal}"/>
+                                <p:ajax process="@this" listener="#{reportesBean.cambiarSucursal}" update=":formFiltros :panelReporte"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="manjar-field">
+                            <label for="formFiltros:desde">Desde</label>
+                            <h:inputText id="desde" value="#{reportesBean.desde}" pt:type="date" styleClass="mj-fecha"/>
+                        </div>
+                        <div class="manjar-field">
+                            <label for="formFiltros:hasta">Hasta</label>
+                            <h:inputText id="hasta" value="#{reportesBean.hasta}" pt:type="date" styleClass="mj-fecha"/>
+                        </div>
+                        <div class="manjar-field">
+                            <p:outputLabel for="agrupar" value="Ver por"/>
+                            <p:selectOneButton id="agrupar" value="#{reportesBean.agrupar}">
+                                <f:selectItem itemLabel="Día" itemValue="DIA"/>
+                                <f:selectItem itemLabel="Mes" itemValue="MES"/>
+                            </p:selectOneButton>
+                        </div>
+                    </div>
+                    <div class="manjar-row">
+                        <div class="manjar-field">
+                            <p:outputLabel for="platillo" value="Platillo"/>
+                            <p:selectOneMenu id="platillo" value="#{reportesBean.platilloId}">
+                                <f:selectItem itemLabel="Todos los platillos" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{reportesBean.opcionesPlatillo}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="manjar-field">
+                            <p:outputLabel for="mesero" value="Mesero"/>
+                            <p:selectOneMenu id="mesero" value="#{reportesBean.meseroId}">
+                                <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{reportesBean.opcionesMesero}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                    <div class="manjar-form-actions mj-atajos">
+                        <p:commandButton id="ver" value="Ver reporte" action="#{reportesBean.generar}"
+                                         process="@form" update=":panelReporte"/>
+                        <span class="manjar-muted">Atajos:</span>
+                        <p:commandButton value="Hoy" styleClass="manjar-btn-sec" action="#{reportesBean.hoy}" process="@this" update=":formFiltros :panelReporte"/>
+                        <p:commandButton value="Esta semana" styleClass="manjar-btn-sec" action="#{reportesBean.estaSemana}" process="@this" update=":formFiltros :panelReporte"/>
+                        <p:commandButton value="Este mes" styleClass="manjar-btn-sec" action="#{reportesBean.esteMes}" process="@this" update=":formFiltros :panelReporte"/>
+                        <p:commandButton value="Últimos 30 días" styleClass="manjar-btn-sec" action="#{reportesBean.ultimos30}" process="@this" update=":formFiltros :panelReporte"/>
+                    </div>
+                </h:form>
+
+                <h:panelGroup id="panelReporte" layout="block">
+                    <h:panelGroup layout="block" rendered="#{reportesBean.reporte != null}">
+                        <h2 class="mj-titulo-seccion">
+                            <h:outputText value="#{reportesBean.reporte.sucursalNombre}"/>
+                            <span class="manjar-muted"> · del #{fmt.fecha(reportesBean.reporte.desde)} al #{fmt.fecha(reportesBean.reporte.hasta)}</span>
+                        </h2>
+                        <h:panelGroup layout="block" styleClass="manjar-aviso" rendered="#{reportesBean.filtrado}">
+                            Con filtro:
+                            <h:outputText value=" un solo platillo." rendered="#{reportesBean.platilloId != null and reportesBean.meseroId == null}"/>
+                            <h:outputText value=" un solo mesero (no incluye apartados en línea)." rendered="#{reportesBean.meseroId != null and reportesBean.platilloId == null}"/>
+                            <h:outputText value=" un platillo y un mesero." rendered="#{reportesBean.meseroId != null and reportesBean.platilloId != null}"/>
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" styleClass="mj-vacio" id="sinVentas" rendered="#{reportesBean.reporte.vacio}">
+                            No hay ventas en este periodo. Aquí cuentan las comandas cobradas y los apartados ya pagados.
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" rendered="#{not reportesBean.reporte.vacio}">
+                            <div class="mj-stats">
+                                <div class="mj-stat"><span>Ingresos</span><strong>$<h:outputText value="#{reportesBean.reporte.total.ingresos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                                <div class="mj-stat"><span>Costo</span><strong>$<h:outputText value="#{reportesBean.reporte.total.costo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                                <div class="mj-stat destacado"><span>Ganancia</span><strong>$<h:outputText value="#{reportesBean.reporte.total.ganancia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                                <div class="mj-stat"><span>Margen</span><strong><h:outputText value="#{reportesBean.reporte.total.margen}"><f:convertNumber minFractionDigits="1" maxFractionDigits="1"/></h:outputText>%</strong></div>
+                                <div class="mj-stat"><span>Ventas</span><strong>#{reportesBean.reporte.total.ventas}</strong></div>
+                                <div class="mj-stat"><span>Ticket promedio</span><strong>$<h:outputText value="#{reportesBean.reporte.total.ticketPromedio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                                <div class="mj-stat"><span>Porciones</span><strong>#{reportesBean.reporte.total.porciones}</strong></div>
+                            </div>
+
+                            <h:panelGroup layout="block" styleClass="manjar-aviso warn" rendered="#{reportesBean.reporte.haySinCosto}">
+                                Estos platillos no tienen costo registrado, así que su ganancia aparece completa:
+                                <strong><h:outputText value="#{reportesBean.reporte.platillosSinCosto}"/></strong>.
+                                Captura su costo en Administrar platillos para ver la ganancia real.
+                            </h:panelGroup>
+
+                            <h:panelGroup layout="block" styleClass="manjar-aviso" rendered="#{reportesBean.reporte.mejorPlatillo != null and reportesBean.platilloId == null}">
+                                El platillo que más ganancia dejó: <strong><h:outputText value="#{reportesBean.reporte.mejorPlatillo.etiqueta}"/></strong>
+                                ($<h:outputText value="#{reportesBean.reporte.mejorPlatillo.ganancia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>).
+                            </h:panelGroup>
+
+                            <h2 class="mj-titulo-seccion">Ventas por periodo</h2>
+                            <ui:include src="/WEB-INF/fragmentos/reporte-tabla.xhtml">
+                                <ui:param name="encabezado" value="#{reportesBean.reporte.agrupar == 'MES' ? 'Mes' : 'Día'}"/>
+                                <ui:param name="filas" value="#{reportesBean.reporte.porPeriodo}"/>
+                            </ui:include>
+
+                            <h2 class="mj-titulo-seccion">Por platillo <span class="manjar-muted">(de mayor a menor ganancia)</span></h2>
+                            <ui:include src="/WEB-INF/fragmentos/reporte-tabla.xhtml">
+                                <ui:param name="encabezado" value="Platillo"/>
+                                <ui:param name="filas" value="#{reportesBean.reporte.porPlatillo}"/>
+                            </ui:include>
+
+                            <h2 class="mj-titulo-seccion">Por mesero</h2>
+                            <ui:include src="/WEB-INF/fragmentos/reporte-tabla.xhtml">
+                                <ui:param name="encabezado" value="Mesero"/>
+                                <ui:param name="filas" value="#{reportesBean.reporte.porMesero}"/>
+                            </ui:include>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

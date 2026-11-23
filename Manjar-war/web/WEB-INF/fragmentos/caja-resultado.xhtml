@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <!-- Cuentas de una caja (arqueo). Parámetro: corte = la caja (CajaVista). Lo usan el corte, el cierre y el historial. -->
+        <ui:composition>
+            <dl class="mj-arqueo">
+                <div><dt>Fondo inicial</dt>
+                    <dd>$<h:outputText value="#{corte.montoInicial}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div><dt>+ Ventas en efectivo</dt>
+                    <dd>$<h:outputText value="#{corte.ingresosEfectivo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div><dt>− Retiros</dt>
+                    <dd>$<h:outputText value="#{corte.retiros}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div><dt>− Gastos</dt>
+                    <dd>$<h:outputText value="#{corte.gastos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div class="total"><dt>= Efectivo esperado</dt>
+                    <dd>$<h:outputText value="#{corte.montoEsperado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div><dt>Dinero contado</dt>
+                    <dd>$<h:outputText value="#{corte.montoContado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div class="resultado dif-#{corte.cuadra ? 'ok' : (c.sobrante ? 'sobra' : 'falta')}">
+                    <dt>#{corte.resultadoTexto}</dt>
+                    <dd><h:outputText value="#{corte.diferencia}"><f:convertNumber pattern="+$#,##0.00;-$#,##0.00"/></h:outputText></dd></div>
+                <div class="aparte"><dt>Cobrado con tarjeta</dt>
+                    <dd>$<h:outputText value="#{corte.ingresosTarjeta}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div class="aparte"><dt>Cobrado por transferencia</dt>
+                    <dd>$<h:outputText value="#{corte.ingresosTransferencia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+                <div class="aparte"><dt>Total vendido (todas las formas de pago)</dt>
+                    <dd>$<h:outputText value="#{corte.totalVendido}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></dd></div>
+            </dl>
+        </ui:composition>
+    </body>
+</html>

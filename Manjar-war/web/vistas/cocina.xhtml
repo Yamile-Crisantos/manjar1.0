@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <!-- Pantalla compartida de cocina (HU-10). Entra con la clave de la sucursal (?k=...) o con la sesión del personal.
+         Es una página aparte, sin la barra de Manjar, para dejarla fija en una tablet o televisión. -->
+    <f:metadata>
+        <f:viewParam name="k" value="#{cocinaBean.token}"/>
+    </f:metadata>
+
+    <h:head>
+        <f:facet name="first">
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <meta name="robots" content="noindex,nofollow"/>
+        </f:facet>
+        <title>Cocina · Manjar</title>
+        <f:facet name="last">
+            <h:outputStylesheet library="css" name="manjar.css"/>
+        </f:facet>
+    </h:head>
+
+    <h:body styleClass="manjar mj-cocina-body">
+        <p:growl id="growl" autoUpdate="true" life="4500"/>
+
+        <header class="mj-cocina-cab">
+            <div class="mj-cocina-cab-in">
+                <div>
+                    <span class="mj-cocina-marca">Cocina</span>
+                    <h:outputText value=" · #{cocinaBean.sucursalNombre}" rendered="#{cocinaBean.autorizado}"/>
+                </div>
+                <div class="mj-cocina-der">
+                    <h:link value="Volver a mi panel" outcome="/vistas/panel" rendered="#{sesion.personal}"/>
+                </div>
+            </div>
+        </header>
+
+        <main class="mj-cocina-main">
+
+            <!-- Sin clave ni sesión -->
+            <h:panelGroup layout="block" styleClass="mj-cocina-negado" rendered="#{not cocinaBean.autorizado and not cocinaBean.perdioAcceso}">
+                <h1>Pantalla de cocina</h1>
+                <p>Para ver las comandas abre el enlace de la cocina que te dio el dueño o el gerente,
+                    o inicia sesión con tu cuenta del personal.</p>
+                <h:link value="Iniciar sesión" outcome="/vistas/acceso" styleClass="manjar-btn">
+                    <f:param name="destino" value="/vistas/cocina"/>
+                </h:link>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" rendered="#{cocinaBean.autorizado or cocinaBean.perdioAcceso}">
+
+                <h:form id="formSondeo">
+                    <p:poll interval="4" listener="#{cocinaBean.refrescar}" process="@this" update=":tablero"/>
+                </h:form>
+
+                <h:panelGroup id="tablero" layout="block">
+                    <h:form id="formTablero">
+                        <h:panelGroup layout="block" styleClass="mj-cocina-negado" rendered="#{cocinaBean.perdioAcceso}">
+                            <h1>Esta pantalla ya no tiene acceso</h1>
+                            <p>La clave de la cocina cambió o se cerró la sesión. Pide el enlace nuevo al dueño o al gerente.</p>
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" styleClass="mj-cocina-vacio" rendered="#{cocinaBean.autorizado and cocinaBean.total == 0}">
+                            No hay comandas por preparar.
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" styleClass="mj-cocina-cols" rendered="#{cocinaBean.autorizado}">
+
+                            <section class="mj-cocina-col">
+                                <h2>Pendientes <span class="mj-cocina-n">#{cocinaBean.pendientes.size()}</span></h2>
+                                <ui:repeat var="c" value="#{cocinaBean.pendientes}">
+                                    <article class="mj-ticket cocina e-#{c.estado} #{c.minutosEspera ge 20 ? 'tarde' : (c.minutosEspera ge 10 ? 'demora' : '')}">
+                                        <header class="mj-ticket-cab">
+                                            <div><strong>#{c.id}</strong> <h:outputText value=" · #{c.etiqueta}"/></div>
+                                            <span class="mj-espera">#{c.minutosEspera} min</span>
+                                        </header>
+                                        <ul class="mj-ticket-lineas">
+                                            <ui:repeat var="l" value="#{c.lineas}">
+                                                <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/>
+                                                    <em class="mj-ticket-nota"><h:outputText value=" — #{l.nota}" rendered="#{not empty l.nota}"/></em></li>
+                                            </ui:repeat>
+                                        </ul>
+                                        <div class="mj-ticket-pie"><span class="manjar-muted">Mesero: <h:outputText value="#{c.meseroNombre}"/></span></div>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Empezar" action="#{cocinaBean.empezar(c.id)}" process="@this" update=":tablero"/>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+
+                            <section class="mj-cocina-col">
+                                <h2>En preparación <span class="mj-cocina-n">#{cocinaBean.enPreparacion.size()}</span></h2>
+                                <ui:repeat var="c" value="#{cocinaBean.enPreparacion}">
+                                    <article class="mj-ticket cocina e-#{c.estado} #{c.minutosEspera ge 20 ? 'tarde' : (c.minutosEspera ge 10 ? 'demora' : '')}">
+                                        <header class="mj-ticket-cab">
+                                            <div><strong>#{c.id}</strong> <h:outputText value=" · #{c.etiqueta}"/></div>
+                                            <span class="mj-espera">#{c.minutosEspera} min</span>
+                                        </header>
+                                        <ul class="mj-ticket-lineas">
+                                            <ui:repeat var="l" value="#{c.lineas}">
+                                                <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/>
+                                                    <em class="mj-ticket-nota"><h:outputText value=" — #{l.nota}" rendered="#{not empty l.nota}"/></em></li>
+                                            </ui:repeat>
+                                        </ul>
+                                        <div class="mj-ticket-pie"><span class="manjar-muted">Mesero: <h:outputText value="#{c.meseroNombre}"/></span></div>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Lista" action="#{cocinaBean.terminar(c.id)}" process="@this" update=":tablero"/>
+                                            <p:commandButton value="Regresar a pendiente" styleClass="manjar-btn-sec"
+                                                             action="#{cocinaBean.regresarAPendiente(c.id)}" process="@this" update=":tablero"/>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+
+                            <section class="mj-cocina-col">
+                                <h2>Listas <span class="mj-cocina-n">#{cocinaBean.listas.size()}</span></h2>
+                                <ui:repeat var="c" value="#{cocinaBean.listas}">
+                                    <article class="mj-ticket cocina e-#{c.estado}">
+                                        <header class="mj-ticket-cab">
+                                            <div><strong>#{c.id}</strong> <h:outputText value=" · #{c.etiqueta}"/></div>
+                                            <span class="mj-espera">#{c.minutosEspera} min</span>
+                                        </header>
+                                        <ul class="mj-ticket-lineas">
+                                            <ui:repeat var="l" value="#{c.lineas}">
+                                                <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/></li>
+                                            </ui:repeat>
+                                        </ul>
+                                        <div class="mj-ticket-pie"><span class="manjar-muted">Esperando al mesero: <h:outputText value="#{c.meseroNombre}"/></span></div>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Regresar a preparación" styleClass="manjar-btn-sec"
+                                                             action="#{cocinaBean.regresarAPreparacion(c.id)}" process="@this" update=":tablero"/>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+                        </h:panelGroup>
+                    </h:form>
+                </h:panelGroup>
+
+                <!-- El enlace de la pantalla compartida: solo lo ve el dueño o el gerente con sesión -->
+                <h:panelGroup id="panelEnlace" layout="block" styleClass="mj-linkbox mj-cocina-enlace" rendered="#{cocinaBean.puedeAdministrar}">
+                    <div>
+                        <strong>Pantalla compartida de la cocina</strong>
+                        <span class="manjar-muted">Abre este enlace en la tablet o la televisión de la cocina. No pide cuenta, así que no lo compartas fuera del negocio.</span>
+                        <code>#{cocinaBean.enlaceCompartido}</code>
+                        <h:form id="formClave">
+                            <p:commandButton value="Generar una clave nueva" styleClass="manjar-btn-sec"
+                                             action="#{cocinaBean.generarNuevaClave}" process="@this" update=":panelEnlace">
+                                <p:confirm header="Nueva clave" icon="ui-icon-alert"
+                                           message="El enlace actual dejará de funcionar y habrá que abrir el nuevo en la pantalla de la cocina. ¿Continuar?"/>
+                            </p:commandButton>
+                        </h:form>
+                    </div>
+                </h:panelGroup>
+
+                <h:form id="formConfirmar">
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes"/>
+                        <p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no manjar-btn-sec"/>
+                    </p:confirmDialog>
+                </h:form>
+            </h:panelGroup>
+        </main>
+    </h:body>
+</html>

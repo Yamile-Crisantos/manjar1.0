@@ -75,18 +75,20 @@
                         </p:submenu>
 
                         <p:submenu label="Comandas" rendered="#{sesion.personal}">
-                            <p:menuitem value="Comandas del mesero" outcome="/vistas/comandas"/>
-                            <p:menuitem value="Pantalla de cocina" disabled="true" title="Próximamente"/>
+                            <p:menuitem value="Registro de comandas" outcome="/vistas/comandas"/>
+                            <p:menuitem value="Pantalla de cocina" outcome="/vistas/cocina"/>
                         </p:submenu>
 
                         <p:menuitem value="Caja" outcome="/vistas/caja" rendered="#{sesion.administra}"/>
+                        <p:menuitem value="Apartados" outcome="/vistas/apartados" rendered="#{sesion.administra}"/>
 
                         <p:menuitem value="Apartados" outcome="/vistas/apartar" rendered="#{sesion.cliente}"/>
 
                         <p:submenu label="Administración" rendered="#{sesion.dueno}">
                             <p:menuitem value="Personal" outcome="/vistas/personal"/>
-                            <p:menuitem value="Sucursales" disabled="true" title="Próximamente"/>
-                            <p:menuitem value="Reportes" disabled="true" title="Próximamente"/>
+                            <p:menuitem value="Sucursales" outcome="/vistas/sucursales"/>
+                            <p:menuitem value="Reportes" outcome="/vistas/reportes"/>
+                            <p:menuitem value="Vista consolidada" outcome="/vistas/consolidado"/>
                         </p:submenu>
 
                         <f:facet name="options">

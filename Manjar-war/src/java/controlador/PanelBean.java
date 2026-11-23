@@ -7,6 +7,7 @@ import javax.inject.Named;
 import logicaneg.MEstablecimiento;
 import logicaneg.MPlatillo;
 import logicaneg.MUsuario;
+import logicaneg.ReglaNegocioException;
 
 /**
  * Datos del panel de inicio de cada rol (números rápidos del negocio).
@@ -37,17 +38,27 @@ public class PanelBean {
         return "denegado".equals(acceso);
     }
 
+    /** Los conteos se piden con el usuario de la sesión: si ya no trabaja en esa sucursal el EJB los rechaza y se muestran en cero. */
     public long getTotalPlatillos() {
         if (totalPlatillos == null) {
-            totalPlatillos = sesion.getEstablecimientoId() == null ? 0L : mPlatillo.contar(sesion.getEstablecimientoId());
+            try {
+                totalPlatillos = sesion.getEstablecimientoId() == null ? 0L
+                        : mPlatillo.contar(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+            } catch (ReglaNegocioException e) {
+                totalPlatillos = 0L;
+            }
         }
         return totalPlatillos;
     }
 
     public long getPlatillosDisponibles() {
         if (platillosDisponibles == null) {
-            platillosDisponibles = sesion.getEstablecimientoId() == null
-                    ? 0L : mPlatillo.contarDisponibles(sesion.getEstablecimientoId());
+            try {
+                platillosDisponibles = sesion.getEstablecimientoId() == null ? 0L
+                        : mPlatillo.contarDisponibles(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+            } catch (ReglaNegocioException e) {
+                platillosDisponibles = 0L;
+            }
         }
         return platillosDisponibles;
     }
@@ -57,7 +68,11 @@ public class PanelBean {
     }
 
     public long getPersonalActivo() {
-        return sesion.getEstablecimientoId() == null ? 0 : mUsuario.contarPersonalActivo(sesion.getEstablecimientoId());
+        try {
+            return sesion.getEstablecimientoId() == null ? 0 : mUsuario.contarPersonalActivo(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+        } catch (ReglaNegocioException e) {
+            return 0;
+        }
     }
 
     /** true si el dueño todavía no ha cargado ningún platillo: se le muestran los primeros pasos. */

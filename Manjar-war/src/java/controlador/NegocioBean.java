@@ -42,7 +42,7 @@ public class NegocioBean implements Serializable {
 
     public String guardar() {
         try {
-            Establecimiento e = mEstablecimiento.actualizarNegocio(sesion.getEstablecimientoId(), datos);
+            Establecimiento e = mEstablecimiento.actualizarNegocio(sesion.getEstablecimientoId(), sesion.getUsuarioId(), datos);
             sesion.actualizarNombreNegocio(e.getNombre());
             // Se vuelve a leer lo guardado (así se ven los datos ya normalizados, por ejemplo el usuario de Instagram sin @)
             datos = DatosNegocio.de(e);

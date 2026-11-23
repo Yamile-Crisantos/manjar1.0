@@ -26,6 +26,16 @@ public final class Enlaces {
         return req.getScheme() + "://" + req.getServerName() + (estandar ? "" : ":" + puerto) + rutaMenu(codigo);
     }
 
+    /** Dirección completa de la pantalla compartida de cocina, con su clave: http://servidor:puerto/.../cocina.xhtml?k=<clave> */
+    public static String cocinaCompleto(String token) {
+        HttpServletRequest req = peticion();
+        int puerto = req.getServerPort();
+        boolean estandar = ("http".equals(req.getScheme()) && puerto == 80)
+                || ("https".equals(req.getScheme()) && puerto == 443);
+        return req.getScheme() + "://" + req.getServerName() + (estandar ? "" : ":" + puerto)
+                + contexto() + "/vistas/cocina.xhtml?k=" + token;
+    }
+
     private static String contexto() {
         return peticion().getContextPath();
     }

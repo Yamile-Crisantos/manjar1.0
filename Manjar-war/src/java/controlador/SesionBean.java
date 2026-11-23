@@ -76,6 +76,19 @@ public class SesionBean implements Serializable {
         }
     }
 
+    /**
+     * El dueño pasa a operar otra de sus sucursales (HU-18). Quien llama ya comprobó con MSucursal.operar que
+     * esa sucursal es suya; aquí solo se actualiza lo que la sesión recuerda.
+     */
+    public void cambiarSucursal(Integer sucursalId, String sucursalNombre) {
+        if (!isDueno() || sucursalId == null) {
+            return;
+        }
+        this.establecimientoId = sucursalId;
+        this.establecimientoNombre = sucursalNombre;
+        FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put(ATTR_ESTABLECIMIENTO, sucursalId);
+    }
+
     /** Recuerda el último menú que se consultó con un código de QR. */
     public void recordarMenu(String codigo, String nombre) {
         this.ultimoMenuCodigo = codigo;

@@ -109,6 +109,10 @@ public class Establecimiento implements Serializable {
     @Size(max = 160)
     @Column(name = "Aviso")
     private String aviso;
+    /** Clave secreta de la pantalla de cocina de esta sucursal (la pantalla compartida entra con ella, sin cuenta). */
+    @Size(max = 64)
+    @Column(name = "TOKENCOCINA")
+    private String tokenCocina;
     @JoinColumn(name = "DUENOID", referencedColumnName = "ID")
     @ManyToOne
     private Usuario duenoid;
@@ -275,6 +279,14 @@ public class Establecimiento implements Serializable {
 
     public void setAviso(String aviso) {
         this.aviso = aviso;
+    }
+
+    public String getTokenCocina() {
+        return tokenCocina;
+    }
+
+    public void setTokenCocina(String tokenCocina) {
+        this.tokenCocina = tokenCocina;
     }
 
     public Usuario getDuenoid() {

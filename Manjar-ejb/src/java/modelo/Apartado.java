@@ -85,6 +85,16 @@ public class Apartado implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "apartadoid")
     private List<Notificacion> notificacionList;
 
+    /** Cuándo se entregó al cliente. */
+    @Column(name = "FECHAENTREGA")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaentrega;
+
+    /** Quién confirmó la entrega. */
+    @JoinColumn(name = "ENTREGADOPORID", referencedColumnName = "ID")
+    @ManyToOne
+    private Usuario entregadoporid;
+
     public Apartado() {
     }
 
@@ -188,6 +198,22 @@ public class Apartado implements Serializable {
 
     public void setNotificacionList(List<Notificacion> notificacionList) {
         this.notificacionList = notificacionList;
+    }
+
+    public Date getFechaentrega() {
+        return fechaentrega;
+    }
+
+    public void setFechaentrega(Date fechaentrega) {
+        this.fechaentrega = fechaentrega;
+    }
+
+    public Usuario getEntregadoporid() {
+        return entregadoporid;
+    }
+
+    public void setEntregadoporid(Usuario entregadoporid) {
+        this.entregadoporid = entregadoporid;
     }
 
     @Override

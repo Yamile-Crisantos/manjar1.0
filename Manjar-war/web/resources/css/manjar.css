@@ -2257,3 +2257,830 @@ body.manjar .ui-dialog .ui-dialog-content {
         display: none;
     }
 }
+
+
+/* ==========================================================
+   9. Operación del negocio: comandas, cocina, caja, apartados, sucursales y reportes
+   ========================================================== */
+
+/* Dos columnas que en el celular pasan a una */
+.mj-op-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.manjar h2.mj-op-titulo {
+    margin: 4px 0 10px;
+    font-size: 20px;
+}
+
+.manjar h3.mj-op-sub {
+    margin: 18px 0 8px;
+    font-size: 15px;
+    color: var(--mj-muted);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.mj-filtro {
+    margin: 0 0 10px;
+}
+
+/* Botones de "una sola opción" (Mesa / Para llevar): la elegida se ve rellena, la otra con borde */
+.manjar .ui-selectonebutton .ui-button.ui-state-default {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-default .ui-button-text {
+    color: var(--mj-ink);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-active,
+.manjar .ui-selectonebutton .ui-button.ui-state-active.ui-state-hover {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-active .ui-button-text {
+    color: #fff;
+}
+
+/* Mesa o para llevar */
+.mj-tipo {
+    margin-bottom: 12px;
+}
+
+.manjar .mj-tipo .ui-selectonebutton .ui-button {
+    min-width: 120px;
+}
+
+/* El pedido que se está armando */
+.mj-carrito {
+    margin: 4px 0 12px;
+}
+
+.mj-linea {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--mj-border-strong);
+}
+
+.mj-linea-cab {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mj-linea-sub {
+    font-variant-numeric: tabular-nums;
+}
+
+.mj-linea-ctl {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.mj-cant {
+    min-width: 26px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.manjar .mj-nota-linea {
+    flex: 1;
+    min-width: 140px;
+    padding: 6px 9px;
+}
+
+.mj-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding-top: 10px;
+    font-size: 16px;
+}
+
+/* Lista de platillos para elegir */
+.mj-carta {
+    margin-top: 18px;
+}
+
+.manjar h3.mj-carta-cat {
+    margin: 16px 0 6px;
+    font-size: 15px;
+    color: var(--mj-muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.mj-carta-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-carta-txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Comandas como tickets */
+.mj-ticket {
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-ticket.e-PENDIENTE {
+    border-left-color: var(--mj-warn);
+}
+
+.mj-ticket.e-EN_PREPARACION {
+    border-left-color: var(--mj-accent);
+}
+
+.mj-ticket.e-LISTA {
+    border-left-color: var(--mj-ok);
+}
+
+.mj-ticket.e-ENTREGADA,
+.mj-ticket.e-CANCELADA {
+    border-left-color: var(--mj-border-strong);
+}
+
+.mj-ticket-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.mj-ticket-lineas {
+    margin: 8px 0;
+    padding-left: 18px;
+}
+
+.mj-ticket-nota {
+    color: var(--mj-warn);
+}
+
+.mj-ticket-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.mj-ticket-acc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.mj-ticket-acc:empty {
+    display: none;
+}
+
+/* Etiqueta de estado */
+.mj-estado {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--mj-border-strong);
+    background: var(--mj-tint);
+    color: var(--mj-ink);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mj-estado.e-PENDIENTE {
+    background: var(--mj-warn-bg);
+    border-color: #ecd596;
+    color: var(--mj-warn);
+}
+
+.mj-estado.e-EN_PREPARACION {
+    background: #fbe7de;
+    border-color: #f0c2ae;
+    color: var(--mj-primary-dark);
+}
+
+.mj-estado.e-LISTA,
+.mj-estado.e-PAGADO,
+.mj-estado.e-LISTO,
+.mj-estado.e-ENTREGADO,
+.mj-estado.e-ABIERTA {
+    background: var(--mj-ok-bg);
+    border-color: #b9d3c0;
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-CANCELADA,
+.mj-estado.e-CANCELADO,
+.mj-estado.e-VENCIDO,
+.mj-estado.e-CERRADA {
+    background: var(--mj-off-bg);
+    border-color: #e6bdb3;
+    color: var(--mj-off);
+}
+
+.mj-terminada {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    margin-bottom: 4px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    font-size: 14px;
+}
+
+/* ---------- Pantalla de cocina (compartida, a pantalla completa y con fondo oscuro) ---------- */
+body.mj-cocina-body {
+    background: #1f1814;
+    color: #fff4e8;
+}
+
+.mj-cocina-body a {
+    color: var(--mj-accent-claro);
+}
+
+.mj-cocina-cab {
+    background: #14100d;
+    border-bottom: 1px solid #3a2f28;
+}
+
+.mj-cocina-cab-in {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 18px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+}
+
+.mj-cocina-marca {
+    font-family: var(--mj-font-title);
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--mj-accent-claro);
+}
+
+.mj-cocina-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 18px 18px 40px;
+    box-sizing: border-box;
+}
+
+.mj-cocina-negado {
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 24px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    border-radius: var(--mj-radius);
+}
+
+.mj-cocina-negado h1 {
+    font-size: 24px;
+}
+
+.mj-cocina-vacio {
+    padding: 28px;
+    text-align: center;
+    color: #d2c3b5;
+    border: 1px dashed #4a3d34;
+    border-radius: var(--mj-radius);
+    margin-bottom: 16px;
+}
+
+.mj-cocina-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.mj-cocina-col h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    color: #fff4e8;
+    font-size: 20px;
+}
+
+.mj-cocina-n {
+    padding: 0 12px;
+    background: #3a2f28;
+    border-radius: 999px;
+    font-size: 15px;
+}
+
+.mj-ticket.cocina {
+    color: var(--mj-ink);
+    font-size: 17px;
+}
+
+.mj-ticket.cocina .mj-ticket-lineas {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+    font-size: 19px;
+    line-height: 1.5;
+}
+
+.mj-ticket.cocina .mj-ticket-lineas b {
+    color: var(--mj-primary-dark);
+}
+
+.mj-ticket.cocina.demora {
+    border-color: #e0a62b;
+    background: #fff6dc;
+}
+
+.mj-ticket.cocina.tarde {
+    border-color: #c4442c;
+    background: #fde8e3;
+}
+
+.mj-espera {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.mj-cocina-enlace {
+    margin-top: 26px;
+    color: var(--mj-ink);
+}
+
+@media (max-width: 800px) {
+    .mj-op-cols {
+        grid-template-columns: 1fr;
+    }
+
+    .mj-cocina-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Caja (HU-11, HU-12) ---- */
+.mj-caja-estado {
+    margin: 0 0 12px;
+    color: var(--mj-muted);
+    font-size: 14px;
+}
+
+.mj-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 0 0 22px;
+}
+
+.mj-stat {
+    padding: 12px 14px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-stat span {
+    display: block;
+    font-size: 12px;
+    color: var(--mj-muted);
+}
+
+.mj-stat strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 20px;
+    color: var(--mj-ink);
+}
+
+.mj-stat.destacado {
+    background: var(--mj-tint);
+    border-color: var(--mj-border-strong);
+}
+
+.mj-stat.destacado strong {
+    color: var(--mj-primary-dark);
+}
+
+.mj-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.mj-tabla th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mj-muted);
+    background: var(--mj-tint);
+    border-bottom: 1px solid var(--mj-border);
+}
+
+.mj-tabla td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--mj-border);
+    vertical-align: top;
+}
+
+.mj-tabla tr:last-child td {
+    border-bottom: 0;
+}
+
+.mj-tabla .num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.mj-tabla .acc {
+    text-align: right;
+}
+
+.mov-ingreso {
+    color: var(--mj-ok);
+    font-weight: 600;
+}
+
+.mov-egreso {
+    color: var(--mj-off);
+    font-weight: 600;
+}
+
+.mj-arqueo {
+    margin: 0 0 12px;
+}
+
+.mj-arqueo > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--mj-border);
+}
+
+.mj-arqueo dt {
+    color: var(--mj-muted);
+}
+
+.mj-arqueo dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.mj-arqueo .total {
+    border-bottom: 1px solid var(--mj-border-strong);
+}
+
+.mj-arqueo .total dt,
+.mj-arqueo .total dd {
+    color: var(--mj-ink);
+}
+
+.mj-arqueo .resultado {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: var(--mj-radius);
+    font-size: 16px;
+}
+
+.mj-arqueo .resultado dt {
+    color: inherit;
+    font-weight: 600;
+}
+
+.mj-arqueo .aparte dt,
+.mj-arqueo .aparte dd {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.mj-arqueo .resultado.dif-ok,
+td.dif-ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-arqueo .resultado.dif-sobra,
+td.dif-sobra {
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+}
+
+.mj-arqueo .resultado.dif-falta,
+td.dif-falta {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.mj-aviso {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+    border-radius: var(--mj-radius);
+    font-size: 14px;
+}
+
+.mj-corte-final,
+.mj-detalle-caja {
+    max-width: 520px;
+    margin: 0 0 22px;
+    padding: 14px 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-detalle-caja {
+    max-width: none;
+    margin-top: 18px;
+}
+
+.mj-caja-abrir {
+    max-width: 520px;
+}
+
+.manjar h2.mj-historial-tit {
+    margin-top: 30px;
+}
+
+/* ---- Apartados (HU-13 a HU-17) ---- */
+.mj-negocio-apartar {
+    margin: 0 0 10px;
+    color: var(--mj-muted);
+}
+
+.mj-apartado {
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-apartado.e-PENDIENTE {
+    border-left-color: var(--mj-warn);
+}
+
+.mj-apartado.e-PAGADO,
+.mj-apartado.e-LISTO,
+.mj-apartado.e-ENTREGADO {
+    border-left-color: var(--mj-ok);
+}
+
+.mj-apartado.e-CANCELADO,
+.mj-apartado.e-VENCIDO {
+    border-left-color: var(--mj-off);
+    opacity: .85;
+}
+
+.mj-apartado.reciente {
+    box-shadow: 0 0 0 2px var(--mj-primary), var(--mj-shadow);
+}
+
+.mj-apartado-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.mj-apartado-cab > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mj-codigo {
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    color: var(--mj-ink);
+}
+
+.mj-apartado-cab {
+    flex-wrap: wrap;
+}
+
+.mj-apartado-cab .mj-espera {
+    font-size: 13px;
+    color: var(--mj-muted);
+    white-space: nowrap;
+}
+
+.mj-contador {
+    display: inline-block;
+    min-width: 24px;
+    margin-left: 6px;
+    padding: 0 9px;
+    background: var(--mj-primary);
+    color: #fff;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mj-apartado-nota {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.mj-apartado-nota.ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-PAGADO,
+.mj-estado.e-LISTO,
+.mj-estado.e-ENTREGADO {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-CANCELADO,
+.mj-estado.e-VENCIDO {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.mj-avisos {
+    margin-bottom: 14px;
+}
+
+.mj-aviso-cliente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 9px 12px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    font-size: 14px;
+}
+
+.mj-aviso-cliente > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mj-aviso-cliente.nueva {
+    background: var(--mj-tint);
+    border-color: var(--mj-border-strong);
+}
+
+.mj-aviso-cliente.listo.nueva {
+    background: var(--mj-ok-bg);
+    border-color: var(--mj-ok);
+}
+
+.mj-aviso-cliente.leida {
+    color: var(--mj-muted);
+}
+
+.mj-apartado-cuadro {
+    margin-bottom: 18px;
+}
+
+.mj-apartados-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.mj-entrega {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.mj-entrega .mj-codigo-entrada {
+    flex: 1;
+    min-width: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+@media (max-width: 1100px) {
+    .mj-apartados-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.mj-ticket-lineas b {
+    margin-right: 0.35em;
+}
+
+.mj-sucursales td {
+    vertical-align: top;
+}
+
+.mj-sucursales tr.activa {
+    background: var(--mj-primary-soft, #fbeee8);
+}
+
+.mj-ahora {
+    margin-left: 4px;
+}
+
+.mj-filtros .mj-atajos {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-filtros .manjar-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.mj-filtros input.mj-fecha {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 9px 12px;
+    font: inherit;
+    color: var(--mj-ink);
+    background: #fff;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius-sm, 8px);
+}
+
+.mj-reporte td.gan {
+    font-weight: 700;
+}
+
+.mj-reporte td.num,
+.mj-reporte th.num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.mj-tabla-scroll {
+    margin: 0 0 22px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mj-tabla-scroll .mj-tabla {
+    min-width: 560px;
+}

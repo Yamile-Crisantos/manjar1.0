@@ -8,6 +8,7 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import modelo.Establecimiento;
 import modelo.Usuario;
@@ -38,6 +39,9 @@ public class MUsuario {
 
     @EJB
     private EstablecimientoFacade establecimientoFacade;
+
+    @EJB
+    private MAcceso mAcceso;
 
     // ------------------------------------------------------------------
     // Inicio de sesión
@@ -92,12 +96,14 @@ public class MUsuario {
     // ------------------------------------------------------------------
     // HU-02: el dueño da de alta cuentas de personal
     // ------------------------------------------------------------------
-    public Usuario crearPersonal(Integer establecimientoId, String nombre, String correo, String clave, int rol)
-            throws ReglaNegocioException {
+    public Usuario crearPersonal(Integer establecimientoId, Integer duenoId, String nombre, String correo, String clave,
+            int rol) throws ReglaNegocioException {
+        mAcceso.dueno(establecimientoId, duenoId); // solo el dueño de esa sucursal da de alta cuentas
         if (rol != Constantes.ROL_MESERO && rol != Constantes.ROL_GERENTE) {
             throw new ReglaNegocioException("Solo se pueden crear cuentas de Gerente o Mesero.");
         }
-        Establecimiento est = establecimientoFacade.find(establecimientoId);
+        // Se bloquea la sucursal: dos altas de gerente a la vez no pueden dejar dos gerentes activos
+        Establecimiento est = em.find(Establecimiento.class, establecimientoId, LockModeType.PESSIMISTIC_WRITE);
         if (est == null) {
             throw new ReglaNegocioException("No se encontró el negocio.");
         }
@@ -121,7 +127,8 @@ public class MUsuario {
         return u;
     }
 
-    public List<Usuario> listarPersonal(Integer establecimientoId) {
+    public List<Usuario> listarPersonal(Integer establecimientoId, Integer duenoId) throws ReglaNegocioException {
+        mAcceso.dueno(establecimientoId, duenoId);
         return em.createQuery(
                 "SELECT u FROM Usuario u WHERE u.establecimientoid.id = :e AND u.rol IN (:g, :m) "
                 + "ORDER BY u.rol, u.nombre", Usuario.class)
@@ -131,7 +138,8 @@ public class MUsuario {
                 .getResultList();
     }
 
-    public long contarPersonalActivo(Integer establecimientoId) {
+    public long contarPersonalActivo(Integer establecimientoId, Integer duenoId) throws ReglaNegocioException {
+        mAcceso.dueno(establecimientoId, duenoId);
         return em.createQuery(
                 "SELECT COUNT(u) FROM Usuario u WHERE u.establecimientoid.id = :e AND u.rol IN (:g, :m) "
                 + "AND u.estado = :a", Long.class)
@@ -143,8 +151,10 @@ public class MUsuario {
     }
 
     /** Activa o desactiva una cuenta de personal (no se borran: queda el historial). */
-    public void cambiarEstado(Integer establecimientoId, Integer usuarioId, boolean activo) throws ReglaNegocioException {
-        Usuario u = usuarioFacade.find(usuarioId);
+    public void cambiarEstado(Integer establecimientoId, Integer duenoId, Integer usuarioId, boolean activo)
+            throws ReglaNegocioException {
+        mAcceso.dueno(establecimientoId, duenoId);
+        Usuario u = usuarioId == null ? null : em.find(Usuario.class, usuarioId);
         boolean esPersonalDelNegocio = u != null
                 && u.getEstablecimientoid() != null
                 && u.getEstablecimientoid().getId().equals(establecimientoId)
@@ -153,7 +163,7 @@ public class MUsuario {
         if (!esPersonalDelNegocio) {
             throw new ReglaNegocioException("Esa cuenta no pertenece a tu negocio.");
         }
-        Establecimiento est = u.getEstablecimientoid();
+        Establecimiento est = em.find(Establecimiento.class, u.getEstablecimientoid().getId(), LockModeType.PESSIMISTIC_WRITE);
         if (u.getRol() == Constantes.ROL_GERENTE) {
             if (activo) {
                 if (tieneGerenteActivo(est) && !u.equals(est.getGerenteid())) {

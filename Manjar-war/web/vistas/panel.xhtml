@@ -79,12 +79,32 @@
 
                     <h:link outcome="/vistas/comandas" styleClass="mj-accion" rendered="#{sesion.personal}">
                         <strong>Comandas</strong>
-                        <span>Registro de pedidos por mesa y seguimiento en cocina.</span>
+                        <span>Registra pedidos por mesa y sigue su avance hasta la entrega.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/caja" styleClass="mj-accion" rendered="#{sesion.administra}">
                         <strong>Caja</strong>
-                        <span>Cobro de cuentas y control de efectivo.</span>
+                        <span>Apertura, cobro de cuentas, retiros y gastos, y corte del día.</span>
+                    </h:link>
+
+                    <h:link outcome="/vistas/apartados" styleClass="mj-accion" rendered="#{sesion.administra}">
+                        <strong>Apartados</strong>
+                        <span>Registra el pago de los apartados, márcalos listos y entrégalos con su código.</span>
+                    </h:link>
+
+                    <h:link outcome="/vistas/sucursales" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <strong>Sucursales</strong>
+                        <span>Registra sucursales, asigna a su gerente y elige cuál operas.</span>
+                    </h:link>
+
+                    <h:link outcome="/vistas/reportes" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <strong>Reportes</strong>
+                        <span>Ventas y ganancia por periodo, platillo y mesero.</span>
+                    </h:link>
+
+                    <h:link outcome="/vistas/consolidado" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <strong>Vista consolidada</strong>
+                        <span>Todas tus sucursales en una sola pantalla.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/menu" styleClass="mj-accion" rendered="#{sesion.personal}">

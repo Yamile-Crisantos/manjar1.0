@@ -93,9 +93,6 @@
                                              title="#{pl.estado == 1 ? 'Marcar como agotado' : 'Marcar como disponible'}"
                                              styleClass="manjar-btn-sec"
                                              action="#{platillosBean.alternar(pl)}" process="@this" update=":formTabla"/>
-                            <p:commandButton icon="ui-icon-minusthick" title="Simular una venta (descuenta 1 porción)"
-                                             styleClass="manjar-btn-sec"
-                                             action="#{platillosBean.simularVenta(pl)}" process="@this" update=":formTabla"/>
                             <p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="manjar-btn-peligro"
                                              action="#{platillosBean.eliminar(pl)}" process="@this" update=":formTabla">
                                 <p:confirm header="Eliminar platillo" icon="ui-icon-alert"

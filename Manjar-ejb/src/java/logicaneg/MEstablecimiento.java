@@ -56,6 +56,9 @@ public class MEstablecimiento {
     @EJB
     private MUsuario mUsuario;
 
+    @EJB
+    private MAcceso mAcceso;
+
     // ------------------------------------------------------------------
     // Consultas
     // ------------------------------------------------------------------
@@ -95,6 +98,63 @@ public class MEstablecimiento {
             establecimientoFacade.edit(e);
         }
         return e.getCodigoQR();
+    }
+
+    // ------------------------------------------------------------------
+    // Pantalla de cocina (HU-10): la pantalla compartida entra con una clave por sucursal, sin cuenta
+    // ------------------------------------------------------------------
+    /** Una clave de cocina válida: 32 caracteres hexadecimales. */
+    public static boolean tokenCocinaConFormato(String token) {
+        return token != null && token.length() == 32 && token.matches("[0-9a-f]{32}");
+    }
+
+    /** La clave de la pantalla de cocina de la sucursal; se genera la primera vez que se pide. */
+    public String tokenCocina(Integer establecimientoId, Integer usuarioId) throws ReglaNegocioException {
+        mAcceso.administrador(establecimientoId, usuarioId);
+        Establecimiento e = buscar(establecimientoId);
+        if (e == null) {
+            return null;
+        }
+        if (!tokenCocinaConFormato(e.getTokenCocina())) {
+            e.setTokenCocina(nuevoTokenCocina());
+            establecimientoFacade.edit(e);
+        }
+        return e.getTokenCocina();
+    }
+
+    /** Cambia la clave (por ejemplo si se perdió una tablet): el enlace anterior deja de funcionar. */
+    public String regenerarTokenCocina(Integer establecimientoId, Integer usuarioId) throws ReglaNegocioException {
+        mAcceso.administrador(establecimientoId, usuarioId);
+        Establecimiento e = buscar(establecimientoId);
+        if (e == null) {
+            throw new ReglaNegocioException("No se encontró la sucursal.");
+        }
+        e.setTokenCocina(nuevoTokenCocina());
+        establecimientoFacade.edit(e);
+        return e.getTokenCocina();
+    }
+
+    /** La sucursal a la que pertenece una clave de cocina, o null si no existe o no tiene el formato correcto. */
+    public Establecimiento buscarPorTokenCocina(String token) {
+        if (!tokenCocinaConFormato(token)) {
+            return null;
+        }
+        List<Establecimiento> r = em.createQuery(
+                "SELECT e FROM Establecimiento e WHERE e.tokenCocina = :t", Establecimiento.class)
+                .setParameter("t", token)
+                .setMaxResults(1)
+                .getResultList();
+        return r.isEmpty() ? null : r.get(0);
+    }
+
+    private String nuevoTokenCocina() {
+        byte[] b = new byte[16];
+        ALEATORIO.nextBytes(b);
+        StringBuilder sb = new StringBuilder(32);
+        for (byte x : b) {
+            sb.append(Character.forDigit((x >> 4) & 0xF, 16)).append(Character.forDigit(x & 0xF, 16));
+        }
+        return sb.toString();
     }
 
     // ------------------------------------------------------------------
@@ -150,7 +210,9 @@ public class MEstablecimiento {
      * Actualiza lo que el dueño controla de su negocio: datos generales, cómo se ve su menú público
      * (color y estilo), contacto y aviso del día. Todo se valida aquí, no solo en la pantalla.
      */
-    public Establecimiento actualizarNegocio(Integer establecimientoId, DatosNegocio d) throws ReglaNegocioException {
+    public Establecimiento actualizarNegocio(Integer establecimientoId, Integer duenoId, DatosNegocio d)
+            throws ReglaNegocioException {
+        mAcceso.dueno(establecimientoId, duenoId);
         Establecimiento e = buscar(establecimientoId);
         if (e == null) {
             throw new ReglaNegocioException("No se encontró el negocio.");
@@ -230,6 +292,16 @@ public class MEstablecimiento {
             s = s.substring(0, maximo).replaceAll("-+$", "");
         }
         return s.isEmpty() ? "negocio" : s;
+    }
+
+    /** Identificador de tenant que todavía no usa ningún otro negocio o sucursal (lo usa MSucursal). */
+    public String nuevoTenant(String nombre) {
+        return generarTenantUnico(nombre);
+    }
+
+    /** Código de QR que todavía no usa ningún otro negocio o sucursal (lo usa MSucursal). */
+    public String nuevoCodigoQR(String nombre) {
+        return generarCodigoUnico(nombre);
     }
 
     private String generarTenantUnico(String nombre) {

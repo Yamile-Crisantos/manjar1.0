@@ -51,8 +51,14 @@ public class PlatillosBean implements Serializable {
     }
 
     private void cargar() {
-        platillos = mPlatillo.listar(sesion.getEstablecimientoId());
-        categorias = mPlatillo.listarCategorias(sesion.getEstablecimientoId());
+        try {
+            platillos = mPlatillo.listar(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+            categorias = mPlatillo.listarCategorias(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+        } catch (ReglaNegocioException e) {
+            platillos = new java.util.ArrayList<>();
+            categorias = new java.util.ArrayList<>();
+            Mensajes.error(e.getMessage());
+        }
     }
 
     // ------------------------------------------------------------------
@@ -84,7 +90,7 @@ public class PlatillosBean implements Serializable {
     public void guardar() {
         try {
             boolean eraNuevo = platillo.getId() == null;
-            mPlatillo.guardar(sesion.getEstablecimientoId(), categoriaId, platillo, disponible);
+            mPlatillo.guardar(sesion.getEstablecimientoId(), sesion.getUsuarioId(), categoriaId, platillo, disponible);
             Mensajes.info(eraNuevo ? "Platillo agregado al menú." : "Platillo actualizado.");
             cargar();
         } catch (ReglaNegocioException e) {
@@ -98,30 +104,21 @@ public class PlatillosBean implements Serializable {
     // ------------------------------------------------------------------
     public void alternar(Platillo p) {
         ejecutar(() -> {
-            Platillo r = mPlatillo.alternarDisponibilidad(sesion.getEstablecimientoId(), p.getId());
+            Platillo r = mPlatillo.alternarDisponibilidad(sesion.getEstablecimientoId(), sesion.getUsuarioId(), p.getId());
             Mensajes.info(r.getNombre() + (r.getEstado() == 1 ? ": disponible." : ": marcado como agotado."));
-        });
-    }
-
-    public void simularVenta(Platillo p) {
-        ejecutar(() -> {
-            Platillo r = mPlatillo.descontar(sesion.getEstablecimientoId(), p.getId(), 1);
-            Mensajes.info(r.getEstado() == 1
-                    ? "Se descontó 1 porción de " + r.getNombre() + "."
-                    : r.getNombre() + " se agotó automáticamente.");
         });
     }
 
     public void eliminar(Platillo p) {
         ejecutar(() -> {
-            mPlatillo.eliminar(sesion.getEstablecimientoId(), p.getId());
+            mPlatillo.eliminar(sesion.getEstablecimientoId(), sesion.getUsuarioId(), p.getId());
             Mensajes.info("Platillo eliminado.");
         });
     }
 
     public void reiniciarDia() {
         ejecutar(() -> {
-            int n = mPlatillo.reiniciarDia(sesion.getEstablecimientoId());
+            int n = mPlatillo.reiniciarDia(sesion.getEstablecimientoId(), sesion.getUsuarioId());
             Mensajes.info(n == 0
                     ? "Ningún platillo lleva control de porciones."
                     : "Día reiniciado: " + n + " platillo(s) con porciones completas.");
@@ -130,7 +127,7 @@ public class PlatillosBean implements Serializable {
 
     public void crearCategoria() {
         ejecutar(() -> {
-            mPlatillo.crearCategoria(sesion.getEstablecimientoId(), nuevaCategoria);
+            mPlatillo.crearCategoria(sesion.getEstablecimientoId(), sesion.getUsuarioId(), nuevaCategoria);
             Mensajes.info("Categoría \"" + nuevaCategoria.trim() + "\" creada.");
             nuevaCategoria = null;
         });

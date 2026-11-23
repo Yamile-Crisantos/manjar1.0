@@ -56,6 +56,10 @@ public class Detalleapartado implements Serializable {
     @ManyToOne(optional = false)
     private Platillo platilloid;
 
+    /** Costo del platillo al momento de apartar (para el reporte de ganancia). */
+    @Column(name = "COSTOUNITARIO")
+    private BigDecimal costounitario;
+
     public Detalleapartado() {
     }
 
@@ -107,6 +111,14 @@ public class Detalleapartado implements Serializable {
 
     public void setPlatilloid(Platillo platilloid) {
         this.platilloid = platilloid;
+    }
+
+    public BigDecimal getCostounitario() {
+        return costounitario;
+    }
+
+    public void setCostounitario(BigDecimal costounitario) {
+        this.costounitario = costounitario;
     }
 
     @Override

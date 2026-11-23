@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="metadata">
+                <f:metadata>
+                    <f:event type="preRenderView" listener="#{consolidadoBean.iniciar}"/>
+                </f:metadata>
+            </ui:define>
+
+            <ui:define name="titulo">Vista consolidada · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Administración"/>
+                    <ui:param name="actual" value="Vista consolidada"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">Todas tus sucursales</p>
+                        <h1>Vista consolidada</h1>
+                        <p class="mj-lead">
+                            Lo vendido en el periodo y cómo va la operación ahora mismo en cada sucursal, en una sola pantalla.
+                            Los gerentes no ven esta pantalla: solo ven su propia sucursal.
+                        </p>
+                    </div>
+                </div>
+
+                <h:form id="formFiltros" styleClass="manjar-form mj-panel mj-filtros">
+                    <div class="manjar-row">
+                        <div class="manjar-field">
+                            <label for="formFiltros:desde">Desde</label>
+                            <h:inputText id="desde" value="#{consolidadoBean.desde}" pt:type="date" styleClass="mj-fecha"/>
+                        </div>
+                        <div class="manjar-field">
+                            <label for="formFiltros:hasta">Hasta</label>
+                            <h:inputText id="hasta" value="#{consolidadoBean.hasta}" pt:type="date" styleClass="mj-fecha"/>
+                        </div>
+                    </div>
+                    <div class="manjar-form-actions mj-atajos">
+                        <p:commandButton id="ver" value="Ver resumen" action="#{consolidadoBean.generar}"
+                                         process="@form" update=":panelResumen"/>
+                        <span class="manjar-muted">Atajos:</span>
+                        <p:commandButton value="Hoy" styleClass="manjar-btn-sec" action="#{consolidadoBean.hoy}" process="@this" update=":formFiltros :panelResumen"/>
+                        <p:commandButton value="Esta semana" styleClass="manjar-btn-sec" action="#{consolidadoBean.estaSemana}" process="@this" update=":formFiltros :panelResumen"/>
+                        <p:commandButton value="Este mes" styleClass="manjar-btn-sec" action="#{consolidadoBean.esteMes}" process="@this" update=":formFiltros :panelResumen"/>
+                        <p:commandButton value="Últimos 30 días" styleClass="manjar-btn-sec" action="#{consolidadoBean.ultimos30}" process="@this" update=":formFiltros :panelResumen"/>
+                    </div>
+                </h:form>
+
+                <h:panelGroup id="panelResumen" layout="block">
+                    <h:panelGroup layout="block" rendered="#{consolidadoBean.datos != null}">
+                        <h2 class="mj-titulo-seccion">
+                            Ventas del <h:outputText value="#{fmt.fecha(consolidadoBean.datos.desde)}"/> al <h:outputText value="#{fmt.fecha(consolidadoBean.datos.hasta)}"/>
+                        </h2>
+                        <div class="mj-stats">
+                            <div class="mj-stat"><span>Ingresos</span><strong>$<h:outputText value="#{consolidadoBean.datos.total.ingresos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                            <div class="mj-stat"><span>Costo</span><strong>$<h:outputText value="#{consolidadoBean.datos.total.costo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                            <div class="mj-stat destacado"><span>Ganancia</span><strong>$<h:outputText value="#{consolidadoBean.datos.total.ganancia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong></div>
+                            <div class="mj-stat"><span>Margen</span><strong><h:outputText value="#{consolidadoBean.datos.total.margen}"><f:convertNumber minFractionDigits="1" maxFractionDigits="1"/></h:outputText>%</strong></div>
+                            <div class="mj-stat"><span>Ventas</span><strong>#{consolidadoBean.datos.total.ventas}</strong></div>
+                            <div class="mj-stat"><span>Sucursales</span><strong>#{consolidadoBean.datos.sucursales.size()}</strong></div>
+                        </div>
+
+                        <h:panelGroup layout="block" styleClass="manjar-aviso" rendered="#{consolidadoBean.datos.mayorVenta != null and consolidadoBean.datos.sucursales.size() gt 1}">
+                            La sucursal que más vendió: <strong><h:outputText value="#{consolidadoBean.datos.mayorVenta.nombre}"/></strong>.
+                        </h:panelGroup>
+
+                        <h2 class="mj-titulo-seccion">Ventas por sucursal</h2>
+                        <div class="mj-tabla-scroll"><table class="mj-tabla mj-reporte" id="tablaVentas">
+                            <thead>
+                                <tr>
+                                    <th>Sucursal</th>
+                                    <th class="num">Ventas</th>
+                                    <th class="num">Ingresos</th>
+                                    <th class="num">Costo</th>
+                                    <th class="num">Ganancia</th>
+                                    <th class="num">Margen</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat var="suc" value="#{consolidadoBean.datos.sucursales}">
+                                    <tr>
+                                        <td><strong><h:outputText value="#{suc.nombre}"/></strong></td>
+                                        <td class="num">#{suc.ventas.ventas}</td>
+                                        <td class="num">$<h:outputText value="#{suc.ventas.ingresos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                        <td class="num">$<h:outputText value="#{suc.ventas.costo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                        <td class="num gan">$<h:outputText value="#{suc.ventas.ganancia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                        <td class="num"><h:outputText value="#{suc.ventas.margen}"><f:convertNumber minFractionDigits="1" maxFractionDigits="1"/></h:outputText>%</td>
+                                        <td>
+                                            <h:link value="Ver reporte" outcome="/vistas/reportes">
+                                                <f:param name="s" value="#{suc.sucursalId}"/>
+                                                <f:param name="desde" value="#{consolidadoBean.desde}"/>
+                                                <f:param name="hasta" value="#{consolidadoBean.hasta}"/>
+                                            </h:link>
+                                        </td>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table></div>
+
+                        <h2 class="mj-titulo-seccion">Operación ahora</h2>
+                        <div class="mj-stats">
+                            <div class="mj-stat"><span>Cajas abiertas</span><strong>#{consolidadoBean.datos.cajasAbiertas} de #{consolidadoBean.datos.sucursales.size()}</strong></div>
+                            <div class="mj-stat"><span>Comandas en cocina</span><strong>#{consolidadoBean.datos.comandasEnCocina}</strong></div>
+                            <div class="mj-stat"><span>Cuentas por cobrar</span><strong>#{consolidadoBean.datos.porCobrar}</strong></div>
+                            <div class="mj-stat"><span>Apartados en proceso</span><strong>#{consolidadoBean.datos.apartadosActivos}</strong></div>
+                        </div>
+                        <div class="mj-tabla-scroll"><table class="mj-tabla mj-reporte" id="tablaOperacion">
+                            <thead>
+                                <tr>
+                                    <th>Sucursal</th>
+                                    <th>Gerente</th>
+                                    <th>Caja</th>
+                                    <th class="num">En cocina</th>
+                                    <th class="num">Por cobrar</th>
+                                    <th class="num">Apartados</th>
+                                    <th class="num">Platillos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat var="suc" value="#{consolidadoBean.datos.sucursales}">
+                                    <tr>
+                                        <td><strong><h:outputText value="#{suc.nombre}"/></strong></td>
+                                        <td>
+                                            <h:outputText value="#{suc.gerente}" rendered="#{suc.gerente != null}"/>
+                                            <h:panelGroup rendered="#{suc.gerente == null}"><span class="manjar-muted">Lo opera el dueño</span></h:panelGroup>
+                                        </td>
+                                        <td>
+                                            <h:panelGroup rendered="#{suc.cajaAbierta}">
+                                                <span class="manjar-badge ok">Abierta</span>
+                                                $<h:outputText value="#{suc.efectivoEsperado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText> en efectivo
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{not suc.cajaAbierta}"><span class="manjar-badge off">Cerrada</span></h:panelGroup>
+                                        </td>
+                                        <td class="num">#{suc.comandasEnCocina}</td>
+                                        <td class="num">#{suc.porCobrar}</td>
+                                        <td class="num">#{suc.apartadosActivos}</td>
+                                        <td class="num">#{suc.platillosDisponibles} disp. · #{suc.platillosAgotados} agot.</td>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table></div>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

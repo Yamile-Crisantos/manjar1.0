@@ -43,12 +43,17 @@ public class PersonalBean implements Serializable {
     }
 
     private void cargar() {
-        personal = mUsuario.listarPersonal(sesion.getEstablecimientoId());
+        try {
+            personal = mUsuario.listarPersonal(sesion.getEstablecimientoId(), sesion.getUsuarioId());
+        } catch (ReglaNegocioException e) {
+            personal = new ArrayList<>();
+            Mensajes.error(e.getMessage());
+        }
     }
 
     public void crear() {
         try {
-            mUsuario.crearPersonal(sesion.getEstablecimientoId(), nombre, correo, clave, rol);
+            mUsuario.crearPersonal(sesion.getEstablecimientoId(), sesion.getUsuarioId(), nombre, correo, clave, rol);
             Mensajes.info("Cuenta creada para " + nombre.trim() + " (" + Constantes.nombreRol(rol) + ").");
             nombre = null;
             correo = null;
@@ -64,7 +69,7 @@ public class PersonalBean implements Serializable {
     public void alternarEstado(Usuario u) {
         boolean activar = u.getEstado() == null || u.getEstado() != Constantes.ESTADO_ACTIVO;
         try {
-            mUsuario.cambiarEstado(sesion.getEstablecimientoId(), u.getId(), activar);
+            mUsuario.cambiarEstado(sesion.getEstablecimientoId(), sesion.getUsuarioId(), u.getId(), activar);
             Mensajes.info("Cuenta de " + u.getNombre() + (activar ? " activada." : " desactivada."));
             cargar();
         } catch (ReglaNegocioException e) {

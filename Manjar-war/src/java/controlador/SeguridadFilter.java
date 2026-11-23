@@ -24,7 +24,9 @@ import logicaneg.Constantes;
  * Control de acceso: decide quién puede abrir cada vista.
  *
  * Reglas:
- *  - Vistas PÚBLICAS (lista de abajo): cualquiera.
+ *  - Vistas PÚBLICAS (lista de abajo): cualquiera. La pantalla de cocina (cocina.xhtml) está aquí porque la
+ *    pantalla compartida entra con la clave de la sucursal, sin cuenta; la propia página y la lógica comprueban
+ *    la clave (o la sesión del personal) en cada petición.
  *  - Vistas con roles (mapa PERMISOS): solo esos roles.
  *  - Cualquier otra vista dentro de /vistas/: requiere haber iniciado sesión
  *    (así, una vista nueva queda protegida por defecto).
@@ -45,6 +47,7 @@ public class SeguridadFilter implements Filter {
     private static final Set<String> PUBLICAS = new HashSet<>(Arrays.asList(
             "/vistas/inicio.xhtml",
             "/vistas/menu.xhtml",
+            "/vistas/cocina.xhtml",
             "/vistas/acceso.xhtml",
             "/vistas/registro.xhtml",
             "/vistas/registro-negocio.xhtml"));
@@ -61,6 +64,10 @@ public class SeguridadFilter implements Filter {
         PERMISOS.put("/vistas/personal.xhtml", roles(Constantes.ROL_DUENO));
         PERMISOS.put("/vistas/comandas.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE, Constantes.ROL_MESERO));
         PERMISOS.put("/vistas/caja.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE));
+        PERMISOS.put("/vistas/apartados.xhtml", roles(Constantes.ROL_DUENO, Constantes.ROL_GERENTE));
+        PERMISOS.put("/vistas/sucursales.xhtml", roles(Constantes.ROL_DUENO));
+        PERMISOS.put("/vistas/reportes.xhtml", roles(Constantes.ROL_DUENO));
+        PERMISOS.put("/vistas/consolidado.xhtml", roles(Constantes.ROL_DUENO));
     }
 
     private static Set<Integer> roles(Integer... r) {
