@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <f:facet name="first">
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        </f:facet>
+        <title><ui:insert name="titulo">Manjar</ui:insert></title>
+        <!-- "last" hace que nuestro CSS cargue DESPUÉS del tema de PrimeFaces y lo pueda sobrescribir -->
+        <f:facet name="last">
+            <h:outputStylesheet library="css" name="manjar.css"/>
+        </f:facet>
+    </h:head>
+
+    <h:body styleClass="manjar">
+
+        <!-- ENCABEZADO (marca) -->
+        <header class="manjar-header">
+            <div class="manjar-header-inner">
+                <h:link outcome="/vistas/inicio" styleClass="manjar-brand">
+                    <span class="manjar-brand-mark">M</span>
+                    <span class="manjar-brand-name">Manjar</span>
+                </h:link>
+                <span class="manjar-tagline">Gestión para fondas y restaurantes</span>
+            </div>
+        </header>
+
+        <!-- MENÚ DE NAVEGACIÓN (PrimeFaces): se escribe una sola vez, aquí -->
+        <nav class="manjar-nav" aria-label="Menú principal">
+            <div class="manjar-nav-inner">
+                <h:form id="formMenu">
+                    <p:menubar styleClass="manjar-menubar">
+
+                        <p:menuitem value="Inicio" icon="ui-icon-home" outcome="/vistas/inicio"/>
+
+                        <p:submenu label="Menú" icon="ui-icon-document">
+                            <p:menuitem value="Platillos y disponibilidad" outcome="/vistas/menu"/>
+                            <p:menuitem value="Menú público (QR)" disabled="true" title="Próximamente"/>
+                        </p:submenu>
+
+                        <p:submenu label="Comandas" icon="ui-icon-clipboard">
+                            <p:menuitem value="Comandas del mesero" outcome="/vistas/comandas"/>
+                            <p:menuitem value="Pantalla de cocina" disabled="true" title="Próximamente"/>
+                        </p:submenu>
+
+                        <p:submenu label="Caja" icon="ui-icon-cart">
+                            <p:menuitem value="Control de caja" outcome="/vistas/caja"/>
+                        </p:submenu>
+
+                        <p:menuitem value="Apartados" icon="ui-icon-calendar" disabled="true" title="Próximamente"/>
+
+                        <p:submenu label="Administración" icon="ui-icon-gear">
+                            <p:menuitem value="Sucursales y roles" disabled="true" title="Próximamente"/>
+                            <p:menuitem value="Reportes" disabled="true" title="Próximamente"/>
+                        </p:submenu>
+
+                        <f:facet name="options">
+                            <h:link value="Iniciar sesión" outcome="/vistas/acceso" styleClass="manjar-login"/>
+                        </f:facet>
+                    </p:menubar>
+                </h:form>
+            </div>
+        </nav>
+
+        <!-- CUERPO: ruta (breadcrumb) + contenido de cada página -->
+        <main class="manjar-main">
+            <nav class="manjar-crumbs" aria-label="Ruta de navegación">
+                <ui:insert name="ruta">
+                    <p:breadCrumb homeDisplay="text">
+                        <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
+                    </p:breadCrumb>
+                </ui:insert>
+            </nav>
+
+            <section class="manjar-content">
+                <ui:insert name="contenido">Contenido de la página</ui:insert>
+            </section>
+        </main>
+
+        <footer class="manjar-footer">
+            Manjar · Gestión para fondas y restaurantes · 2026
+        </footer>
+
+    </h:body>
+</html>

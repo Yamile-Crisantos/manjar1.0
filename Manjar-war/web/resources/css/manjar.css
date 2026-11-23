@@ -1,0 +1,305 @@
+/* ==========================================================
+   Manjar · estilos globales
+   Se carga desde plantilla.xhtml DESPUÉS del tema de PrimeFaces
+   ========================================================== */
+
+:root {
+    --mj-bg: #faf6f1;
+    --mj-surface: #ffffff;
+    --mj-ink: #2a2118;
+    --mj-muted: #6b5d50;
+    --mj-border: #e7dccf;
+    --mj-header: #2a2118;
+    --mj-primary: #b8410f;
+    --mj-primary-dark: #8f300a;
+    --mj-gold: #f2b544;
+    --mj-tint: #f6e7dc;
+    --mj-radius: 12px;
+    --mj-shadow: 0 1px 2px rgba(42, 33, 24, .08), 0 8px 20px rgba(42, 33, 24, .07);
+    --mj-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mj-font-title: Georgia, "Times New Roman", serif;
+}
+
+/* ---------- Base ---------- */
+body.manjar {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--mj-bg);
+    color: var(--mj-ink);
+    font-family: var(--mj-font);
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+/* El tema de PrimeFaces fuerza su propia fuente en los componentes */
+.manjar .ui-widget {
+    font-family: var(--mj-font);
+}
+
+.manjar h1,
+.manjar h2,
+.manjar h3 {
+    font-family: var(--mj-font-title);
+    color: var(--mj-ink);
+    line-height: 1.2;
+}
+
+.manjar a {
+    color: var(--mj-primary);
+}
+
+/* ---------- Encabezado (marca) ---------- */
+.manjar-header {
+    background: var(--mj-header);
+    border-bottom: 4px solid var(--mj-gold);
+}
+
+.manjar-header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+}
+
+.manjar a.manjar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    text-decoration: none;
+    color: #fff;
+}
+
+.manjar-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--mj-gold);
+    color: var(--mj-header);
+    font-family: var(--mj-font-title);
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.manjar-brand-name {
+    font-family: var(--mj-font-title);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.manjar-tagline {
+    color: #cdbfb0;
+    font-size: 14px;
+}
+
+/* ---------- Barra de navegación (PrimeFaces Menubar) ---------- */
+.manjar-nav {
+    background: var(--mj-surface);
+    border-bottom: 1px solid var(--mj-border);
+    box-shadow: 0 2px 6px rgba(42, 33, 24, .05);
+}
+
+.manjar-nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.manjar-nav form {
+    margin: 0;
+}
+
+/* Quita el degradado gris del tema */
+.manjar .ui-menubar.manjar-menubar {
+    background: transparent;
+    border: 0;
+    padding: 4px 0;
+    font-size: 15px;
+}
+
+.manjar .ui-menubar .ui-menuitem-link {
+    color: var(--mj-ink);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-decoration: none;
+}
+
+.manjar .ui-menubar .ui-menuitem-text {
+    color: inherit;
+}
+
+/* Al pasar el mouse */
+.manjar .ui-menubar .ui-menuitem-link:hover,
+.manjar .ui-menubar .ui-menuitem-link.ui-state-hover,
+.manjar .ui-menubar .ui-menuitem.ui-menuitem-active > .ui-menuitem-link {
+    background: var(--mj-tint);
+    border-color: transparent;
+    color: var(--mj-ink);
+}
+
+/* Submenús desplegables (reemplazan el fondo gris del tema) */
+.manjar .ui-menubar .ui-menu-child {
+    background: var(--mj-surface);
+    border: 1px solid var(--mj-border);
+    border-radius: 10px;
+    box-shadow: var(--mj-shadow);
+    padding: 6px;
+}
+
+/* Botón "Iniciar sesión" (a la derecha de la barra) */
+.manjar a.manjar-login {
+    display: inline-block;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--mj-primary);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.manjar a.manjar-login:hover {
+    background: var(--mj-primary-dark);
+}
+
+/* ---------- Cuerpo ---------- */
+.manjar-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 32px;
+    box-sizing: border-box;
+}
+
+.manjar-crumbs {
+    padding: 16px 0 8px;
+}
+
+/* Breadcrumb de PrimeFaces sin el degradado del tema */
+.manjar-crumbs .ui-breadcrumb {
+    background: transparent;
+    border: 0;
+    padding: 0;
+}
+
+.manjar-crumbs .ui-breadcrumb .ui-menuitem-link {
+    color: var(--mj-primary);
+    text-decoration: none;
+}
+
+.manjar-crumbs .ui-breadcrumb .ui-menuitem-link:hover {
+    text-decoration: underline;
+}
+
+.manjar-content {
+    background: var(--mj-surface);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    padding: 24px 28px 32px;
+}
+
+.manjar-content h1:first-child {
+    margin-top: 0;
+}
+
+/* ---------- Inicio: hero + tarjetas ---------- */
+.manjar-hero {
+    padding: 8px 0 20px;
+    border-bottom: 1px solid var(--mj-border);
+    margin-bottom: 24px;
+}
+
+.manjar-hero h1 {
+    margin: 0 0 8px;
+    font-size: 36px;
+}
+
+.manjar-hero p {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--mj-muted);
+    font-size: 18px;
+}
+
+.manjar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.manjar-card {
+    background: var(--mj-bg);
+    border: 1px solid var(--mj-border);
+    border-top: 4px solid var(--mj-primary);
+    border-radius: var(--mj-radius);
+    padding: 16px 18px 20px;
+}
+
+.manjar-card h3 {
+    margin: 0 0 6px;
+}
+
+.manjar-card p {
+    margin: 0 0 14px;
+    color: var(--mj-muted);
+}
+
+.manjar a.manjar-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--mj-primary);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.manjar a.manjar-btn:hover {
+    background: var(--mj-primary-dark);
+}
+
+/* ---------- Módulos en construcción ---------- */
+.manjar-soon {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 16px;
+    border: 2px dashed var(--mj-border);
+    border-radius: 8px;
+    color: var(--mj-muted);
+    font-weight: 600;
+}
+
+/* ---------- Pie ---------- */
+.manjar-footer {
+    padding: 18px 16px;
+    background: var(--mj-header);
+    color: #cdbfb0;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 700px) {
+    .manjar-content {
+        padding: 18px 16px 24px;
+    }
+    .manjar-hero h1 {
+        font-size: 28px;
+    }
+    .manjar-tagline {
+        display: none;
+    }
+}

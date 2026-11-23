@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Iniciar sesión · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <p:breadCrumb homeDisplay="text">
+                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
+                    <p:menuitem value="Iniciar sesión" outcome="/vistas/acceso"/>
+                </p:breadCrumb>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <h1>Iniciar sesión</h1>
+                <p>Aquí entrarán el cliente, el dueño y el mesero con su cuenta.</p>
+                <div class="manjar-soon">Módulo en construcción</div>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>
