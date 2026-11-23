@@ -69,6 +69,26 @@ public class Movimientocaja implements Serializable {
     @ManyToOne
     private Comanda comandaid;
 
+    /** VENTA, APARTADO, RETIRO o GASTO. */
+    @Size(max = 20)
+    @Column(name = "CLASE")
+    private String clase;
+
+    /** EFECTIVO, TARJETA o TRANSFERENCIA. Solo el efectivo cuenta en el arqueo. */
+    @Size(max = 20)
+    @Column(name = "METODO")
+    private String metodo;
+
+    /** Quién registró el movimiento. */
+    @JoinColumn(name = "USUARIOID", referencedColumnName = "ID")
+    @ManyToOne
+    private Usuario usuarioid;
+
+    /** Apartado al que corresponde el cobro (si es un pago de apartado). */
+    @JoinColumn(name = "APARTADOID", referencedColumnName = "ID")
+    @ManyToOne
+    private Apartado apartadoid;
+
     public Movimientocaja() {
     }
 
@@ -136,6 +156,38 @@ public class Movimientocaja implements Serializable {
 
     public void setComandaid(Comanda comandaid) {
         this.comandaid = comandaid;
+    }
+
+    public String getClase() {
+        return clase;
+    }
+
+    public void setClase(String clase) {
+        this.clase = clase;
+    }
+
+    public String getMetodo() {
+        return metodo;
+    }
+
+    public void setMetodo(String metodo) {
+        this.metodo = metodo;
+    }
+
+    public Usuario getUsuarioid() {
+        return usuarioid;
+    }
+
+    public void setUsuarioid(Usuario usuarioid) {
+        this.usuarioid = usuarioid;
+    }
+
+    public Apartado getApartadoid() {
+        return apartadoid;
+    }
+
+    public void setApartadoid(Apartado apartadoid) {
+        this.apartadoid = apartadoid;
     }
 
     @Override

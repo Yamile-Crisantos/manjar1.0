@@ -2,7 +2,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:p="http://primefaces.org/ui">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
@@ -10,16 +12,297 @@
             <ui:define name="titulo">Caja · Manjar</ui:define>
 
             <ui:define name="ruta">
-                <p:breadCrumb homeDisplay="text">
-                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    <p:menuitem value="Caja" outcome="/vistas/caja"/>
-                </p:breadCrumb>
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Caja"/>
+                </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
-                <h1>Control de caja</h1>
-                <p>Aquí se cobrarán las cuentas y se llevará el control del efectivo.</p>
-                <div class="manjar-soon">Módulo en construcción</div>
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
+                        <h1>Caja</h1>
+                        <p class="mj-lead">
+                            Abre la caja con el dinero con el que empiezas, cobra las cuentas, anota retiros y gastos
+                            y al terminar el día haz el corte para saber si el dinero contado coincide con lo vendido.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Actualización automática. Está fuera de panelCaja para que siga viva cuando la caja se abre o se cierra;
+                     solo renueva lo que lleva la clase mj-vivo (resumen, cuentas por cobrar y movimientos), así no se pierde lo que se esté escribiendo. -->
+                <h:form id="formSondeo">
+                    <p:poll interval="10" listener="#{cajaBean.refrescar}" process="@this" update="@(.mj-vivo)"/>
+                </h:form>
+
+                <h:panelGroup id="panelCaja" layout="block">
+
+                    <!-- Caja cerrada -->
+                    <h:panelGroup layout="block" rendered="#{not cajaBean.abierta}">
+
+                        <h:panelGroup layout="block" styleClass="mj-corte-final" rendered="#{cajaBean.ultimoCorte != null}">
+                            <h2 class="mj-op-titulo">Corte realizado</h2>
+                            <ui:include src="/WEB-INF/fragmentos/caja-resultado.xhtml">
+                                <ui:param name="corte" value="#{cajaBean.ultimoCorte}"/>
+                            </ui:include>
+                        </h:panelGroup>
+
+                        <section class="mj-op-col mj-caja-abrir">
+                            <h2 class="mj-op-titulo">Abrir la caja</h2>
+                            <h:form id="formAbrir" styleClass="manjar-form mj-panel">
+                                <p class="manjar-muted">
+                                    La caja está cerrada. Escribe cuánto efectivo hay en el cajón para empezar.
+                                    Al abrirla, las porciones del día de los platillos vuelven a su cantidad inicial.
+                                </p>
+                                <div class="manjar-field">
+                                    <p:outputLabel for="montoInicial" value="Monto inicial (efectivo)"/>
+                                    <p:inputText id="montoInicial" value="#{cajaBean.montoInicial}" required="true"
+                                                 requiredMessage="Escribe el monto inicial (puede ser 0)."
+                                                 converter="javax.faces.BigDecimal"
+                                                 converterMessage="Escribe un monto válido, por ejemplo 500 o 500.50."
+                                                 placeholder="0.00" pt:inputmode="decimal" maxlength="12"/>
+                                </div>
+                                <div class="manjar-form-actions">
+                                    <p:commandButton id="abrir" value="Abrir caja" action="#{cajaBean.abrir}"
+                                                     process="@form" update=":panelCaja"/>
+                                </div>
+                            </h:form>
+                        </section>
+                    </h:panelGroup>
+
+                    <!-- Caja abierta -->
+                    <h:panelGroup layout="block" rendered="#{cajaBean.abierta}">
+
+                        <p class="mj-caja-estado">
+                            <span class="manjar-badge ok">Caja abierta</span>
+                            desde #{fmt.diaHora(cajaBean.caja.fechaApertura)} por
+                            <h:outputText value="#{cajaBean.caja.abiertaPor}"/>
+                        </p>
+
+                        <h:panelGroup id="panelResumen" layout="block" styleClass="mj-stats mj-vivo">
+                            <div class="mj-stat">
+                                <span>Fondo inicial</span>
+                                <strong>$<h:outputText value="#{cajaBean.caja.montoInicial}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </div>
+                            <div class="mj-stat">
+                                <span>Ventas en efectivo</span>
+                                <strong>$<h:outputText value="#{cajaBean.caja.ingresosEfectivo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </div>
+                            <div class="mj-stat">
+                                <span>Tarjeta y transferencia</span>
+                                <strong>$<h:outputText value="#{cajaBean.caja.ingresosElectronicos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </div>
+                            <div class="mj-stat">
+                                <span>Retiros y gastos</span>
+                                <strong>$<h:outputText value="#{cajaBean.caja.totalEgresos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </div>
+                            <div class="mj-stat destacado">
+                                <span>Efectivo esperado en caja</span>
+                                <strong>$<h:outputText value="#{cajaBean.caja.montoEsperado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </div>
+                        </h:panelGroup>
+
+                        <div class="mj-op-cols">
+
+                            <!-- Columna izquierda: cobrar y egresos -->
+                            <section class="mj-op-col">
+                                <h2 class="mj-op-titulo">Cuentas por cobrar</h2>
+                                <h:panelGroup id="panelCobrar" layout="block" styleClass="mj-vivo">
+                                    <h:form id="formCobrar">
+                                        <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty cajaBean.porCobrar}">
+                                            No hay cuentas por cobrar.
+                                        </h:panelGroup>
+                                        <ui:repeat var="c" value="#{cajaBean.porCobrar}">
+                                            <article class="mj-ticket estado-#{c.estado}">
+                                                <header class="mj-ticket-cab">
+                                                    <div>
+                                                        <strong>#{c.id}</strong>
+                                                        <h:outputText value=" · #{c.etiqueta}"/>
+                                                    </div>
+                                                    <span class="mj-estado e-#{c.estado}">#{c.estadoTexto}</span>
+                                                </header>
+                                                <ul class="mj-ticket-lineas">
+                                                    <ui:repeat var="l" value="#{c.lineas}">
+                                                        <li>
+                                                            <b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/>
+                                                            <span class="manjar-muted">$<h:outputText value="#{l.subtotal}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                                        </li>
+                                                    </ui:repeat>
+                                                </ul>
+                                                <footer class="mj-ticket-pie">
+                                                    <span class="manjar-muted">hace #{c.minutosEspera} min · <h:outputText value="#{c.meseroNombre}"/></span>
+                                                    <strong>Total: $<h:outputText value="#{c.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </footer>
+                                                <div class="mj-ticket-acc">
+                                                    <p:commandButton value="Efectivo" action="#{cajaBean.cobrar(c.id, 'EFECTIVO')}"
+                                                                     process="@this" update=":panelCaja">
+                                                        <p:confirm header="Cobrar en efectivo" icon="ui-icon-help"
+                                                                   message="¿Cobrar $#{c.total} en efectivo de la comanda #{c.id} (#{c.etiqueta})?"/>
+                                                    </p:commandButton>
+                                                    <p:commandButton value="Tarjeta" styleClass="manjar-btn-sec"
+                                                                     action="#{cajaBean.cobrar(c.id, 'TARJETA')}" process="@this" update=":panelCaja">
+                                                        <p:confirm header="Cobrar con tarjeta" icon="ui-icon-help"
+                                                                   message="¿Cobrar $#{c.total} con tarjeta de la comanda #{c.id} (#{c.etiqueta})?"/>
+                                                    </p:commandButton>
+                                                    <p:commandButton value="Transferencia" styleClass="manjar-btn-sec"
+                                                                     action="#{cajaBean.cobrar(c.id, 'TRANSFERENCIA')}" process="@this" update=":panelCaja">
+                                                        <p:confirm header="Cobrar con transferencia" icon="ui-icon-help"
+                                                                   message="¿Cobrar $#{c.total} por transferencia de la comanda #{c.id} (#{c.etiqueta})?"/>
+                                                    </p:commandButton>
+                                                </div>
+                                            </article>
+                                        </ui:repeat>
+                                    </h:form>
+                                </h:panelGroup>
+
+                                <h2 class="mj-op-titulo">Retiros y gastos</h2>
+                                <h:form id="formEgreso" styleClass="manjar-form mj-panel">
+                                    <div class="mj-tipo">
+                                        <p:selectOneButton id="clase" value="#{cajaBean.claseEgreso}">
+                                            <f:selectItem itemLabel="Retiro" itemValue="RETIRO"/>
+                                            <f:selectItem itemLabel="Gasto" itemValue="GASTO"/>
+                                            <p:ajax process="@this"/>
+                                        </p:selectOneButton>
+                                    </div>
+                                    <div class="manjar-field">
+                                        <p:outputLabel for="montoEgreso" value="Monto"/>
+                                        <p:inputText id="montoEgreso" value="#{cajaBean.montoEgreso}" required="true"
+                                                     requiredMessage="Escribe el monto."
+                                                     converter="javax.faces.BigDecimal"
+                                                     converterMessage="Escribe un monto válido, por ejemplo 150 o 150.50."
+                                                     placeholder="0.00" pt:inputmode="decimal" maxlength="12"/>
+                                    </div>
+                                    <div class="manjar-field">
+                                        <p:outputLabel for="motivo" value="Motivo"/>
+                                        <p:inputText id="motivo" value="#{cajaBean.motivo}" maxlength="120"
+                                                     placeholder="Por ejemplo: compra de gas, pago a proveedor"/>
+                                    </div>
+                                    <div class="manjar-form-actions">
+                                        <p:commandButton id="registrarEgreso" value="Registrar" action="#{cajaBean.registrarEgreso}"
+                                                         process="@form" update=":panelCaja"/>
+                                    </div>
+                                </h:form>
+                            </section>
+
+                            <!-- Columna derecha: corte y movimientos -->
+                            <section class="mj-op-col">
+                                <h2 class="mj-op-titulo">Corte de caja</h2>
+                                <h:panelGroup id="panelCorte" layout="block">
+
+                                    <h:form id="formCorte" styleClass="manjar-form mj-panel" rendered="#{cajaBean.vistaPrevia == null}">
+                                        <p class="manjar-muted">
+                                            Al terminar el día cuenta el efectivo que hay en el cajón y escríbelo aquí.
+                                            Antes de cerrar verás si coincide con lo que el sistema registró.
+                                        </p>
+                                        <div class="manjar-field">
+                                            <p:outputLabel for="contado" value="Dinero contado en la caja"/>
+                                            <p:inputText id="contado" value="#{cajaBean.contado}" required="true"
+                                                         requiredMessage="Escribe el dinero que contaste."
+                                                         converter="javax.faces.BigDecimal"
+                                                         converterMessage="Escribe un monto válido, por ejemplo 1250 o 1250.50."
+                                                         placeholder="0.00" pt:inputmode="decimal" maxlength="12"/>
+                                        </div>
+                                        <div class="manjar-form-actions">
+                                            <p:commandButton id="hacerCorte" value="Hacer corte" action="#{cajaBean.calcularCorte}"
+                                                             process="@form" update=":panelCorte"/>
+                                        </div>
+                                    </h:form>
+
+                                    <h:form id="formConfirmarCorte" styleClass="manjar-form mj-panel" rendered="#{cajaBean.vistaPrevia != null}">
+                                        <ui:include src="/WEB-INF/fragmentos/caja-resultado.xhtml">
+                                            <ui:param name="corte" value="#{cajaBean.vistaPrevia}"/>
+                                        </ui:include>
+                                        <h:panelGroup layout="block" styleClass="mj-aviso" rendered="#{cajaBean.vistaPrevia.pendientesDeCobro gt 0}">
+                                            Hay #{cajaBean.vistaPrevia.pendientesDeCobro} cuenta(s) sin cobrar. Si cierras la caja así,
+                                            seguirán pendientes de cobro para la próxima caja.
+                                        </h:panelGroup>
+                                        <div class="manjar-form-actions">
+                                            <p:commandButton id="confirmarCorte" value="Confirmar y cerrar la caja"
+                                                             action="#{cajaBean.confirmarCorte}" process="@this" update=":panelCaja">
+                                                <p:confirm header="Cerrar la caja" icon="ui-icon-alert"
+                                                           message="Al cerrar la caja ya no se podrán cobrar cuentas ni registrar movimientos en ella. ¿Cerrar la caja?"/>
+                                            </p:commandButton>
+                                            <p:commandButton id="corregirConteo" value="Corregir el conteo" styleClass="manjar-btn-sec"
+                                                             action="#{cajaBean.corregirConteo}" process="@this" update=":panelCorte"/>
+                                        </div>
+                                    </h:form>
+                                </h:panelGroup>
+
+                                <h2 class="mj-op-titulo">Movimientos de esta caja</h2>
+                                <h:panelGroup id="panelMovs" layout="block" styleClass="mj-vivo">
+                                    <ui:include src="/WEB-INF/fragmentos/caja-movimientos.xhtml">
+                                        <ui:param name="lista" value="#{cajaBean.movimientos}"/>
+                                    </ui:include>
+                                </h:panelGroup>
+                            </section>
+                        </div>
+                    </h:panelGroup>
+
+                    <!-- Historial (siempre que haya cajas cerradas) -->
+                    <h:panelGroup layout="block" rendered="#{not empty cajaBean.historial}">
+                        <h2 class="mj-op-titulo mj-historial-tit">Cortes anteriores</h2>
+                        <h:form id="formHistorial">
+                            <table class="mj-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Abierta</th>
+                                        <th>Cerrada</th>
+                                        <th class="num">Fondo</th>
+                                        <th class="num">Vendido</th>
+                                        <th class="num">Esperado</th>
+                                        <th class="num">Contado</th>
+                                        <th class="num">Diferencia</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat var="h" value="#{cajaBean.historial}">
+                                        <tr>
+                                            <td>#{fmt.diaHora(h.fechaApertura)}</td>
+                                            <td>#{fmt.diaHora(h.fechaCierre)}</td>
+                                            <td class="num">$<h:outputText value="#{h.montoInicial}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                            <td class="num">$<h:outputText value="#{h.totalVendido}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                            <td class="num">$<h:outputText value="#{h.montoEsperado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                            <td class="num">$<h:outputText value="#{h.montoContado}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                            <td class="num dif-#{h.cuadra ? 'ok' : (h.sobrante ? 'sobra' : 'falta')}">
+                                                <h:outputText value="#{h.diferencia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                                            </td>
+                                            <td class="acc">
+                                                <p:commandButton value="Ver" styleClass="manjar-btn-sec"
+                                                                 action="#{cajaBean.verDetalle(h.id)}" process="@this" update=":panelDetalle"/>
+                                            </td>
+                                        </tr>
+                                    </ui:repeat>
+                                </tbody>
+                            </table>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup id="panelDetalle" layout="block">
+                    <h:panelGroup layout="block" styleClass="mj-detalle-caja" rendered="#{cajaBean.detalle != null}">
+                        <h:form id="formDetalle">
+                            <h2 class="mj-op-titulo">
+                                Caja del #{fmt.fechaHora(cajaBean.detalle.fechaApertura)}
+                                <p:commandButton value="Cerrar detalle" styleClass="manjar-btn-sec"
+                                                 action="#{cajaBean.cerrarDetalle}" process="@this" update=":panelDetalle"/>
+                            </h2>
+                            <ui:include src="/WEB-INF/fragmentos/caja-resultado.xhtml">
+                                <ui:param name="corte" value="#{cajaBean.detalle}"/>
+                            </ui:include>
+                            <ui:include src="/WEB-INF/fragmentos/caja-movimientos.xhtml">
+                                <ui:param name="lista" value="#{cajaBean.movimientosDetalle}"/>
+                            </ui:include>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:form id="formConfirmar">
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes"/>
+                        <p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no manjar-btn-sec"/>
+                    </p:confirmDialog>
+                </h:form>
             </ui:define>
 
         </ui:composition>

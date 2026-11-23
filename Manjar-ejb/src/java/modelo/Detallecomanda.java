@@ -5,6 +5,8 @@
 package modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import javax.validation.constraints.Size;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,6 +51,19 @@ public class Detallecomanda implements Serializable {
     @ManyToOne(optional = false)
     private Platillo platilloid;
 
+    /** Precio del platillo al momento de pedir (no cambia si el menú cambia después). */
+    @Column(name = "PRECIOUNITARIO")
+    private BigDecimal preciounitario;
+
+    /** Costo del platillo al momento de pedir (para el reporte de ganancia). */
+    @Column(name = "COSTOUNITARIO")
+    private BigDecimal costounitario;
+
+    /** Indicación para cocina, por ejemplo "sin cebolla". */
+    @Size(max = 120)
+    @Column(name = "NOTA")
+    private String nota;
+
     public Detallecomanda() {
     }
 
@@ -91,6 +106,30 @@ public class Detallecomanda implements Serializable {
 
     public void setPlatilloid(Platillo platilloid) {
         this.platilloid = platilloid;
+    }
+
+    public BigDecimal getPreciounitario() {
+        return preciounitario;
+    }
+
+    public void setPreciounitario(BigDecimal preciounitario) {
+        this.preciounitario = preciounitario;
+    }
+
+    public BigDecimal getCostounitario() {
+        return costounitario;
+    }
+
+    public void setCostounitario(BigDecimal costounitario) {
+        this.costounitario = costounitario;
+    }
+
+    public String getNota() {
+        return nota;
+    }
+
+    public void setNota(String nota) {
+        this.nota = nota;
     }
 
     @Override

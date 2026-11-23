@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Apartados · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Apartados"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
+                        <h1>Apartados</h1>
+                        <p class="mj-lead">
+                            Pedidos que los clientes apartaron. Registra el pago cuando lo recibas, prepara los pagados,
+                            avisa cuando estén listos y entrégalos pidiendo el código del comprobante.
+                        </p>
+                    </div>
+                </div>
+
+                <h:form id="formSondeo">
+                    <p:poll interval="10" listener="#{apartadosBean.refrescar}" process="@this" update=":panelTablero"/>
+                </h:form>
+
+                <h:panelGroup id="panelTablero" layout="block">
+                    <h:form id="formTablero">
+
+                        <div class="mj-apartados-cols">
+
+                            <!-- 1. Esperando pago -->
+                            <section class="mj-op-col">
+                                <h2 class="mj-op-titulo">Esperando pago <span class="mj-contador">#{apartadosBean.porPagar.size()}</span></h2>
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartadosBean.porPagar}">
+                                    Ningún apartado espera pago.
+                                </h:panelGroup>
+                                <ui:repeat var="a" value="#{apartadosBean.porPagar}">
+                                    <article class="mj-apartado e-#{a.estado}">
+                                        <header class="mj-apartado-cab">
+                                            <div>
+                                                <span class="mj-codigo">#{a.codigoVisible}</span>
+                                                <span class="manjar-muted"><h:outputText value="#{a.clienteNombre}"/></span>
+                                            </div>
+                                            <span class="mj-espera">se libera en #{a.minutosParaVencer} min</span>
+                                        </header>
+                                        <ui:include src="/WEB-INF/fragmentos/apartado-detalle.xhtml">
+                                            <ui:param name="ap" value="#{a}"/>
+                                        </ui:include>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Registrar pago" action="#{apartadosBean.abrirPago(a)}"
+                                                             process="@this" update=":formPago"
+                                                             oncomplete="PF('dlgPago').show()"/>
+                                            <p:commandButton value="Cancelar" styleClass="manjar-btn-peligro"
+                                                             action="#{apartadosBean.cancelar(a.id)}" process="@this" update=":panelTablero">
+                                                <p:confirm header="Cancelar apartado" icon="ui-icon-alert"
+                                                           message="¿Cancelar el apartado #{a.codigoVisible}? Las porciones regresarán al menú."/>
+                                            </p:commandButton>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+
+                            <!-- 2. Pagados: por preparar -->
+                            <section class="mj-op-col">
+                                <h2 class="mj-op-titulo">Pagados, por preparar <span class="mj-contador">#{apartadosBean.porPreparar.size()}</span></h2>
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartadosBean.porPreparar}">
+                                    No hay apartados pagados por preparar.
+                                </h:panelGroup>
+                                <ui:repeat var="a" value="#{apartadosBean.porPreparar}">
+                                    <article class="mj-apartado e-#{a.estado}">
+                                        <header class="mj-apartado-cab">
+                                            <div>
+                                                <span class="mj-codigo">#{a.codigoVisible}</span>
+                                                <span class="manjar-muted"><h:outputText value="#{a.clienteNombre}"/></span>
+                                            </div>
+                                            <span class="mj-espera">recoge a las #{fmt.hora(a.horaRecoleccion)}</span>
+                                        </header>
+                                        <ui:include src="/WEB-INF/fragmentos/apartado-detalle.xhtml">
+                                            <ui:param name="ap" value="#{a}"/>
+                                        </ui:include>
+                                        <div class="mj-ticket-acc">
+                                            <p:commandButton value="Marcar como listo" action="#{apartadosBean.marcarListo(a.id)}"
+                                                             process="@this" update=":panelTablero"/>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+
+                            <!-- 3. Listos: entregar con el código -->
+                            <section class="mj-op-col">
+                                <h2 class="mj-op-titulo">Listos para entregar <span class="mj-contador">#{apartadosBean.listos.size()}</span></h2>
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartadosBean.listos}">
+                                    No hay apartados listos esperando al cliente.
+                                </h:panelGroup>
+                                <ui:repeat var="a" value="#{apartadosBean.listos}">
+                                    <article class="mj-apartado e-#{a.estado}">
+                                        <header class="mj-apartado-cab">
+                                            <div>
+                                                <span class="manjar-muted"><h:outputText value="#{a.clienteNombre}"/></span>
+                                            </div>
+                                            <span class="mj-espera">recoge a las #{fmt.hora(a.horaRecoleccion)}</span>
+                                        </header>
+                                        <ui:include src="/WEB-INF/fragmentos/apartado-detalle.xhtml">
+                                            <ui:param name="ap" value="#{a}"/>
+                                        </ui:include>
+                                        <div class="mj-entrega">
+                                            <p:inputText value="#{apartadosBean.codigos[a.id]}" maxlength="12"
+                                                         placeholder="Código del cliente" styleClass="mj-codigo-entrada"/>
+                                            <p:commandButton value="Entregar" action="#{apartadosBean.entregar(a.id)}"
+                                                             process="@form" update=":panelTablero"/>
+                                        </div>
+                                    </article>
+                                </ui:repeat>
+                            </section>
+                        </div>
+
+                        <h2 class="mj-op-titulo mj-historial-tit">Terminados hoy</h2>
+                        <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartadosBean.terminados}">
+                            Todavía no hay apartados entregados, cancelados o vencidos hoy.
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" rendered="#{not empty apartadosBean.terminados}">
+                            <table class="mj-tabla">
+                                <thead>
+                                    <tr><th>Código</th><th>Cliente</th><th>Estado</th><th>Pago</th><th class="num">Total</th></tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat var="a" value="#{apartadosBean.terminados}">
+                                        <tr>
+                                            <td><strong>#{a.codigoVisible}</strong></td>
+                                            <td><h:outputText value="#{a.clienteNombre}"/></td>
+                                            <td><span class="mj-estado e-#{a.estado}">#{a.estadoTexto}</span>
+                                                <span class="manjar-muted"><h:outputText value=" · #{fmt.hora(a.fechaEntrega)}" rendered="#{a.entregado}"/></span></td>
+                                            <td>#{a.metodoPagoTexto}</td>
+                                            <td class="num">$<h:outputText value="#{a.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                                        </tr>
+                                    </ui:repeat>
+                                </tbody>
+                            </table>
+                        </h:panelGroup>
+                    </h:form>
+                </h:panelGroup>
+
+                <!-- Ventana para registrar el pago -->
+                <p:dialog id="dlgPago" widgetVar="dlgPago" header="Registrar pago del anticipo" modal="true"
+                          resizable="false" draggable="false" appendTo="@(body)" styleClass="mj-dialogo-pago">
+                    <h:form id="formPago" styleClass="manjar-form">
+                        <h:panelGroup layout="block" rendered="#{apartadosBean.seleccionado != null}">
+                            <p>
+                                Apartado <strong>#{apartadosBean.seleccionado.codigoVisible}</strong> de
+                                <strong><h:outputText value="#{apartadosBean.seleccionado.clienteNombre}"/></strong>:
+                                <strong>$<h:outputText value="#{apartadosBean.seleccionado.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                            </p>
+                            <div class="manjar-field">
+                                <p:outputLabel for="metodo" value="¿Cómo pagó el cliente?"/>
+                                <p:selectOneRadio id="metodo" value="#{apartadosBean.metodo}" layout="lineDirection">
+                                    <f:selectItem itemLabel="Efectivo" itemValue="EFECTIVO"/>
+                                    <f:selectItem itemLabel="Tarjeta" itemValue="TARJETA"/>
+                                    <f:selectItem itemLabel="Transferencia" itemValue="TRANSFERENCIA"/>
+                                    <p:ajax process="@this" update="referenciaCampo"/>
+                                </p:selectOneRadio>
+                            </div>
+                            <h:panelGroup id="referenciaCampo" layout="block" styleClass="manjar-field">
+                                <h:panelGroup rendered="#{apartadosBean.pagoConReferencia}">
+                                    <p:outputLabel for="referencia" value="#{apartadosBean.metodo == 'TRANSFERENCIA' ? 'Referencia o clave de rastreo' : 'Número de aprobación (opcional)'}"/>
+                                    <p:inputText id="referencia" value="#{apartadosBean.referencia}" maxlength="80"/>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <p class="manjar-muted">El pago entra a la caja abierta de la sucursal.</p>
+                            <div class="manjar-form-actions">
+                                <p:commandButton id="confirmarPago" value="Confirmar pago" action="#{apartadosBean.registrarPago}"
+                                                 process="@form" update=":panelTablero :formPago"
+                                                 oncomplete="if (!args.validationFailed) { PF('dlgPago').hide(); }"/>
+                                <p:commandButton value="Cancelar" styleClass="manjar-btn-sec" type="button" onclick="PF('dlgPago').hide()"/>
+                            </div>
+                        </h:panelGroup>
+                    </h:form>
+                </p:dialog>
+
+                <h:form id="formConfirmar">
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes"/>
+                        <p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no manjar-btn-sec"/>
+                    </p:confirmDialog>
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

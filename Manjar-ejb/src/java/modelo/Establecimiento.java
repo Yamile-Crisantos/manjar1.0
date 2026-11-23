@@ -61,6 +61,58 @@ public class Establecimiento implements Serializable {
     @Size(max = 255)
     @Column(name = "DIRECCION")
     private String direccion;
+    /** Color de acento del menú público (#RRGGBB de la paleta de Temas). Personalización del negocio. */
+    @Size(max = 7)
+    @Column(name = "ColorMenu")
+    private String colorMenu;
+    /** Lema o frase corta que aparece bajo el nombre en el menú público. */
+    @Size(max = 120)
+    @Column(name = "Lema")
+    private String lema;
+    /** Diseño de la lista de platillos del menú público: "tarjetas" o "lista". */
+    @Size(max = 10)
+    @Column(name = "DisenoMenu")
+    private String diseno;
+    /** Tipografía del menú público: "clasica", "moderna" o "calida". */
+    @Size(max = 10)
+    @Column(name = "Tipografia")
+    private String tipografia;
+    /** Forma de las esquinas del menú público: "redondas" o "rectas". */
+    @Size(max = 10)
+    @Column(name = "Esquinas")
+    private String esquinas;
+    /** Fondo del menú público: "claro" u "oscuro". */
+    @Size(max = 10)
+    @Column(name = "FondoMenu")
+    private String fondo;
+    /** Teléfono del negocio (se muestra en el menú público). */
+    @Size(max = 20)
+    @Column(name = "Telefono")
+    private String telefono;
+    /** WhatsApp del negocio (se muestra en el menú público). */
+    @Size(max = 20)
+    @Column(name = "Whatsapp")
+    private String whatsapp;
+    /** Horario de atención, en texto libre. */
+    @Size(max = 255)
+    @Column(name = "Horario")
+    private String horario;
+    /** Usuario de Instagram, sin @. */
+    @Size(max = 30)
+    @Column(name = "Instagram")
+    private String instagram;
+    /** Nombre de la página de Facebook (lo que va después de facebook.com/). */
+    @Size(max = 50)
+    @Column(name = "Facebook")
+    private String facebook;
+    /** Aviso del día que se destaca arriba del menú. */
+    @Size(max = 160)
+    @Column(name = "Aviso")
+    private String aviso;
+    /** Clave secreta de la pantalla de cocina de esta sucursal (la pantalla compartida entra con ella, sin cuenta). */
+    @Size(max = 64)
+    @Column(name = "TOKENCOCINA")
+    private String tokenCocina;
     @JoinColumn(name = "DUENOID", referencedColumnName = "ID")
     @ManyToOne
     private Usuario duenoid;
@@ -131,6 +183,110 @@ public class Establecimiento implements Serializable {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public String getColorMenu() {
+        return colorMenu;
+    }
+
+    public void setColorMenu(String colorMenu) {
+        this.colorMenu = colorMenu;
+    }
+
+    public String getLema() {
+        return lema;
+    }
+
+    public void setLema(String lema) {
+        this.lema = lema;
+    }
+
+    public String getDiseno() {
+        return diseno;
+    }
+
+    public void setDiseno(String diseno) {
+        this.diseno = diseno;
+    }
+
+    public String getTipografia() {
+        return tipografia;
+    }
+
+    public void setTipografia(String tipografia) {
+        this.tipografia = tipografia;
+    }
+
+    public String getEsquinas() {
+        return esquinas;
+    }
+
+    public void setEsquinas(String esquinas) {
+        this.esquinas = esquinas;
+    }
+
+    public String getFondo() {
+        return fondo;
+    }
+
+    public void setFondo(String fondo) {
+        this.fondo = fondo;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getWhatsapp() {
+        return whatsapp;
+    }
+
+    public void setWhatsapp(String whatsapp) {
+        this.whatsapp = whatsapp;
+    }
+
+    public String getHorario() {
+        return horario;
+    }
+
+    public void setHorario(String horario) {
+        this.horario = horario;
+    }
+
+    public String getInstagram() {
+        return instagram;
+    }
+
+    public void setInstagram(String instagram) {
+        this.instagram = instagram;
+    }
+
+    public String getFacebook() {
+        return facebook;
+    }
+
+    public void setFacebook(String facebook) {
+        this.facebook = facebook;
+    }
+
+    public String getAviso() {
+        return aviso;
+    }
+
+    public void setAviso(String aviso) {
+        this.aviso = aviso;
+    }
+
+    public String getTokenCocina() {
+        return tokenCocina;
+    }
+
+    public void setTokenCocina(String tokenCocina) {
+        this.tokenCocina = tokenCocina;
     }
 
     public Usuario getDuenoid() {

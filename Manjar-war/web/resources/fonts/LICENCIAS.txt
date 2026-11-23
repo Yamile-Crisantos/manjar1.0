@@ -1,0 +1,14 @@
+Tipografías incluidas en esta carpeta (se empacan para que la aplicación se vea igual sin conexión a internet):
+
+- Montserrat (montserrat-400.woff2, montserrat-600.woff2)
+  Copyright 2011 The Montserrat Project Authors (https://github.com/JulietaUla/Montserrat)
+
+- Playfair Display (playfair-display-700.woff2)
+  Copyright 2017 The Playfair Display Project Authors (https://github.com/clauseggers/Playfair-Display)
+
+- Nunito (nunito-400.woff2, nunito-800.woff2)
+  Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)
+
+Todas se distribuyen bajo la licencia SIL Open Font License, Version 1.1:
+https://openfontlicense.org
+Se permite usarlas, copiarlas y redistribuirlas, incluso en proyectos comerciales, siempre que se conserve este aviso.

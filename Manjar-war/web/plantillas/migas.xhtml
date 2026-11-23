@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <!--
+            Ruta de navegación (migas de pan) en HTML simple: no necesita formulario.
+            Se usa así:
+              <ui:include src="/plantillas/migas.xhtml">
+                  <ui:param name="padre" value="Administración"/>   (opcional)
+                  <ui:param name="actual" value="Personal"/>
+              </ui:include>
+            El primer paso es "Mi panel" si ya iniciaste sesión e "Inicio" si eres visitante.
+        -->
+        <ui:composition>
+            <ui:fragment rendered="#{actual ne 'Inicio' and not (sesion.autenticado and actual eq 'Mi panel')}">
+            <ol class="mj-crumbs">
+                <li>
+                    <h:link outcome="#{sesion.autenticado ? '/vistas/panel' : '/vistas/inicio'}"
+                            value="#{sesion.autenticado ? 'Mi panel' : 'Inicio'}"/>
+                </li>
+                <ui:fragment rendered="#{not empty padre}">
+                    <li>#{padre}</li>
+                </ui:fragment>
+                <li class="actual" aria-current="page">#{actual}</li>
+            </ol>
+            </ui:fragment>
+        </ui:composition>
+    </body>
+</html>

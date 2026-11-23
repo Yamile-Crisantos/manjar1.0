@@ -82,6 +82,11 @@ public class Caja implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cajaid")
     private List<Movimientocaja> movimientocajaList;
 
+    /** Quién hizo el corte y cerró la caja. */
+    @JoinColumn(name = "CERRADAPORID", referencedColumnName = "ID")
+    @ManyToOne
+    private Usuario cerradaporid;
+
     public Caja() {
     }
 
@@ -181,6 +186,14 @@ public class Caja implements Serializable {
 
     public void setMovimientocajaList(List<Movimientocaja> movimientocajaList) {
         this.movimientocajaList = movimientocajaList;
+    }
+
+    public Usuario getCerradaporid() {
+        return cerradaporid;
+    }
+
+    public void setCerradaporid(Usuario cerradaporid) {
+        this.cerradaporid = cerradaporid;
     }
 
     @Override

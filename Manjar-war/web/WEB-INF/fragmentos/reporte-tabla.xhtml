@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <!-- Tabla de un reporte de ventas. Parámetros: encabezado (texto de la primera columna) y filas (lista de FilaReporte) -->
+        <ui:composition>
+            <div class="mj-tabla-scroll">
+            <table class="mj-tabla mj-reporte">
+                <thead>
+                    <tr>
+                        <th>#{encabezado}</th>
+                        <th class="num">Ventas</th>
+                        <th class="num">Porciones</th>
+                        <th class="num">Ingresos</th>
+                        <th class="num">Costo</th>
+                        <th class="num">Ganancia</th>
+                        <th class="num">Margen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat var="fila" value="#{filas}">
+                        <tr>
+                            <td><strong><h:outputText value="#{fila.etiqueta}"/></strong></td>
+                            <td class="num">#{fila.ventas}</td>
+                            <td class="num">#{fila.porciones}</td>
+                            <td class="num">$<h:outputText value="#{fila.ingresos}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                            <td class="num">$<h:outputText value="#{fila.costo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                            <td class="num gan">$<h:outputText value="#{fila.ganancia}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
+                            <td class="num"><h:outputText value="#{fila.margen}"><f:convertNumber minFractionDigits="1" maxFractionDigits="1"/></h:outputText>%</td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+            </table>
+            </div>
+        </ui:composition>
+    </body>
+</html>

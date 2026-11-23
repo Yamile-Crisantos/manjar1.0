@@ -1,65 +1,184 @@
 /* ==========================================================
-   Manjar · estilos globales
-   Se carga desde plantilla.xhtml DESPUÉS del tema de PrimeFaces
+   Manjar · estilos globales (diseño minimalista)
+   Se carga desde plantilla.xhtml DESPUÉS del tema de PrimeFaces,
+   por eso puede sobrescribirlo.
+
+   Paleta (la misma de la presentación del proyecto):
+     crema #FFFAF2 · café oscuro #2E2521 · terracota #CC4E27
+   Tipografías: Playfair Display (títulos), Montserrat (texto) y Nunito (estilo "cálido"),
+   empacadas en resources/fonts, así que funcionan sin internet.
+   Para cambiar los colores basta con editar las variables de abajo.
+
+   Organización:
+     1. Fuentes, variables y base   5. Páginas: inicio, menú, panel
+     2. Encabezado y navegación     6. Acceso y registro
+     3. Piezas reutilizables        7. Administración (formularios, tablas, diálogos)
+     4. Mensajes, pie y pantallas pequeñas
+     (antes del 4: registro de negocio, "Mi negocio" y página del QR)
+     8. Al final: vista de comensal (el menú vestido con la marca del negocio) y estilos del menú
    ========================================================== */
 
-:root {
-    --mj-bg: #faf6f1;
-    --mj-surface: #ffffff;
-    --mj-ink: #2a2118;
-    --mj-muted: #6b5d50;
-    --mj-border: #e7dccf;
-    --mj-header: #2a2118;
-    --mj-primary: #b8410f;
-    --mj-primary-dark: #8f300a;
-    --mj-gold: #f2b544;
-    --mj-tint: #f6e7dc;
-    --mj-radius: 12px;
-    --mj-shadow: 0 1px 2px rgba(42, 33, 24, .08), 0 8px 20px rgba(42, 33, 24, .07);
-    --mj-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-    --mj-font-title: Georgia, "Times New Roman", serif;
+/* ---------- 1. Fuentes, variables y base ---------- */
+@font-face {
+    font-family: "Montserrat";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:montserrat-400.woff2']}") format("woff2");
 }
 
-/* ---------- Base ---------- */
+@font-face {
+    font-family: "Montserrat";
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:montserrat-600.woff2']}") format("woff2");
+}
+
+@font-face {
+    font-family: "Nunito";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:nunito-400.woff2']}") format("woff2");
+}
+
+@font-face {
+    font-family: "Nunito";
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:nunito-800.woff2']}") format("woff2");
+}
+
+@font-face {
+    font-family: "Playfair Display";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("#{resource['fonts:playfair-display-700.woff2']}") format("woff2");
+}
+
+:root {
+    --mj-cream: #fffaf2;
+    --mj-card: #ffffff;
+    --mj-dark: #2e2521;
+    --mj-ink: #2e2521;
+    --mj-muted: #7d6e64;
+    --mj-border: #eadfd2;
+    --mj-border-strong: #d6c6b4;
+    --mj-tint: #f7ece0;
+    --mj-accent: #cc4e27;
+    --mj-accent-claro: #f2a283;   /* el acento aclarado, para textos sobre fondo oscuro */
+    --mj-primary: #c44a24;
+    --mj-primary-dark: #a33a19;
+    --mj-ok: #3d6b4b;
+    --mj-ok-bg: #e8f1ea;
+    --mj-off: #a23b27;
+    --mj-off-bg: #f8e6e1;
+    --mj-warn: #8a5a00;
+    --mj-warn-bg: #fcf0d4;
+    --mj-on-dark: #fff4e8;
+    --mj-on-dark-muted: #d2c3b5;
+    --mj-radius: 10px;
+    --mj-shadow: 0 1px 2px rgba(46, 37, 33, .05), 0 6px 16px rgba(46, 37, 33, .05);
+    --mj-shadow-hover: 0 2px 4px rgba(46, 37, 33, .07), 0 10px 24px rgba(46, 37, 33, .09);
+    --mj-font: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --mj-font-title: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
 body.manjar {
     margin: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--mj-bg);
+    background: var(--mj-cream);
     color: var(--mj-ink);
     font-family: var(--mj-font);
-    font-size: 16px;
-    line-height: 1.55;
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 /* El tema de PrimeFaces fuerza su propia fuente en los componentes */
-.manjar .ui-widget {
+.manjar .ui-widget,
+.manjar .ui-widget input,
+.manjar .ui-widget textarea,
+.manjar .ui-widget button {
     font-family: var(--mj-font);
+    font-size: 14px;
+}
+
+.manjar strong,
+.manjar b {
+    font-weight: 600;
 }
 
 .manjar h1,
 .manjar h2,
 .manjar h3 {
-    font-family: var(--mj-font-title);
     color: var(--mj-ink);
     line-height: 1.2;
 }
 
-.manjar a {
-    color: var(--mj-primary);
+/* Playfair usa por defecto números "de antiguo estilo" (el 5 y el 1 bajan de la línea): se piden alineados */
+.manjar h1,
+.manjar h2,
+.manjar .mj-precio,
+.manjar-stat b {
+    font-variant-numeric: lining-nums;
+    font-feature-settings: "lnum" 1;
 }
 
-/* ---------- Encabezado (marca) ---------- */
+/* Título de página: serif en mayúsculas con la barrita de acento de la presentación */
+.manjar h1 {
+    margin: 0 0 8px;
+    font-family: var(--mj-font-title);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+}
+
+.manjar h1::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 4px;
+    margin-top: 12px;
+    border-radius: 4px;
+    background: var(--mj-accent);
+}
+
+.manjar h2 {
+    font-family: var(--mj-font-title);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.manjar h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.manjar a {
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.manjar-muted {
+    color: var(--mj-muted);
+}
+
+/* ---------- 2. Encabezado y navegación ---------- */
 .manjar-header {
-    background: var(--mj-header);
-    border-bottom: 4px solid var(--mj-gold);
+    background: var(--mj-dark);
 }
 
 .manjar-header-inner {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 0 16px;
+    box-sizing: border-box;
+    min-height: 52px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -68,51 +187,45 @@ body.manjar {
 }
 
 .manjar a.manjar-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
     padding: 12px 0;
     text-decoration: none;
-    color: #fff;
-}
-
-.manjar-brand-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--mj-gold);
-    color: var(--mj-header);
-    font-family: var(--mj-font-title);
-    font-weight: 700;
-    font-size: 20px;
+    color: var(--mj-on-dark);
 }
 
 .manjar-brand-name {
     font-family: var(--mj-font-title);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: .5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
 }
 
-.manjar-tagline {
-    color: #cdbfb0;
+/* Quién tiene la sesión (esquina del encabezado) */
+.manjar-context-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: var(--mj-on-dark);
+    line-height: 1.3;
     font-size: 14px;
 }
 
-/* ---------- Barra de navegación (PrimeFaces Menubar) ---------- */
+.manjar-context-text small {
+    color: var(--mj-on-dark-muted);
+    font-size: 12.5px;
+}
+
+/* Barra de navegación (PrimeFaces Menubar) */
 .manjar-nav {
-    background: var(--mj-surface);
     border-bottom: 1px solid var(--mj-border);
-    box-shadow: 0 2px 6px rgba(42, 33, 24, .05);
+    background: var(--mj-card);
 }
 
 .manjar-nav-inner {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 0 16px 0 4px;   /* el texto de la barra queda alineado con el contenido */
+    box-sizing: border-box;
 }
 
 .manjar-nav form {
@@ -123,143 +236,146 @@ body.manjar {
 .manjar .ui-menubar.manjar-menubar {
     background: transparent;
     border: 0;
-    padding: 4px 0;
+    padding: 3px 0;
     font-size: 15px;
 }
 
 .manjar .ui-menubar .ui-menuitem-link {
+    display: block;
     color: var(--mj-ink);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: var(--mj-radius);
+    padding: 7px 12px;
     text-decoration: none;
 }
 
 .manjar .ui-menubar .ui-menuitem-text {
+    float: none;
     color: inherit;
 }
 
-/* Al pasar el mouse */
 .manjar .ui-menubar .ui-menuitem-link:hover,
 .manjar .ui-menubar .ui-menuitem-link.ui-state-hover,
 .manjar .ui-menubar .ui-menuitem.ui-menuitem-active > .ui-menuitem-link {
     background: var(--mj-tint);
     border-color: transparent;
-    color: var(--mj-ink);
+    color: var(--mj-link, var(--mj-primary-dark));
 }
 
-/* Submenús desplegables (reemplazan el fondo gris del tema) */
+/* Opciones "Próximamente" */
+.manjar .ui-menubar .ui-state-disabled,
+.manjar .ui-menubar .ui-menuitem-link.ui-state-disabled {
+    opacity: .5;
+}
+
+/* Submenús desplegables */
 .manjar .ui-menubar .ui-menu-child {
-    background: var(--mj-surface);
+    background: var(--mj-card);
     border: 1px solid var(--mj-border);
-    border-radius: 10px;
+    border-radius: var(--mj-radius);
     box-shadow: var(--mj-shadow);
-    padding: 6px;
+    padding: 4px;
+    min-width: 200px;
 }
 
-/* Botón "Iniciar sesión" (a la derecha de la barra) */
+/* Enlaces y botones a la derecha de la barra (Iniciar sesión, Cerrar sesión...) */
 .manjar a.manjar-login {
     display: inline-block;
-    padding: 7px 16px;
-    border-radius: 999px;
+    padding: 6px 14px;
+    border: 1px solid var(--mj-primary);
+    border-radius: 8px;
     background: var(--mj-primary);
     color: #fff;
     font-weight: 600;
     text-decoration: none;
+    margin-left: 6px;
 }
 
 .manjar a.manjar-login:hover {
     background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.manjar a.manjar-login-sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.manjar a.manjar-login-sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.manjar a.manjar-link-suave {
+    display: inline-block;
+    padding: 6px 10px;
+    color: var(--mj-ink);
+    text-decoration: none;
+}
+
+.manjar a.manjar-link-suave:hover {
+    color: var(--mj-primary);
+    text-decoration: underline;
 }
 
 /* ---------- Cuerpo ---------- */
 .manjar-main {
     flex: 1;
     width: 100%;
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 0 16px 32px;
+    padding: 0 16px 40px;
     box-sizing: border-box;
 }
 
 .manjar-crumbs {
-    padding: 16px 0 8px;
+    padding: 14px 0 14px;
 }
 
-/* Breadcrumb de PrimeFaces sin el degradado del tema */
-.manjar-crumbs .ui-breadcrumb {
-    background: transparent;
-    border: 0;
+.manjar-crumbs:empty {
+    padding: 8px 0;
+}
+
+/* Ruta de navegación (migas de pan) */
+.mj-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
     padding: 0;
+    list-style: none;
+    font-size: 14px;
+    color: var(--mj-muted);
 }
 
-.manjar-crumbs .ui-breadcrumb .ui-menuitem-link {
-    color: var(--mj-primary);
+.mj-crumbs li + li::before {
+    content: "/";
+    margin: 0 8px;
+    color: var(--mj-border-strong);
+}
+
+.mj-crumbs a {
+    color: var(--mj-muted);
     text-decoration: none;
 }
 
-.manjar-crumbs .ui-breadcrumb .ui-menuitem-link:hover {
+.mj-crumbs a:hover {
+    color: var(--mj-primary);
     text-decoration: underline;
 }
 
-.manjar-content {
-    background: var(--mj-surface);
-    border: 1px solid var(--mj-border);
-    border-radius: var(--mj-radius);
-    box-shadow: var(--mj-shadow);
-    padding: 24px 28px 32px;
+.mj-crumbs li.actual {
+    color: var(--mj-ink);
 }
 
-.manjar-content h1:first-child {
-    margin-top: 0;
-}
+/* ---------- 3. Piezas reutilizables ---------- */
 
-/* ---------- Inicio: hero + tarjetas ---------- */
-.manjar-hero {
-    padding: 8px 0 20px;
-    border-bottom: 1px solid var(--mj-border);
-    margin-bottom: 24px;
-}
-
-.manjar-hero h1 {
-    margin: 0 0 8px;
-    font-size: 36px;
-}
-
-.manjar-hero p {
-    margin: 0;
-    max-width: 60ch;
-    color: var(--mj-muted);
-    font-size: 18px;
-}
-
-.manjar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.manjar-card {
-    background: var(--mj-bg);
-    border: 1px solid var(--mj-border);
-    border-top: 4px solid var(--mj-primary);
-    border-radius: var(--mj-radius);
-    padding: 16px 18px 20px;
-}
-
-.manjar-card h3 {
-    margin: 0 0 6px;
-}
-
-.manjar-card p {
-    margin: 0 0 14px;
-    color: var(--mj-muted);
-}
-
+/* Botones propios (enlaces h:link) */
 .manjar a.manjar-btn {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 9px 18px;
+    border: 1px solid var(--mj-primary);
     border-radius: 8px;
     background: var(--mj-primary);
     color: #fff;
@@ -269,37 +385,2702 @@ body.manjar {
 
 .manjar a.manjar-btn:hover {
     background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
 }
 
-/* ---------- Módulos en construcción ---------- */
-.manjar-soon {
+.manjar a.manjar-btn.manjar-btn-sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.manjar a.manjar-btn.manjar-btn-sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.manjar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+/* Etiquetas de estado */
+.manjar .manjar-badge {
     display: inline-block;
-    margin-top: 8px;
-    padding: 10px 16px;
-    border: 2px dashed var(--mj-border);
-    border-radius: 8px;
+    padding: 1px 10px;
+    border-radius: 999px;
+    background: var(--mj-tint);
     color: var(--mj-muted);
+    font-size: 12.5px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-/* ---------- Pie ---------- */
-.manjar-footer {
-    padding: 18px 16px;
-    background: var(--mj-header);
-    color: #cdbfb0;
-    text-align: center;
+.manjar .manjar-badge.ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.manjar .manjar-badge.off {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.manjar .manjar-badge.aviso {
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+}
+
+/* Datos cortos en texto simple */
+.manjar .mj-chip {
+    color: var(--mj-muted);
     font-size: 14px;
 }
 
-/* ---------- Pantallas pequeñas ---------- */
+.manjar .mj-chip.ok {
+    color: var(--mj-ok);
+}
+
+.manjar .mj-chip.off {
+    color: var(--mj-off);
+}
+
+/* Avisos */
+.manjar-aviso {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.manjar-aviso.warn {
+    background: var(--mj-warn-bg);
+    border-color: #ecd596;
+}
+
+/* Nota corta de una línea */
+.mj-nota {
+    margin: 16px 0 0;
+    font-size: 14px;
+}
+
+.mj-vacio {
+    padding: 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    color: var(--mj-muted);
+}
+
+/* Textos de apoyo */
+.mj-eyebrow {
+    margin: 0 0 4px;
+    color: var(--mj-accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.mj-lead {
+    margin: 4px 0 0;
+    max-width: 64ch;
+    color: var(--mj-muted);
+}
+
+.manjar .mj-titulo-seccion {
+    margin: 30px 0 12px;
+}
+
+.mj-sub {
+    margin: 0 0 14px;
+}
+
+/* Cabecera de las páginas de administración */
+.mj-pagina-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 20px;
+    margin-bottom: 16px;
+}
+
+.mj-pagina-cab h1 {
+    margin: 0;
+}
+
+/* Cuadro simple con borde */
+.mj-panel,
+.mj-herramientas {
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+}
+
+.mj-herramientas {
+    padding: 10px 14px;
+}
+
+/* Caja con un dato para copiar (enlace del menú) */
+.mj-linkbox {
+    margin: 22px 0 14px;
+    padding: 12px 16px 12px 18px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-linkbox strong,
+.mj-linkbox code,
+.mj-linkbox span {
+    display: block;
+}
+
+.mj-linkbox code {
+    margin: 4px 0;
+    color: var(--mj-ink);
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.mj-linkbox .manjar-muted {
+    font-size: 14px;
+}
+
+/* ---------- 5. Páginas ---------- */
+
+/* Banner de las páginas públicas (inicio y menú de un negocio): bloque oscuro liso con la barra terracota,
+   como los bloques de la presentación */
+.mj-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px 28px;
+    margin-top: 4px;
+    padding: 28px 32px;
+    border-left: 6px solid var(--mj-accent);
+    border-radius: 6px 14px 14px 6px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+}
+
+.mj-banner > div {
+    min-width: 0;
+}
+
+.manjar .mj-banner h1 {
+    margin: 0;
+    color: var(--mj-on-dark);
+}
+
+.manjar .mj-banner .mj-eyebrow {
+    color: var(--mj-accent-claro);
+}
+
+.manjar .mj-banner .mj-lead,
+.manjar .mj-banner .mj-rest-dir {
+    color: var(--mj-on-dark-muted);
+}
+
+.manjar .mj-banner .mj-lead {
+    margin: 14px 0 0;
+}
+
+.manjar .mj-banner .mj-nota {
+    margin: 12px 0 0;
+    color: var(--mj-on-dark-muted);
+}
+
+.manjar .mj-banner a:not(.manjar-btn) {
+    color: var(--mj-accent-claro);
+}
+
+.manjar .mj-banner a.manjar-btn.manjar-btn-sec {
+    border-color: rgba(255, 244, 232, .5);
+    color: var(--mj-on-dark);
+}
+
+.manjar .mj-banner a.manjar-btn.manjar-btn-sec:hover {
+    background: rgba(255, 244, 232, .12);
+    border-color: var(--mj-on-dark);
+    color: #fff;
+}
+
+/* Página de inicio: Manjar como servicio que se contrata */
+.mj-banner.mj-hero {
+    align-items: center;
+    padding: 34px 36px;
+}
+
+.mj-hero-texto {
+    flex: 1 1 340px;
+}
+
+.manjar .mj-hero h1 {
+    font-size: 34px;
+}
+
+.mj-hero .manjar-actions {
+    margin-top: 24px;
+}
+
+.mj-hero-muestra {
+    flex: 0 1 270px;
+}
+
+/* Dibujo de ejemplo de un menú personalizado (sin datos reales) */
+.mj-muestra {
+    padding: 16px 18px 14px;
+    border-left: 6px solid var(--mj-accent);
+    border-radius: 6px 12px 12px 6px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+.mj-muestra strong {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mj-muestra small {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-muestra-linea {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 0;
+    border-top: 1px solid var(--mj-border);
+}
+
+.mj-esqueleto {
+    display: block;
+    height: 8px;
+    border-radius: 8px;
+    background: var(--mj-border);
+}
+
+.mj-esqueleto.largo {
+    flex: 1;
+}
+
+.mj-esqueleto.precio {
+    width: 38px;
+    background: var(--mj-accent);
+}
+
+.mj-muestra-colores {
+    display: flex;
+    gap: 7px;
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--mj-border);
+}
+
+.mj-muestra-colores i {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.mj-modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.mj-modulo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px 14px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-modulo.pronto {
+    background: transparent;
+    box-shadow: none;
+}
+
+.manjar .mj-modulo h3 {
+    margin: 0;
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mj-modulo p {
+    flex: 1;
+    margin: 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-modulo-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-pasos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: paso;
+}
+
+.mj-pasos li {
+    position: relative;
+    padding: 16px 18px 16px 62px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    counter-increment: paso;
+}
+
+.mj-pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    top: 15px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+    font-family: var(--mj-font-title);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: lining-nums;
+}
+
+.mj-pasos strong {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mj-pasos span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.manjar .mj-pasos a {
+    text-decoration: none;
+}
+
+.manjar .mj-pasos a:hover {
+    text-decoration: underline;
+}
+
+.mj-banner.mj-cierre {
+    align-items: center;
+    margin-top: 30px;
+}
+
+.manjar .mj-cierre h2 {
+    margin: 0;
+    color: var(--mj-on-dark);
+}
+
+/* Menú de un negocio */
+.manjar .mj-rest-lema {
+    margin: 10px 0 0;
+    color: var(--mj-on-dark);
+    font-size: 16px;
+    font-style: italic;
+}
+
+.mj-rest-dir {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.mj-rest-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Menú de un negocio: categorías y platillos */
+.mj-catnav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 10px 0;
+    overflow-x: auto;
+    background: var(--mj-cream);
+}
+
+.mj-catnav:empty {
+    display: none;
+}
+
+.mj-catnav a {
+    flex: none;
+    padding: 5px 16px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    color: var(--mj-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mj-catnav a:hover {
+    border-color: var(--mj-accent);
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.manjar .mj-platos + .mj-titulo-seccion,
+.manjar .mj-catnav + .mj-titulo-seccion {
+    margin-top: 18px;
+}
+
+.manjar h2[id^="cat-"] {
+    scroll-margin-top: 60px;
+}
+
+.mj-platos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.mj-plato {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-plato.agotado {
+    background: transparent;
+    box-shadow: none;
+}
+
+.mj-plato.agotado h3,
+.mj-plato.agotado .mj-precio {
+    color: var(--mj-muted);
+}
+
+.mj-plato.agotado h3 {
+    text-decoration: line-through;
+}
+
+.mj-plato-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.manjar .mj-plato h3 {
+    margin: 0;
+    font-size: 15.5px;
+}
+
+.mj-precio {
+    color: var(--mj-link, var(--mj-primary-dark));
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.mj-plato p {
+    flex: 1;
+    margin: 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-plato p:empty {
+    display: none;
+}
+
+.mj-plato-pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+/* Panel */
+.manjar-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.manjar-stat {
+    padding: 14px 18px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    box-shadow: var(--mj-shadow);
+}
+
+.manjar-stat b {
+    display: block;
+    font-family: var(--mj-font-title);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--mj-ink);
+}
+
+.manjar-stat span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.manjar-stat.ok b {
+    color: var(--mj-ok);
+}
+
+.manjar-stat.off b {
+    color: var(--mj-off);
+}
+
+.mj-acciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.manjar a.mj-accion {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 16px 18px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    box-shadow: var(--mj-shadow);
+    color: var(--mj-ink);
+    text-decoration: none;
+    transition: box-shadow .15s, border-color .15s;
+}
+
+.manjar a.mj-accion:hover {
+    border-color: var(--mj-accent);
+    box-shadow: var(--mj-shadow-hover);
+}
+
+.mj-accion strong {
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.manjar a.mj-accion:hover strong {
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.mj-accion > span {
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+/* Módulos en construcción */
+.mj-pronto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 20px;
+    padding: 20px 24px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-pronto strong {
+    font-family: var(--mj-font-title);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mj-pronto > span {
+    margin-bottom: 8px;
+    color: var(--mj-muted);
+}
+
+/* ---------- 6. Acceso y registro ---------- */
+.mj-auth {
+    max-width: 440px;
+    margin: 8px auto 0;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+    background: var(--mj-card);
+}
+
+.mj-auth-form {
+    padding: 24px 26px 22px;
+}
+
+.mj-auth-form h1 {
+    margin: 0 0 14px;
+}
+
+.mj-pie-form {
+    margin: 16px 0 0;
+    color: var(--mj-muted);
+}
+
+.mj-auth .manjar-row {
+    grid-template-columns: 1fr;
+}
+
+/* Formularios */
+.manjar-form .manjar-field {
+    margin-bottom: 12px;
+}
+
+.manjar-form label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.manjar-form .ui-inputfield,
+.manjar-form .ui-inputtextarea,
+.manjar-form .ui-selectonemenu {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.manjar-form .ui-inputfield {
+    padding: 8px 10px;
+}
+
+.manjar-form .ui-spinner {
+    display: block;
+}
+
+.manjar-form .ui-spinner-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 28px;
+    text-align: left;
+}
+
+.manjar-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+}
+
+.manjar-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.manjar-form-actions.fin {
+    justify-content: flex-end;
+}
+
+/* Cuentas de prueba (solo en desarrollo) */
+.manjar-hint {
+    margin-top: 20px;
+    padding: 10px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-tint);
+    font-size: 14px;
+}
+
+.manjar-hint strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.manjar-hint code {
+    padding: 0 4px;
+    background: var(--mj-card);
+    border-radius: 3px;
+}
+
+.mj-rapido {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.mj-rapido button {
+    padding: 3px 10px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.mj-rapido button:hover {
+    border-color: var(--mj-primary);
+    color: var(--mj-primary);
+}
+
+/* ---------- 7. Administración ---------- */
+.manjar-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0;
+}
+
+.mj-herramientas.manjar-toolbar {
+    margin: 0 0 14px;
+}
+
+.manjar-toolbar .ui-inputfield {
+    width: 220px;
+}
+
+.manjar-spacer {
+    flex: 1;
+}
+
+.manjar-num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.manjar-acciones {
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Ajustes a componentes de PrimeFaces 5.0 (tema "aristo") */
+
+/* Botones p:commandButton */
+.manjar .ui-button.ui-state-default {
+    background: var(--mj-primary);
+    border: 1px solid var(--mj-primary);
+    color: #fff;
+    border-radius: 8px;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.manjar .ui-button.ui-state-default .ui-button-text {
+    color: #fff;
+}
+
+.manjar .ui-button.ui-state-hover,
+.manjar .ui-button.ui-state-focus {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+    color: #fff;
+}
+
+.manjar .ui-button.ui-state-active {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.manjar .ui-button.ui-state-disabled {
+    opacity: .5;
+}
+
+/* Variante secundaria: styleClass="manjar-btn-sec" */
+.manjar .ui-button.ui-state-default.manjar-btn-sec {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-sec .ui-button-text {
+    color: var(--mj-ink);
+}
+
+.manjar .ui-button.manjar-btn-sec.ui-state-hover {
+    background: var(--mj-tint);
+    border-color: var(--mj-primary);
+}
+
+/* Variante de cuidado: styleClass="manjar-btn-peligro" */
+.manjar .ui-button.ui-state-default.manjar-btn-peligro {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-peligro .ui-button-text {
+    color: var(--mj-off);
+}
+
+.manjar .ui-button.manjar-btn-peligro.ui-state-hover {
+    background: var(--mj-off-bg);
+    border-color: var(--mj-off);
+}
+
+/* Iconos de los botones: blancos en los principales, oscuros en los demás */
+.manjar .ui-button.ui-state-default .ui-icon {
+    filter: brightness(0) invert(1);
+}
+
+.manjar .ui-button.ui-state-default.manjar-btn-sec .ui-icon,
+.manjar .ui-button.ui-state-default.manjar-btn-peligro .ui-icon {
+    filter: brightness(0);
+    opacity: .7;
+}
+
+/* Botones de iconos dentro de la tabla */
+.manjar .ui-datatable .ui-button.ui-button-icon-only {
+    width: 32px;
+    height: 32px;
+    margin: 0 2px;
+}
+
+/* Campos de texto: borde fino y sin el sombreado interior del tema */
+.manjar .ui-inputfield {
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: #fff;
+    box-shadow: none;
+}
+
+/* Lista desplegable (p:selectOneMenu): PrimeFaces le fija un ancho en línea, por eso !important */
+.manjar .ui-selectonemenu {
+    display: block;
+    width: 100% !important;
+    box-sizing: border-box;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    background: #fff;
+    box-shadow: none;
+}
+
+.manjar .ui-selectonemenu .ui-selectonemenu-label.ui-inputfield {
+    width: calc(100% - 34px) !important;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.manjar .ui-selectonemenu .ui-selectonemenu-trigger {
+    background: var(--mj-tint);
+    border: 0;
+    border-left: 1px solid var(--mj-border);
+    border-radius: 0 5px 5px 0;
+}
+
+.manjar .ui-inputfield.ui-state-focus,
+.manjar .ui-selectonemenu.ui-state-focus {
+    border-color: var(--mj-primary);
+    box-shadow: 0 0 0 3px rgba(204, 78, 39, .15);
+}
+
+.manjar .ui-inputfield.ui-state-error,
+.manjar .ui-selectonemenu.ui-state-error {
+    border-color: var(--mj-off);
+}
+
+/* Tabla de datos */
+.manjar .ui-datatable {
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    overflow: hidden;
+    box-shadow: var(--mj-shadow);
+}
+
+.manjar .ui-datatable thead th.ui-state-default {
+    background: var(--mj-tint);
+    border-color: var(--mj-border);
+    color: var(--mj-ink);
+    text-shadow: none;
+}
+
+.manjar .ui-datatable tbody tr.ui-widget-content {
+    border-color: var(--mj-border);
+}
+
+.manjar .ui-datatable tbody tr.ui-datatable-even,
+.manjar .ui-datatable tbody tr.ui-datatable-odd {
+    background: var(--mj-card);
+}
+
+.manjar .ui-datatable tbody tr.ui-widget-content:hover {
+    background: var(--mj-cream);
+}
+
+.manjar .ui-datatable .ui-paginator.ui-state-default,
+.manjar .ui-paginator.ui-widget-header {
+    background: var(--mj-tint);
+    border-color: var(--mj-border);
+}
+
+.manjar .ui-paginator .ui-paginator-page.ui-state-active {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+    color: #fff;
+}
+
+/* Casillas de verificación */
+.manjar .ui-chkbox .ui-chkbox-box.ui-state-active {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+}
+
+.manjar .ui-chkbox .ui-chkbox-box .ui-icon {
+    filter: brightness(0) invert(1);
+}
+
+.manjar .ui-chkbox-label {
+    margin-left: 6px;
+}
+
+/* Fondo oscurecido detrás de los diálogos */
+body.manjar .ui-widget-overlay {
+    background: var(--mj-dark);
+    opacity: .5;
+}
+
+/* Diálogos */
+body.manjar .ui-dialog {
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow-hover);
+    overflow: hidden;
+}
+
+body.manjar .ui-dialog .ui-dialog-titlebar {
+    background: var(--mj-dark);
+    border: 0;
+    color: var(--mj-on-dark);
+}
+
+body.manjar .ui-dialog .ui-dialog-title {
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+body.manjar .ui-dialog .ui-dialog-content {
+    padding: 14px 18px 16px;
+}
+
+/* ---------- Registro de negocio y "Mi negocio" ---------- */
+.mj-auth.ancho {
+    max-width: 580px;
+}
+
+.mj-grupo {
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+}
+
+.mj-grupo legend {
+    margin-bottom: 10px;
+    padding: 0;
+    font-family: var(--mj-font-title);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mj-ayuda {
+    display: block;
+    margin-top: 4px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-edicion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 22px;
+    align-items: start;
+}
+
+.mj-edicion .mj-panel {
+    margin-bottom: 0;
+}
+
+.mj-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 13px 5px 5px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.mj-swatch i {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+}
+
+.mj-swatch:hover {
+    border-color: var(--mj-ink);
+}
+
+.mj-swatch[aria-checked="true"] {
+    border-color: var(--mj-ink);
+    box-shadow: 0 0 0 1px var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-swatch:focus-visible {
+    outline: 2px solid var(--mj-ink);
+    outline-offset: 2px;
+}
+
+.mj-contador {
+    margin-top: 2px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+    text-align: right;
+}
+
+/* Vista previa del menú (usa las variables de color del tema elegido) */
+.mj-previa {
+    padding: 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-cream);
+    position: sticky;
+    top: 16px;
+}
+
+.mj-previa-titulo {
+    margin: 0 0 10px;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.mj-previa-banner {
+    padding: 14px 16px;
+    border-left: 5px solid var(--mj-accent);
+    border-radius: 5px 10px 10px 5px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark);
+}
+
+.mj-previa-banner small {
+    display: block;
+    color: var(--mj-accent-claro);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.mj-previa-banner strong {
+    display: block;
+    overflow-wrap: anywhere;
+    font-family: var(--mj-font-title);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.mj-previa-banner em {
+    display: block;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+    color: var(--mj-on-dark-muted);
+    font-size: 13px;
+}
+
+.mj-previa-banner em:empty {
+    display: none;
+}
+
+.mj-previa-plato {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.mj-previa-plato .mj-esqueleto.precio {
+    background: var(--mj-primary);
+}
+
+.mj-previa-boton {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--mj-primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.mj-previa-nota {
+    margin: 10px 0 0;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+/* Página del código QR */
+.mj-qr-pagina {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.mj-qr-hoja {
+    padding: 22px 20px;
+    border: 1px solid var(--mj-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: var(--mj-shadow);
+    text-align: center;
+}
+
+.mj-qr-hoja canvas {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.mj-qr-nombre {
+    margin: 0 0 4px;
+    font-family: var(--mj-font-title);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.mj-qr-leyenda {
+    margin: 0 0 8px;
+    color: var(--mj-muted);
+    font-size: 14px;
+}
+
+.mj-qr-enlace {
+    margin: 8px 0 0;
+    color: var(--mj-muted);
+    font-size: 11.5px;
+    word-break: break-all;
+}
+
+.mj-qr-controles .manjar-field {
+    margin-bottom: 14px;
+}
+
+.mj-qr-controles input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    font: inherit;
+}
+
+.mj-qr-controles label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mj-boton {
+    display: inline-block;
+    padding: 9px 18px;
+    border: 1px solid var(--mj-primary);
+    border-radius: 8px;
+    background: var(--mj-primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mj-boton:hover {
+    background: var(--mj-primary-dark);
+    border-color: var(--mj-primary-dark);
+}
+
+.mj-boton.sec {
+    background: transparent;
+    color: var(--mj-primary);
+}
+
+.mj-boton.sec:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+/* Primeros pasos del dueño que acaba de registrar su negocio */
+.mj-primeros {
+    margin: 22px 0 0;
+    padding: 18px 20px 20px;
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-accent);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+}
+
+.manjar .mj-primeros h2 {
+    margin: 0 0 4px;
+}
+
+.mj-primeros p {
+    margin: 0 0 14px;
+    color: var(--mj-muted);
+}
+
+.mj-primeros .mj-pasos li {
+    box-shadow: none;
+    background: var(--mj-cream);
+}
+
+@media print {
+    .manjar-header,
+    .manjar-nav,
+    .manjar-footer,
+    .manjar-crumbs,
+    .manjar .ui-growl,
+    .mj-qr-controles,
+    .mj-qr-pagina ~ *,
+    .mj-pagina-cab {
+        display: none !important;
+    }
+    body.manjar {
+        background: #fff;
+    }
+    .manjar-main {
+        padding: 0;
+    }
+    .mj-qr-pagina {
+        display: block;
+    }
+    .mj-qr-hoja {
+        border: 0;
+        box-shadow: none;
+        padding: 40px 0 0;
+    }
+    .mj-qr-hoja canvas {
+        max-width: 420px;
+    }
+    .mj-qr-nombre {
+        font-size: 34px;
+    }
+    .mj-qr-leyenda {
+        font-size: 18px;
+    }
+}
+
+/* ---------- 4. Mensajes, pie y pantallas pequeñas ---------- */
+
+/* Mensajes emergentes: abajo a la derecha, para no tapar el encabezado */
+.manjar .ui-growl {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    width: 340px;
+    max-width: calc(100vw - 40px);
+}
+
+.manjar .ui-growl-item-container {
+    border-radius: var(--mj-radius);
+    border: 1px solid var(--mj-border-strong);
+    border-left: 4px solid var(--mj-border-strong);
+    background: var(--mj-card);
+    background-image: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    opacity: 1;
+    color: var(--mj-ink);
+}
+
+.manjar .ui-growl-item-container.ui-growl-info {
+    border-left-color: var(--mj-ok);
+}
+
+.manjar .ui-growl-item-container.ui-growl-warn {
+    border-left-color: #d9b45a;
+}
+
+.manjar .ui-growl-item-container.ui-growl-error,
+.manjar .ui-growl-item-container.ui-growl-fatal {
+    border-left-color: var(--mj-off);
+}
+
+.manjar .ui-growl-item-container .ui-growl-title,
+.manjar .ui-growl-item-container .ui-growl-message,
+.manjar .ui-growl-item-container .ui-growl-message p {
+    color: var(--mj-ink);
+    text-shadow: none;
+}
+
+.manjar .ui-growl-item-container .ui-growl-icon-close {
+    filter: invert(1);
+}
+
+.manjar .ui-growl-item-container .ui-growl-image {
+    display: none;
+}
+
+.manjar .ui-growl-item-container .ui-growl-message {
+    margin-left: 0;
+    padding: 4px 28px 4px 4px;
+}
+
+.manjar-footer {
+    padding: 18px 16px;
+    background: var(--mj-dark);
+    color: var(--mj-on-dark-muted);
+    text-align: center;
+    font-size: 12.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
 @media (max-width: 700px) {
-    .manjar-content {
-        padding: 18px 16px 24px;
+    .manjar h1 {
+        font-size: 24px;
     }
-    .manjar-hero h1 {
-        font-size: 28px;
+    .mj-banner {
+        padding: 22px 20px;
     }
-    .manjar-tagline {
+    .manjar-row {
+        grid-template-columns: 1fr;
+    }
+    .manjar-spacer {
         display: none;
     }
+    .mj-banner.mj-hero {
+        padding: 24px 20px;
+    }
+    .manjar .mj-hero h1 {
+        font-size: 26px;
+    }
+    .mj-hero-muestra {
+        flex-basis: 100%;
+    }
+    .mj-edicion,
+    .mj-qr-pagina {
+        grid-template-columns: 1fr;
+    }
+    .mj-previa {
+        position: static;
+    }
+    .mj-auth-form {
+        padding: 20px 18px;
+    }
+    .manjar .ui-growl {
+        right: 12px;
+        bottom: 12px;
+    }
+}
+
+/* ==========================================================
+   8. Vista de comensal y estilos del menú
+   El comensal (quien escanea el QR) ve el menú vestido con la marca del negocio.
+   Las clases mj-diseno-*, mj-tipo-*, mj-esq-* y mj-fondo-* se ponen en el body (o en la
+   vista previa de "Mi negocio") y solo cambian variables, así que sirven en los dos lugares.
+   Los colores del acento (--mj-accent, --mj-dark, --mj-tint, --mj-link...) los pone el servidor.
+   ========================================================== */
+
+/* Tipografía */
+.mj-tipo-moderna {
+    --mj-font-title: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+
+.mj-tipo-calida {
+    --mj-font: "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --mj-font-title: "Nunito", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+
+.mj-tipo-moderna h1,
+.mj-tipo-moderna h2,
+.mj-tipo-moderna .mj-precio,
+.mj-tipo-calida h1,
+.mj-tipo-calida h2,
+.mj-tipo-calida .mj-precio {
+    font-variant-numeric: normal;
+    font-feature-settings: normal;
+}
+
+.mj-tipo-calida h1,
+.mj-tipo-calida h2,
+.mj-tipo-calida .manjar-brand-name,
+.mj-tipo-calida .mj-precio {
+    font-weight: 800;
+}
+
+.mj-tipo-moderna h1,
+.mj-tipo-moderna .manjar-brand-name {
+    font-weight: 600;
+}
+
+/* Esquinas rectas */
+.mj-esq-rectas {
+    --mj-radius: 2px;
+}
+
+.mj-esq-rectas .mj-banner,
+.mj-esq-rectas .mj-previa-banner,
+.mj-esq-rectas .mj-catnav a,
+.mj-esq-rectas .manjar-btn,
+.mj-esq-rectas .manjar-badge,
+.mj-esq-rectas .mj-chip,
+.mj-esq-rectas .mj-cta,
+.mj-esq-rectas .mj-previa-boton {
+    border-radius: 2px;
+}
+
+/* Fondo oscuro */
+.mj-fondo-oscuro {
+    --mj-cream: #1d1a18;
+    --mj-card: #2a2522;
+    --mj-ink: #f4ece3;
+    --mj-muted: #b9ab9e;
+    --mj-border: #3e3732;
+    --mj-border-strong: #5a5048;
+    --mj-ok: #8fd0a1;
+    --mj-ok-bg: #243a2c;
+    --mj-off: #f0a595;
+    --mj-off-bg: #4a2620;
+    --mj-warn: #f2c46d;
+    --mj-warn-bg: #46341a;
+    --mj-shadow: none;
+    --mj-shadow-hover: none;
+    color-scheme: dark;
+}
+
+.mj-fondo-oscuro .mj-swatch,
+.mj-fondo-oscuro .manjar-btn.manjar-btn-sec {
+    background: var(--mj-card);
+}
+
+/* Diseño "lista": una carta clásica, sin recuadros */
+.mj-diseno-lista .mj-platos {
+    display: block;
+    max-width: 640px;
+}
+
+.mj-diseno-lista .mj-plato,
+.mj-diseno-lista .mj-previa-plato {
+    padding: 11px 0;
+    border: 0;
+    border-bottom: 1px dashed var(--mj-border-strong);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.mj-diseno-lista .mj-plato:last-child {
+    border-bottom: 0;
+}
+
+/* Encabezado con la marca del negocio */
+.mj-comensal .manjar-brand-name {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 20px;
+    letter-spacing: .06em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.mj-comensal .manjar-header-inner > a {
+    min-width: 0;
+    max-width: 70%;
+}
+
+.mj-comensal-nav {
+    background: var(--mj-card);
+}
+
+.mj-comensal-menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin: 0;
+    padding: 6px 0 6px 0;
+}
+
+.mj-comensal-menu a {
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--mj-radius);
+    color: var(--mj-ink);
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.mj-comensal-menu a:hover {
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.mj-comensal-menu .mj-espacio {
+    flex: 1 1 auto;
+}
+
+.mj-comensal-menu a.mj-cta {
+    border-color: var(--mj-primary);
+    background: var(--mj-primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.mj-comensal-menu a.mj-cta:hover {
+    border-color: var(--mj-primary-dark);
+    background: var(--mj-primary-dark);
+    color: #fff;
+}
+
+.mj-comensal-menu a.mj-cta.mj-cta-sec {
+    background: transparent;
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+.mj-comensal-menu a.mj-cta.mj-cta-sec:hover {
+    background: var(--mj-tint);
+}
+
+/* Barra para el personal que ve su menú como lo ve el cliente */
+.mj-vistaprevia {
+    background: #2e2521;
+    color: #fff4e8;
+    font-size: 13.5px;
+}
+
+.mj-vistaprevia-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 18px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 7px 16px;
+    box-sizing: border-box;
+}
+
+.mj-vistaprevia-inner span {
+    margin-right: auto;
+    color: #d2c3b5;
+}
+
+.manjar .mj-vistaprevia a {
+    color: #fff4e8;
+    font-weight: 600;
+}
+
+/* Aviso del día, horario y contacto */
+.mj-aviso-dia {
+    margin-top: 14px;
+    padding: 11px 16px;
+    border: 1px solid var(--mj-accent);
+    border-left-width: 5px;
+    border-radius: var(--mj-radius);
+    background: var(--mj-tint);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mj-contacto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 18px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.mj-horario {
+    color: var(--mj-muted);
+    overflow-wrap: anywhere;
+}
+
+.mj-horario b {
+    margin-right: 4px;
+    color: var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-contacto-enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.manjar .mj-chip {
+    display: inline-block;
+    padding: 4px 14px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 999px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.manjar .mj-chip:hover {
+    border-color: var(--mj-accent);
+    background: var(--mj-tint);
+    color: var(--mj-link, var(--mj-primary-dark));
+}
+
+/* "Mi negocio": secciones y selectores de estilo */
+.mj-seccion {
+    margin: 22px 0 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--mj-border);
+}
+
+.manjar .mj-seccion h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.mj-seccion-ayuda {
+    margin: 2px 0 0;
+    color: var(--mj-muted);
+    font-size: 13.5px;
+}
+
+.mj-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-width: 120px;
+    padding: 8px 14px;
+    border: 1px solid var(--mj-border-strong);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--mj-ink);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mj-opcion small {
+    color: var(--mj-muted);
+    font-size: 12px;
+}
+
+.mj-opcion:hover {
+    border-color: var(--mj-ink);
+}
+
+.mj-opcion[aria-checked="true"] {
+    border-color: var(--mj-ink);
+    box-shadow: 0 0 0 1px var(--mj-ink);
+    font-weight: 600;
+}
+
+.mj-opcion:focus-visible {
+    outline: 2px solid var(--mj-ink);
+    outline-offset: 2px;
+}
+
+/* Cada opción de tipografía se muestra con su propia letra */
+.mj-opcion.mj-tipo-clasica,
+.mj-opcion.mj-tipo-moderna,
+.mj-opcion.mj-tipo-calida {
+    font-family: var(--mj-font-title);
+}
+
+.mj-opcion.mj-tipo-clasica small,
+.mj-opcion.mj-tipo-moderna small,
+.mj-opcion.mj-tipo-calida small {
+    font-family: var(--mj-font);
+}
+
+.mj-dos-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+}
+
+/* Vista previa: aviso, platillos y contacto de ejemplo */
+.mj-previa {
+    color: var(--mj-ink);
+    font-family: var(--mj-font);
+}
+
+.mj-previa .mj-aviso-dia {
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.mj-previa .mj-aviso-dia:empty {
+    display: none;
+}
+
+.mj-previa .mj-contacto {
+    margin-top: 8px;
+    font-size: 12.5px;
+}
+
+.mj-previa .mj-contacto:empty {
+    display: none;
+}
+
+.mj-previa-plato b {
+    display: block;
+    font-size: 14px;
+}
+
+.mj-previa-plato span.mj-previa-desc {
+    display: block;
+    color: var(--mj-muted);
+    font-size: 12.5px;
+}
+
+.mj-previa-plato .mj-previa-precio {
+    color: var(--mj-link, var(--mj-primary-dark));
+    font-family: var(--mj-font-title);
+    font-weight: 700;
+}
+
+.mj-previa-banner strong {
+    font-family: var(--mj-font-title);
+}
+
+@media (max-width: 700px) {
+    .mj-dos-col {
+        grid-template-columns: 1fr;
+    }
+    .mj-comensal-menu {
+        gap: 2px;
+    }
+    .mj-comensal-menu a {
+        padding: 6px 8px;
+        font-size: 13.5px;
+    }
+    .mj-comensal-menu .mj-espacio {
+        display: none;
+    }
+    .mj-comensal-menu a.mj-cta {
+        margin-left: auto;
+    }
+    .mj-comensal .manjar-brand-name {
+        font-size: 17px;
+    }
+    .mj-contacto {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media print {
+    .mj-vistaprevia {
+        display: none;
+    }
+}
+
+
+/* ==========================================================
+   9. Operación del negocio: comandas, cocina, caja, apartados, sucursales y reportes
+   ========================================================== */
+
+/* Dos columnas que en el celular pasan a una */
+.mj-op-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.manjar h2.mj-op-titulo {
+    margin: 4px 0 10px;
+    font-size: 20px;
+}
+
+.manjar h3.mj-op-sub {
+    margin: 18px 0 8px;
+    font-size: 15px;
+    color: var(--mj-muted);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.mj-filtro {
+    margin: 0 0 10px;
+}
+
+/* Botones de "una sola opción" (Mesa / Para llevar): la elegida se ve rellena, la otra con borde */
+.manjar .ui-selectonebutton .ui-button.ui-state-default {
+    background: var(--mj-card);
+    border-color: var(--mj-border-strong);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-default .ui-button-text {
+    color: var(--mj-ink);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-active,
+.manjar .ui-selectonebutton .ui-button.ui-state-active.ui-state-hover {
+    background: var(--mj-primary);
+    border-color: var(--mj-primary);
+}
+
+.manjar .ui-selectonebutton .ui-button.ui-state-active .ui-button-text {
+    color: #fff;
+}
+
+/* Mesa o para llevar */
+.mj-tipo {
+    margin-bottom: 12px;
+}
+
+.manjar .mj-tipo .ui-selectonebutton .ui-button {
+    min-width: 120px;
+}
+
+/* El pedido que se está armando */
+.mj-carrito {
+    margin: 4px 0 12px;
+}
+
+.mj-linea {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--mj-border-strong);
+}
+
+.mj-linea-cab {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mj-linea-sub {
+    font-variant-numeric: tabular-nums;
+}
+
+.mj-linea-ctl {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.mj-cant {
+    min-width: 26px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.manjar .mj-nota-linea {
+    flex: 1;
+    min-width: 140px;
+    padding: 6px 9px;
+}
+
+.mj-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding-top: 10px;
+    font-size: 16px;
+}
+
+/* Lista de platillos para elegir */
+.mj-carta {
+    margin-top: 18px;
+}
+
+.manjar h3.mj-carta-cat {
+    margin: 16px 0 6px;
+    font-size: 15px;
+    color: var(--mj-muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.mj-carta-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-carta-txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Comandas como tickets */
+.mj-ticket {
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-ticket.e-PENDIENTE {
+    border-left-color: var(--mj-warn);
+}
+
+.mj-ticket.e-EN_PREPARACION {
+    border-left-color: var(--mj-accent);
+}
+
+.mj-ticket.e-LISTA {
+    border-left-color: var(--mj-ok);
+}
+
+.mj-ticket.e-ENTREGADA,
+.mj-ticket.e-CANCELADA {
+    border-left-color: var(--mj-border-strong);
+}
+
+.mj-ticket-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.mj-ticket-lineas {
+    margin: 8px 0;
+    padding-left: 18px;
+}
+
+.mj-ticket-nota {
+    color: var(--mj-warn);
+}
+
+.mj-ticket-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.mj-ticket-acc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.mj-ticket-acc:empty {
+    display: none;
+}
+
+/* Etiqueta de estado */
+.mj-estado {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--mj-border-strong);
+    background: var(--mj-tint);
+    color: var(--mj-ink);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mj-estado.e-PENDIENTE {
+    background: var(--mj-warn-bg);
+    border-color: #ecd596;
+    color: var(--mj-warn);
+}
+
+.mj-estado.e-EN_PREPARACION {
+    background: #fbe7de;
+    border-color: #f0c2ae;
+    color: var(--mj-primary-dark);
+}
+
+.mj-estado.e-LISTA,
+.mj-estado.e-PAGADO,
+.mj-estado.e-LISTO,
+.mj-estado.e-ENTREGADO,
+.mj-estado.e-ABIERTA {
+    background: var(--mj-ok-bg);
+    border-color: #b9d3c0;
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-CANCELADA,
+.mj-estado.e-CANCELADO,
+.mj-estado.e-VENCIDO,
+.mj-estado.e-CERRADA {
+    background: var(--mj-off-bg);
+    border-color: #e6bdb3;
+    color: var(--mj-off);
+}
+
+.mj-terminada {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    margin-bottom: 4px;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    background: var(--mj-card);
+    font-size: 14px;
+}
+
+/* ---------- Pantalla de cocina (compartida, a pantalla completa y con fondo oscuro) ---------- */
+body.mj-cocina-body {
+    background: #1f1814;
+    color: #fff4e8;
+}
+
+.mj-cocina-body a {
+    color: var(--mj-accent-claro);
+}
+
+.mj-cocina-cab {
+    background: #14100d;
+    border-bottom: 1px solid #3a2f28;
+}
+
+.mj-cocina-cab-in {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 18px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+}
+
+.mj-cocina-marca {
+    font-family: var(--mj-font-title);
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--mj-accent-claro);
+}
+
+.mj-cocina-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 18px 18px 40px;
+    box-sizing: border-box;
+}
+
+.mj-cocina-negado {
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 24px;
+    background: var(--mj-card);
+    color: var(--mj-ink);
+    border-radius: var(--mj-radius);
+}
+
+.mj-cocina-negado h1 {
+    font-size: 24px;
+}
+
+.mj-cocina-vacio {
+    padding: 28px;
+    text-align: center;
+    color: #d2c3b5;
+    border: 1px dashed #4a3d34;
+    border-radius: var(--mj-radius);
+    margin-bottom: 16px;
+}
+
+.mj-cocina-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.mj-cocina-col h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    color: #fff4e8;
+    font-size: 20px;
+}
+
+.mj-cocina-n {
+    padding: 0 12px;
+    background: #3a2f28;
+    border-radius: 999px;
+    font-size: 15px;
+}
+
+.mj-ticket.cocina {
+    color: var(--mj-ink);
+    font-size: 17px;
+}
+
+.mj-ticket.cocina .mj-ticket-lineas {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+    font-size: 19px;
+    line-height: 1.5;
+}
+
+.mj-ticket.cocina .mj-ticket-lineas b {
+    color: var(--mj-primary-dark);
+}
+
+.mj-ticket.cocina.demora {
+    border-color: #e0a62b;
+    background: #fff6dc;
+}
+
+.mj-ticket.cocina.tarde {
+    border-color: #c4442c;
+    background: #fde8e3;
+}
+
+.mj-espera {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.mj-cocina-enlace {
+    margin-top: 26px;
+    color: var(--mj-ink);
+}
+
+@media (max-width: 800px) {
+    .mj-op-cols {
+        grid-template-columns: 1fr;
+    }
+
+    .mj-cocina-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Caja (HU-11, HU-12) ---- */
+.mj-caja-estado {
+    margin: 0 0 12px;
+    color: var(--mj-muted);
+    font-size: 14px;
+}
+
+.mj-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 0 0 22px;
+}
+
+.mj-stat {
+    padding: 12px 14px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-stat span {
+    display: block;
+    font-size: 12px;
+    color: var(--mj-muted);
+}
+
+.mj-stat strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 20px;
+    color: var(--mj-ink);
+}
+
+.mj-stat.destacado {
+    background: var(--mj-tint);
+    border-color: var(--mj-border-strong);
+}
+
+.mj-stat.destacado strong {
+    color: var(--mj-primary-dark);
+}
+
+.mj-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.mj-tabla th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mj-muted);
+    background: var(--mj-tint);
+    border-bottom: 1px solid var(--mj-border);
+}
+
+.mj-tabla td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--mj-border);
+    vertical-align: top;
+}
+
+.mj-tabla tr:last-child td {
+    border-bottom: 0;
+}
+
+.mj-tabla .num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.mj-tabla .acc {
+    text-align: right;
+}
+
+.mov-ingreso {
+    color: var(--mj-ok);
+    font-weight: 600;
+}
+
+.mov-egreso {
+    color: var(--mj-off);
+    font-weight: 600;
+}
+
+.mj-arqueo {
+    margin: 0 0 12px;
+}
+
+.mj-arqueo > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--mj-border);
+}
+
+.mj-arqueo dt {
+    color: var(--mj-muted);
+}
+
+.mj-arqueo dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.mj-arqueo .total {
+    border-bottom: 1px solid var(--mj-border-strong);
+}
+
+.mj-arqueo .total dt,
+.mj-arqueo .total dd {
+    color: var(--mj-ink);
+}
+
+.mj-arqueo .resultado {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: var(--mj-radius);
+    font-size: 16px;
+}
+
+.mj-arqueo .resultado dt {
+    color: inherit;
+    font-weight: 600;
+}
+
+.mj-arqueo .aparte dt,
+.mj-arqueo .aparte dd {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.mj-arqueo .resultado.dif-ok,
+td.dif-ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-arqueo .resultado.dif-sobra,
+td.dif-sobra {
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+}
+
+.mj-arqueo .resultado.dif-falta,
+td.dif-falta {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.mj-aviso {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+    border-radius: var(--mj-radius);
+    font-size: 14px;
+}
+
+.mj-corte-final,
+.mj-detalle-caja {
+    max-width: 520px;
+    margin: 0 0 22px;
+    padding: 14px 18px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+}
+
+.mj-detalle-caja {
+    max-width: none;
+    margin-top: 18px;
+}
+
+.mj-caja-abrir {
+    max-width: 520px;
+}
+
+.manjar h2.mj-historial-tit {
+    margin-top: 30px;
+}
+
+/* ---- Apartados (HU-13 a HU-17) ---- */
+.mj-negocio-apartar {
+    margin: 0 0 10px;
+    color: var(--mj-muted);
+}
+
+.mj-apartado {
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-left: 4px solid var(--mj-border-strong);
+    border-radius: var(--mj-radius);
+    box-shadow: var(--mj-shadow);
+}
+
+.mj-apartado.e-PENDIENTE {
+    border-left-color: var(--mj-warn);
+}
+
+.mj-apartado.e-PAGADO,
+.mj-apartado.e-LISTO,
+.mj-apartado.e-ENTREGADO {
+    border-left-color: var(--mj-ok);
+}
+
+.mj-apartado.e-CANCELADO,
+.mj-apartado.e-VENCIDO {
+    border-left-color: var(--mj-off);
+    opacity: .85;
+}
+
+.mj-apartado.reciente {
+    box-shadow: 0 0 0 2px var(--mj-primary), var(--mj-shadow);
+}
+
+.mj-apartado-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.mj-apartado-cab > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mj-codigo {
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    color: var(--mj-ink);
+}
+
+.mj-apartado-cab {
+    flex-wrap: wrap;
+}
+
+.mj-apartado-cab .mj-espera {
+    font-size: 13px;
+    color: var(--mj-muted);
+    white-space: nowrap;
+}
+
+.mj-contador {
+    display: inline-block;
+    min-width: 24px;
+    margin-left: 6px;
+    padding: 0 9px;
+    background: var(--mj-primary);
+    color: #fff;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mj-apartado-nota {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    background: var(--mj-warn-bg);
+    color: var(--mj-warn);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.mj-apartado-nota.ok {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-PAGADO,
+.mj-estado.e-LISTO,
+.mj-estado.e-ENTREGADO {
+    background: var(--mj-ok-bg);
+    color: var(--mj-ok);
+}
+
+.mj-estado.e-CANCELADO,
+.mj-estado.e-VENCIDO {
+    background: var(--mj-off-bg);
+    color: var(--mj-off);
+}
+
+.mj-avisos {
+    margin-bottom: 14px;
+}
+
+.mj-aviso-cliente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 9px 12px;
+    background: var(--mj-card);
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius);
+    font-size: 14px;
+}
+
+.mj-aviso-cliente > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mj-aviso-cliente.nueva {
+    background: var(--mj-tint);
+    border-color: var(--mj-border-strong);
+}
+
+.mj-aviso-cliente.listo.nueva {
+    background: var(--mj-ok-bg);
+    border-color: var(--mj-ok);
+}
+
+.mj-aviso-cliente.leida {
+    color: var(--mj-muted);
+}
+
+.mj-apartado-cuadro {
+    margin-bottom: 18px;
+}
+
+.mj-apartados-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.mj-entrega {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.mj-entrega .mj-codigo-entrada {
+    flex: 1;
+    min-width: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+@media (max-width: 1100px) {
+    .mj-apartados-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.mj-ticket-lineas b {
+    margin-right: 0.35em;
+}
+
+.mj-sucursales td {
+    vertical-align: top;
+}
+
+.mj-sucursales tr.activa {
+    background: var(--mj-primary-soft, #fbeee8);
+}
+
+.mj-ahora {
+    margin-left: 4px;
+}
+
+.mj-filtros .mj-atajos {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mj-filtros .manjar-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.mj-filtros input.mj-fecha {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 9px 12px;
+    font: inherit;
+    color: var(--mj-ink);
+    background: #fff;
+    border: 1px solid var(--mj-border);
+    border-radius: var(--mj-radius-sm, 8px);
+}
+
+.mj-reporte td.gan {
+    font-weight: 700;
+}
+
+.mj-reporte td.num,
+.mj-reporte th.num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.mj-tabla-scroll {
+    margin: 0 0 22px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mj-tabla-scroll .mj-tabla {
+    min-width: 560px;
 }

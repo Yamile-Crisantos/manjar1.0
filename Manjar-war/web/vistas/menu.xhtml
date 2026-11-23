@@ -2,24 +2,147 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
-            <ui:define name="titulo">Menú · Manjar</ui:define>
+            <!-- Importante: el f:metadata se escribe aquí, dentro de la zona "metadata" de la plantilla.
+                 "q" es el código del QR del negocio. -->
+            <ui:define name="metadata">
+                <f:metadata>
+                    <f:viewParam name="q" value="#{menuPublicoBean.codigo}"/>
+                    <f:viewAction action="#{menuPublicoBean.recordar}"/>
+                </f:metadata>
+            </ui:define>
+
+            <!-- Cuando hay un negocio que mostrar, la página se viste con su marca (ver plantilla.xhtml) -->
+            <ui:param name="comensal" value="#{menuPublicoBean.establecimiento != null}"/>
+
+            <ui:define name="titulo">#{menuPublicoBean.establecimiento != null ? menuPublicoBean.establecimiento.nombre : 'Manjar'} · Menú</ui:define>
 
             <ui:define name="ruta">
-                <p:breadCrumb homeDisplay="text">
-                    <p:menuitem value="Inicio" outcome="/vistas/inicio"/>
-                    <p:menuitem value="Menú" outcome="/vistas/menu"/>
-                </p:breadCrumb>
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="actual" value="Menú"/>
+                </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
-                <h1>Menú</h1>
-                <p>Aquí se administrarán los platillos y su disponibilidad.</p>
-                <div class="manjar-soon">Módulo en construcción</div>
+
+                <!-- Menú de un negocio, con el color, el estilo, el contacto y el aviso que eligió su dueño -->
+                <h:panelGroup layout="block" styleClass="mj-tema" rendered="#{menuPublicoBean.establecimiento != null}">
+                    <div class="mj-banner mj-rest">
+                        <div class="mj-rest-info">
+                            <p class="mj-eyebrow">Menú del día</p>
+                            <h1><h:outputText value="#{menuPublicoBean.establecimiento.nombre}"/></h1>
+                            <h:panelGroup layout="block" styleClass="mj-rest-lema" rendered="#{not empty menuPublicoBean.establecimiento.lema}">
+                                <h:outputText value="#{menuPublicoBean.establecimiento.lema}"/>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" styleClass="mj-rest-dir" rendered="#{not empty menuPublicoBean.establecimiento.direccion}">
+                                <h:outputText value="#{menuPublicoBean.establecimiento.direccion}"/>
+                            </h:panelGroup>
+                            <p class="mj-rest-dir">#{menuPublicoBean.platillosDisponibles} disponibles<h:outputText value=" · #{menuPublicoBean.platillosAgotados} agotados" rendered="#{menuPublicoBean.platillosAgotados gt 0}"/></p>
+                        </div>
+                        <div class="mj-rest-acciones">
+                            <h:link value="Apartar platillos" outcome="/vistas/apartar" styleClass="manjar-btn"
+                                    rendered="#{not sesion.personal}">
+                                <f:param name="q" value="#{menuPublicoBean.establecimiento.codigoQR}"/>
+                            </h:link>
+                            <h:link value="Administrar platillos" outcome="/vistas/platillos" styleClass="manjar-btn manjar-btn-sec"
+                                    rendered="#{sesion.administra}"/>
+                            <h:link value="Personalizar" outcome="/vistas/negocio" styleClass="manjar-btn manjar-btn-sec"
+                                    rendered="#{sesion.dueno}"/>
+                        </div>
+                    </div>
+
+                    <h:panelGroup layout="block" styleClass="mj-aviso-dia" rendered="#{not empty menuPublicoBean.establecimiento.aviso}">
+                        <h:outputText value="#{menuPublicoBean.establecimiento.aviso}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mj-contacto" rendered="#{menuPublicoBean.tieneContacto}">
+                        <h:panelGroup styleClass="mj-horario" rendered="#{not empty menuPublicoBean.establecimiento.horario}">
+                            <b>Horario</b> <h:outputText value="#{menuPublicoBean.establecimiento.horario}"/>
+                        </h:panelGroup>
+                        <span class="mj-contacto-enlaces">
+                            <h:outputLink value="#{menuPublicoBean.enlaceTelefono}" styleClass="mj-chip"
+                                          rendered="#{menuPublicoBean.enlaceTelefono != null}">Llamar</h:outputLink>
+                            <h:outputLink value="#{menuPublicoBean.enlaceWhatsapp}" styleClass="mj-chip" target="_blank" rel="noopener noreferrer"
+                                          rendered="#{menuPublicoBean.enlaceWhatsapp != null}">WhatsApp</h:outputLink>
+                            <h:outputLink value="#{menuPublicoBean.enlaceInstagram}" styleClass="mj-chip" target="_blank" rel="noopener noreferrer"
+                                          rendered="#{menuPublicoBean.enlaceInstagram != null}">Instagram</h:outputLink>
+                            <h:outputLink value="#{menuPublicoBean.enlaceFacebook}" styleClass="mj-chip" target="_blank" rel="noopener noreferrer"
+                                          rendered="#{menuPublicoBean.enlaceFacebook != null}">Facebook</h:outputLink>
+                        </span>
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" styleClass="mj-nota" rendered="#{not sesion.autenticado}">
+                        ¿Quieres apartar platillos? Es gratis crear tu cuenta.
+                        <h:link value="Crea tu cuenta de cliente" outcome="/vistas/registro">
+                            <f:param name="destino" value="/vistas/apartar?q=#{menuPublicoBean.establecimiento.codigoQR}"/>
+                        </h:link>
+                        o
+                        <h:link value="inicia sesión" outcome="/vistas/acceso">
+                            <f:param name="destino" value="/vistas/apartar?q=#{menuPublicoBean.establecimiento.codigoQR}"/>
+                        </h:link>.
+                    </h:panelGroup>
+
+                    <h:panelGroup layout="block" rendered="#{empty menuPublicoBean.grupos}" styleClass="mj-vacio">
+                        Este negocio todavía no ha publicado su menú.
+                    </h:panelGroup>
+
+                    <nav class="mj-catnav" aria-label="Categorías">
+                        <ui:repeat value="#{menuPublicoBean.grupos}" var="g">
+                            <a href="##{g.ancla}"><h:outputText value="#{g.categoria}"/></a>
+                        </ui:repeat>
+                    </nav>
+
+                    <ui:repeat value="#{menuPublicoBean.grupos}" var="g">
+                        <h2 id="#{g.ancla}" class="mj-titulo-seccion"><h:outputText value="#{g.categoria}"/></h2>
+                        <div class="mj-platos">
+                            <ui:repeat value="#{g.platillos}" var="pl">
+                                <article class="mj-plato #{pl.estado == 1 ? '' : 'agotado'}">
+                                    <div class="mj-plato-top">
+                                        <h3><h:outputText value="#{pl.nombre}"/></h3>
+                                        <span class="mj-precio">$<h:outputText value="#{pl.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                    </div>
+                                    <p><h:outputText value="#{pl.descripcion}"/></p>
+                                    <h:panelGroup layout="block" styleClass="mj-plato-pie" rendered="#{pl.estado != 1 or menuPublicoBean.ultimasPorciones(pl)}">
+                                        <h:outputText value="Agotado" styleClass="manjar-badge off" rendered="#{pl.estado != 1}"/>
+                                        <h:outputText value="Últimas porciones" styleClass="manjar-badge aviso"
+                                                      rendered="#{pl.estado == 1 and menuPublicoBean.ultimasPorciones(pl)}"/>
+                                    </h:panelGroup>
+                                </article>
+                            </ui:repeat>
+                        </div>
+                    </ui:repeat>
+                </h:panelGroup>
+
+                <!-- El personal sin negocio asignado -->
+                <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimiento == null and sesion.personal}"
+                              styleClass="mj-vacio">
+                    Tu cuenta todavía no tiene un negocio asignado. Pide al dueño que revise tu cuenta.
+                </h:panelGroup>
+
+                <!-- Visitantes y clientes sin un menú que mostrar: cada negocio se abre con su propio QR -->
+                <h:panelGroup layout="block" rendered="#{menuPublicoBean.establecimiento == null and not sesion.personal}">
+                    <h1>Menú</h1>
+                    <h:panelGroup layout="block" rendered="#{menuPublicoBean.codigoNoEncontrado}" styleClass="manjar-aviso warn">
+                        No encontramos el menú de ese enlace. Revisa el enlace o vuelve a escanear el código QR del negocio.
+                    </h:panelGroup>
+                    <p class="mj-lead">Cada negocio comparte su menú con su propio código QR. Escanéalo con la cámara de tu celular
+                        o abre el enlace que te compartió el negocio para ver el menú del día.</p>
+                    <div class="manjar-actions">
+                        <h:link value="Volver al menú que viste" outcome="/vistas/menu" styleClass="manjar-btn"
+                                rendered="#{sesion.menuReciente}">
+                            <f:param name="q" value="#{sesion.ultimoMenuCodigo}"/>
+                        </h:link>
+                        <h:link value="Ir al inicio" outcome="/vistas/inicio" styleClass="manjar-btn manjar-btn-sec"
+                                rendered="#{not sesion.autenticado}"/>
+                        <h:link value="Ir a mi panel" outcome="/vistas/panel" styleClass="manjar-btn manjar-btn-sec"
+                                rendered="#{sesion.autenticado}"/>
+                    </div>
+                </h:panelGroup>
+
             </ui:define>
 
         </ui:composition>

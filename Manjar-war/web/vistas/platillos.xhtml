@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Administrar platillos · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Mi menú"/>
+                    <ui:param name="actual" value="Administrar platillos"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
+                        <h1>Administrar platillos</h1>
+                        <p class="mj-lead">
+                            Crea y edita tus platillos. Si pones porciones del día, el platillo se marca
+                            como agotado solo cuando se terminan.
+                        </p>
+                    </div>
+                    <h:link value="Ver menú público" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"/>
+                </div>
+
+                <div class="mj-linkbox">
+                    <div>
+                        <strong>Enlace público de tu menú</strong>
+                        <code>#{platillosBean.enlaceMenu}</code>
+                        <span class="manjar-muted">Úsalo para generar el código QR de tus mesas.</span>
+                    </div>
+                </div>
+
+                <h:form id="formHerr" styleClass="manjar-form">
+                    <div class="manjar-toolbar mj-herramientas">
+                        <p:commandButton value="Nuevo platillo"
+                                         action="#{platillosBean.nuevo}" process="@this" resetValues="true"
+                                         update=":dlgPlatillo" oncomplete="PF('dlgPlatillo').show()"/>
+                        <p:commandButton value="Reiniciar día" styleClass="manjar-btn-sec"
+                                         action="#{platillosBean.reiniciarDia}" process="@this" update=":formTabla">
+                            <p:confirm header="Reiniciar día" icon="ui-icon-alert"
+                                       message="Las porciones restantes volverán a las porciones del día y los platillos con control se reabrirán. ¿Continuar?"/>
+                        </p:commandButton>
+                        <span class="manjar-spacer"></span>
+                        <p:inputText id="nuevaCategoria" value="#{platillosBean.nuevaCategoria}" maxlength="255"
+                                     placeholder="Nueva categoría"/>
+                        <p:commandButton value="Agregar categoría" styleClass="manjar-btn-sec"
+                                         action="#{platillosBean.crearCategoria}" process="@this nuevaCategoria"
+                                         update=":formHerr"/>
+                    </div>
+                </h:form>
+
+                <h:form id="formTabla">
+                    <p:dataTable id="tabla" var="pl" value="#{platillosBean.platillos}" rowKey="#{pl.id}"
+                                 paginator="true" rows="10" paginatorPosition="bottom"
+                                 emptyMessage="Aún no hay platillos. Agrega el primero con “Nuevo platillo”.">
+
+                        <p:column headerText="Platillo" sortBy="#{pl.nombre}">
+                            <strong>#{pl.nombre}</strong><br/>
+                            <span class="manjar-muted">#{pl.descripcion}</span>
+                        </p:column>
+
+                        <p:column headerText="Categoría" sortBy="#{pl.categoriaid.nombre}">
+                            #{pl.categoriaid.nombre}
+                        </p:column>
+
+                        <p:column headerText="Precio" sortBy="#{pl.precio}" styleClass="manjar-num">
+                            $<h:outputText value="#{pl.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Porciones" styleClass="manjar-num">
+                            <h:outputText value="#{pl.cantidadRestante} / #{pl.cantidadEstimada}" rendered="#{pl.cantidadEstimada gt 0}"/>
+                            <h:outputText value="Sin control" styleClass="manjar-muted" rendered="#{not (pl.cantidadEstimada gt 0)}"/>
+                        </p:column>
+
+                        <p:column headerText="Estado">
+                            <h:outputText value="Disponible" styleClass="manjar-badge ok" rendered="#{pl.estado == 1}"/>
+                            <h:outputText value="Agotado" styleClass="manjar-badge off" rendered="#{pl.estado != 1}"/>
+                        </p:column>
+
+                        <p:column headerText="Acciones" styleClass="manjar-acciones">
+                            <p:commandButton icon="ui-icon-pencil" title="Editar" styleClass="manjar-btn-sec"
+                                             action="#{platillosBean.editar(pl)}" process="@this" resetValues="true"
+                                             update=":dlgPlatillo" oncomplete="PF('dlgPlatillo').show()"/>
+                            <p:commandButton icon="#{pl.estado == 1 ? 'ui-icon-cancel' : 'ui-icon-check'}"
+                                             title="#{pl.estado == 1 ? 'Marcar como agotado' : 'Marcar como disponible'}"
+                                             styleClass="manjar-btn-sec"
+                                             action="#{platillosBean.alternar(pl)}" process="@this" update=":formTabla"/>
+                            <p:commandButton icon="ui-icon-trash" title="Eliminar" styleClass="manjar-btn-peligro"
+                                             action="#{platillosBean.eliminar(pl)}" process="@this" update=":formTabla">
+                                <p:confirm header="Eliminar platillo" icon="ui-icon-alert"
+                                           message="¿Eliminar &quot;#{pl.nombre}&quot;? Esta acción no se puede deshacer."/>
+                            </p:commandButton>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+
+                <p:dialog id="dlgPlatillo" widgetVar="dlgPlatillo" header="Platillo" modal="true"
+                          resizable="false" draggable="false" showEffect="fade" width="460">
+                    <h:form id="formPlatillo" styleClass="manjar-form">
+                        <div class="manjar-field">
+                            <p:outputLabel for="nombre" value="Nombre"/>
+                            <p:inputText id="nombre" value="#{platillosBean.platillo.nombre}" maxlength="255"
+                                         required="true" requiredMessage="Escribe el nombre del platillo."/>
+                        </div>
+                        <div class="manjar-field">
+                            <p:outputLabel for="descripcion" value="Descripción"/>
+                            <p:inputTextarea id="descripcion" value="#{platillosBean.platillo.descripcion}"
+                                             rows="2" maxlength="255" autoResize="false"/>
+                        </div>
+                        <div class="manjar-row">
+                            <div class="manjar-field">
+                                <p:outputLabel for="precio" value="Precio ($)"/>
+                                <p:inputText id="precio" value="#{platillosBean.platillo.precio}"
+                                             required="true" requiredMessage="Escribe el precio."
+                                             converterMessage="El precio debe ser un número, por ejemplo 85.50"/>
+                            </div>
+                            <div class="manjar-field">
+                                <p:outputLabel for="costo" value="Costo ($)"/>
+                                <p:inputText id="costo" value="#{platillosBean.platillo.costo}"
+                                             converterMessage="El costo debe ser un número, por ejemplo 40.00"/>
+                            </div>
+                        </div>
+                        <div class="manjar-field">
+                            <p:outputLabel for="categoria" value="Categoría"/>
+                            <p:selectOneMenu id="categoria" value="#{platillosBean.categoriaId}"
+                                             required="true" requiredMessage="Elige una categoría.">
+                                <f:selectItem itemLabel="Selecciona..." itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{platillosBean.categorias}" var="c"
+                                               itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="manjar-row">
+                            <div class="manjar-field">
+                                <p:outputLabel for="estimada" value="Porciones del día (0 = sin control)"/>
+                                <p:spinner id="estimada" value="#{platillosBean.platillo.cantidadEstimada}"
+                                           min="0" max="9999"/>
+                            </div>
+                            <h:panelGroup layout="block" styleClass="manjar-field" rendered="#{platillosBean.platillo.id != null}">
+                                <p:outputLabel for="restante" value="Porciones restantes"/>
+                                <p:spinner id="restante" value="#{platillosBean.platillo.cantidadRestante}"
+                                           min="0" max="9999"/>
+                            </h:panelGroup>
+                        </div>
+                        <div class="manjar-field">
+                            <p:selectBooleanCheckbox id="disponible" value="#{platillosBean.disponible}"
+                                                     itemLabel="Disponible en el menú"/>
+                        </div>
+                        <div class="manjar-form-actions fin">
+                            <p:commandButton value="Cancelar" type="button" styleClass="manjar-btn-sec"
+                                             onclick="PF('dlgPlatillo').hide()"/>
+                            <p:commandButton value="Guardar"
+                                             action="#{platillosBean.guardar}" process="@form" update=":formTabla"
+                                             oncomplete="if (!args.validationFailed) { PF('dlgPlatillo').hide(); }"/>
+                        </div>
+                    </h:form>
+                </p:dialog>
+
+                <h:form id="formConfirmar">
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes"/>
+                        <p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no manjar-btn-sec"/>
+                    </p:confirmDialog>
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>

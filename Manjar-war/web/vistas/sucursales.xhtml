@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="/plantillas/plantilla.xhtml">
+
+            <ui:define name="titulo">Sucursales · Manjar</ui:define>
+
+            <ui:define name="ruta">
+                <ui:include src="/plantillas/migas.xhtml">
+                    <ui:param name="padre" value="Administración"/>
+                    <ui:param name="actual" value="Sucursales"/>
+                </ui:include>
+            </ui:define>
+
+            <ui:define name="contenido">
+                <div class="mj-pagina-cab">
+                    <div>
+                        <p class="mj-eyebrow">Tu negocio</p>
+                        <h1>Sucursales</h1>
+                        <p class="mj-lead">
+                            Registra cada una de tus sucursales y asígnale un gerente para que él lleve el día a día.
+                            Cada sucursal tiene su propio menú, caja, comandas, apartados, personal y código QR;
+                            el gerente solo ve y opera la suya.
+                        </p>
+                    </div>
+                </div>
+
+                <h:panelGroup layout="block" styleClass="manjar-aviso" id="avisoUna">
+                    <h:outputText value="Si solo tienes una sucursal puedes operarla directamente con tu cuenta de dueño, sin crear una cuenta de gerente adicional."/>
+                </h:panelGroup>
+
+                <h2 class="mj-titulo-seccion">Mis sucursales</h2>
+                <h:panelGroup id="panelLista" layout="block">
+                    <h:form id="formLista">
+                        <table class="mj-tabla mj-sucursales">
+                            <thead>
+                                <tr>
+                                    <th>Sucursal</th>
+                                    <th>Gerente</th>
+                                    <th>Meseros</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat var="s" value="#{sucursalesBean.sucursales}">
+                                    <tr class="#{sucursalesBean.isActiva(s) ? 'activa' : ''}">
+                                        <td>
+                                            <strong><h:outputText value="#{s.nombre}"/></strong>
+                                            <h:outputText value=" Principal" styleClass="manjar-badge ok" rendered="#{s.principal}"/>
+                                            <h:outputText value=" Operando ahora" styleClass="manjar-badge ok mj-ahora" rendered="#{sucursalesBean.isActiva(s)}"/>
+                                            <br/>
+                                            <span class="manjar-muted"><h:outputText value="#{s.direccion}"/></span>
+                                        </td>
+                                        <td>
+                                            <h:panelGroup rendered="#{s.conGerente}">
+                                                <strong><h:outputText value="#{s.gerenteNombre}"/></strong><br/>
+                                                <span class="manjar-muted"><h:outputText value="#{s.gerenteCorreo}"/></span>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{not s.conGerente}">
+                                                <span class="manjar-muted">Sin gerente: la operas tú con tu cuenta.</span>
+                                            </h:panelGroup>
+                                        </td>
+                                        <td>#{s.meseros}</td>
+                                        <td class="manjar-acciones">
+                                            <p:commandButton value="Operar" styleClass="manjar-btn-sec"
+                                                             action="#{sucursalesBean.operar(s.id)}" ajax="false"
+                                                             rendered="#{not sucursalesBean.isActiva(s)}"/>
+                                            <p:commandButton value="#{s.conGerente ? 'Cambiar gerente' : 'Asignar gerente'}"
+                                                             action="#{sucursalesBean.abrirAsignar(s)}" process="@this"
+                                                             update=":formAsignar" oncomplete="PF('dlgGerente').show()"/>
+                                        </td>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table>
+                    </h:form>
+                </h:panelGroup>
+
+                <h2 class="mj-titulo-seccion">Nueva sucursal</h2>
+                <h:form id="formNueva" styleClass="manjar-form mj-panel">
+                    <div class="manjar-row">
+                        <div class="manjar-field">
+                            <p:outputLabel for="nombre" value="Nombre de la sucursal"/>
+                            <p:inputText id="nombre" value="#{sucursalesBean.nombre}" maxlength="255"
+                                         placeholder="Por ejemplo: Fonda Doña Lupe Reforma"/>
+                        </div>
+                        <div class="manjar-field">
+                            <p:outputLabel for="direccion" value="Dirección"/>
+                            <p:inputText id="direccion" value="#{sucursalesBean.direccion}" maxlength="255"
+                                         placeholder="Calle, número y colonia"/>
+                        </div>
+                    </div>
+                    <div class="manjar-form-actions">
+                        <p:commandButton id="registrar" value="Registrar sucursal" action="#{sucursalesBean.crear}"
+                                         process="@form" update=":formNueva :panelLista"/>
+                    </div>
+                </h:form>
+
+                <!-- Ventana para asignar el gerente de una sucursal -->
+                <p:dialog id="dlgGerente" widgetVar="dlgGerente" header="Gerente de la sucursal" modal="true"
+                          resizable="false" draggable="false" appendTo="@(body)" width="480">
+                    <h:form id="formAsignar" styleClass="manjar-form">
+                        <h:panelGroup layout="block" rendered="#{sucursalesBean.seleccionada != null}">
+                            <p>Sucursal: <strong><h:outputText value="#{sucursalesBean.seleccionada.nombre}"/></strong></p>
+                            <h:panelGroup layout="block" styleClass="manjar-field" rendered="#{sucursalesBean.hayGerentesParaMover}">
+                                <p:selectOneButton id="modo" value="#{sucursalesBean.modo}">
+                                    <f:selectItem itemLabel="Cuenta nueva" itemValue="NUEVA"/>
+                                    <f:selectItem itemLabel="Gerente que ya tengo" itemValue="EXISTENTE"/>
+                                    <p:ajax process="@this" update="camposGerente"/>
+                                </p:selectOneButton>
+                            </h:panelGroup>
+                            <h:panelGroup id="camposGerente" layout="block">
+                                <h:panelGroup layout="block" rendered="#{sucursalesBean.modo == 'NUEVA'}">
+                                    <div class="manjar-field">
+                                        <p:outputLabel for="gnombre" value="Nombre del gerente"/>
+                                        <p:inputText id="gnombre" value="#{sucursalesBean.gerenteNombre}" maxlength="255"/>
+                                    </div>
+                                    <div class="manjar-field">
+                                        <p:outputLabel for="gcorreo" value="Correo"/>
+                                        <p:inputText id="gcorreo" value="#{sucursalesBean.gerenteCorreo}" maxlength="255"/>
+                                    </div>
+                                    <div class="manjar-field">
+                                        <p:outputLabel for="gclave" value="Contraseña inicial (mínimo 8 caracteres)"/>
+                                        <p:password id="gclave" value="#{sucursalesBean.gerenteClave}" maxlength="100"/>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="manjar-field" rendered="#{sucursalesBean.modo == 'EXISTENTE'}">
+                                    <p:outputLabel for="gexistente" value="Gerente"/>
+                                    <p:selectOneMenu id="gexistente" value="#{sucursalesBean.gerenteExistenteId}">
+                                        <f:selectItem itemLabel="Elige un gerente" itemValue="#{null}" noSelectionOption="true"/>
+                                        <f:selectItems value="#{sucursalesBean.gerentesParaMover}"/>
+                                    </p:selectOneMenu>
+                                    <span class="manjar-muted">Dejará su sucursal actual, que la operarás tú hasta que le asignes otro gerente.</span>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                            <p class="manjar-muted">
+                                El gerente solo podrá operar esta sucursal: menú, caja, comandas y apartados. No tiene acceso al
+                                personal, a las demás sucursales ni a los reportes.
+                            </p>
+                            <div class="manjar-form-actions">
+                                <p:commandButton id="asignar" value="Asignar gerente" action="#{sucursalesBean.asignar}"
+                                                 process="@form" update=":formAsignar :panelLista"
+                                                 oncomplete="if (!args.validationFailed) { PF('dlgGerente').hide(); }"/>
+                                <p:commandButton value="Cancelar" styleClass="manjar-btn-sec" type="button" onclick="PF('dlgGerente').hide()"/>
+                            </div>
+                        </h:panelGroup>
+                    </h:form>
+                </p:dialog>
+            </ui:define>
+
+        </ui:composition>
+    </body>
+</html>
