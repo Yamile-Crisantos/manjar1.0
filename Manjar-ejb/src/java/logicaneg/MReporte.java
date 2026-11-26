@@ -31,7 +31,9 @@ import modelo.Usuario;
  *
  * Qué cuenta como venta:
  *  - una comanda cobrada (con fecha de cobro) y no cancelada, en la fecha en que se cobró;
- *  - un apartado con su pago confirmado (pagado, listo o entregado), en la fecha en que se pagó.
+ *  - un apartado entregado, en la fecha de entrega: para entonces ya pagó el anticipo y el saldo. Un apartado que
+ *    aún no se entrega (aunque ya tenga su anticipo) todavía no es una venta del reporte; el anticipo sí está
+ *    en la caja del día en que se recibió.
  * El precio y el costo salen de lo que valía el platillo cuando se vendió (se guardan en cada renglón), así que
  * cambiar un precio después no altera los reportes anteriores. Si un renglón no tiene costo, se suma a los
  * ingresos pero no al costo, y el reporte avisa de qué platillos son.
@@ -284,16 +286,15 @@ public class MReporte {
             r.add(l);
         }
         if (meseroId == null) { // los apartados los levanta el cliente en línea: no tienen mesero
+            // Un apartado es una venta cuando se entrega: para entonces ya está pagado completo (anticipo + saldo)
             TypedQuery<Object[]> qa = em.createQuery(
-                    "SELECT a.id, pg.fecha, d.platilloid.id, d.platilloid.nombre, d.cantidad, "
+                    "SELECT a.id, a.fechaentrega, d.platilloid.id, d.platilloid.nombre, d.cantidad, "
                     + "COALESCE(d.preciounitario, d.platilloid.precio), COALESCE(d.costounitario, d.platilloid.costo) "
-                    + "FROM Detalleapartado d JOIN d.apartadoid a, Pago pg WHERE pg.apartadoid = a AND pg.estado = :conf "
-                    + "AND a.establecimientoid.id = :e AND a.estado IN (:g, :l, :n) "
-                    + "AND pg.fecha >= :desde AND pg.fecha < :hasta"
+                    + "FROM Detalleapartado d JOIN d.apartadoid a "
+                    + "WHERE a.establecimientoid.id = :e AND a.estado = :n AND a.fechaentrega IS NOT NULL "
+                    + "AND a.fechaentrega >= :desde AND a.fechaentrega < :hasta"
                     + (platilloId == null ? "" : " AND d.platilloid.id = :p"), Object[].class)
-                    .setParameter("conf", Constantes.PAGO_CONFIRMADO).setParameter("e", sucursalId)
-                    .setParameter("g", Constantes.APARTADO_PAGADO).setParameter("l", Constantes.APARTADO_LISTO)
-                    .setParameter("n", Constantes.APARTADO_ENTREGADO)
+                    .setParameter("e", sucursalId).setParameter("n", Constantes.APARTADO_ENTREGADO)
                     .setParameter("desde", desde).setParameter("hasta", hastaExclusivo);
             if (platilloId != null) {
                 qa.setParameter("p", platilloId);

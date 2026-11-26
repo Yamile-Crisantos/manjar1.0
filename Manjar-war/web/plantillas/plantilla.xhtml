@@ -38,6 +38,7 @@
         <header class="manjar-header">
             <div class="manjar-header-inner">
                 <h:link outcome="#{sesion.autenticado ? '/vistas/panel' : '/vistas/inicio'}" styleClass="manjar-brand">
+                    <i class="mj-ico i-cubiertos" aria-hidden="true"></i>
                     <span class="manjar-brand-name">Manjar</span>
                 </h:link>
 
@@ -82,7 +83,7 @@
                         <p:menuitem value="Caja" outcome="/vistas/caja" rendered="#{sesion.administra}"/>
                         <p:menuitem value="Apartados" outcome="/vistas/apartados" rendered="#{sesion.administra}"/>
 
-                        <p:menuitem value="Apartados" outcome="/vistas/apartar" rendered="#{sesion.cliente}"/>
+                        <p:menuitem value="Apartar y mis pedidos" outcome="/vistas/apartar" rendered="#{sesion.cliente}"/>
 
                         <p:submenu label="Administración" rendered="#{sesion.dueno}">
                             <p:menuitem value="Personal" outcome="/vistas/personal"/>
@@ -140,7 +141,7 @@
                         <h:link value="Menú" outcome="/vistas/menu">
                             <f:param name="q" value="#{menuPublicoBean.marca.codigoQR}"/>
                         </h:link>
-                        <h:link value="Apartar" outcome="/vistas/apartar" rendered="#{not sesion.personal}">
+                        <h:link value="#{sesion.autenticado ? 'Apartar y mis pedidos' : 'Apartar'}" outcome="/vistas/apartar" rendered="#{not sesion.personal}">
                             <f:param name="q" value="#{menuPublicoBean.marca.codigoQR}"/>
                         </h:link>
                         <span class="mj-espacio"></span>
@@ -173,7 +174,7 @@
         </main>
 
         <footer class="manjar-footer">
-            <h:outputText value="Manjar · 2026" rendered="#{not comensal}"/>
+            <h:outputText value="Manjar · Menús y pedidos para fondas y restaurantes" rendered="#{not comensal}"/>
             <h:outputText value="Menú digital hecho con Manjar" rendered="#{comensal}"/>
         </footer>
 

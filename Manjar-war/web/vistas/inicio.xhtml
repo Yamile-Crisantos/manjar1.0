@@ -31,11 +31,38 @@
                             <h:link value="Registra tu negocio" outcome="/vistas/registro-negocio" styleClass="manjar-btn"/>
                             <h:link value="Ya tengo cuenta" outcome="/vistas/acceso" styleClass="manjar-btn manjar-btn-sec"/>
                         </div>
-                        <p class="mj-nota">¿Eres cliente? Manjar no es un directorio de restaurantes: cada negocio comparte su menú
-                            con su propio código QR. Escanéalo para ver el menú del día.</p>
+                        <p class="mj-nota">¿Eres cliente? Escanea el código QR del negocio para ver su menú del día y apartar tu pedido.</p>
                     </div>
 
-                    <div class="mj-hero-muestra" aria-hidden="true">
+                    <div class="mj-hero-escena" aria-hidden="true">
+                        <svg class="mj-hero-plato" viewBox="0 0 300 260" focusable="false">
+                            <defs>
+                                <radialGradient id="mjPlato" cx="38%" cy="32%" r="80%">
+                                    <stop offset="0" stop-color="#fffdf8"/>
+                                    <stop offset="1" stop-color="#efd9c0"/>
+                                </radialGradient>
+                                <linearGradient id="mjSalsa" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#f2a283"/>
+                                    <stop offset="1" stop-color="#cc4e27"/>
+                                </linearGradient>
+                            </defs>
+                            <ellipse cx="150" cy="240" rx="104" ry="11" fill="#000" opacity=".22"/>
+                            <path d="M30 60v52M42 60v52M54 60v52M30 112a12 12 0 0 0 24 0M42 124v108" fill="none" stroke="#ead9c5" stroke-width="5.5" stroke-linecap="round"/>
+                            <path d="M268 62c-15 15-19 44-14 80h16zM268 142v90" fill="#ead9c5" stroke="#ead9c5" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
+                            <circle cx="150" cy="132" r="104" fill="url(#mjPlato)"/>
+                            <circle cx="150" cy="132" r="84" fill="none" stroke="#e2c9ad" stroke-width="2"/>
+                            <circle cx="150" cy="132" r="64" fill="#f3c987"/>
+                            <circle cx="150" cy="132" r="64" fill="none" stroke="#e3a954" stroke-width="3"/>
+                            <path d="M104 124c14-18 34-22 50-14s30 6 42-6" fill="none" stroke="url(#mjSalsa)" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M110 150c16 10 34 12 50 4s26-8 38-2" fill="none" stroke="url(#mjSalsa)" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+                            <ellipse cx="128" cy="108" rx="9" ry="5" fill="#5f8a4e" transform="rotate(-28 128 108)"/>
+                            <ellipse cx="170" cy="104" rx="9" ry="5" fill="#4d7a3f" transform="rotate(24 170 104)"/>
+                            <ellipse cx="152" cy="162" rx="9" ry="5" fill="#5f8a4e" transform="rotate(-8 152 162)"/>
+                            <circle cx="136" cy="140" r="4.5" fill="#fff4e8"/>
+                            <circle cx="162" cy="138" r="4" fill="#fff4e8"/>
+                            <circle cx="184" cy="150" r="4.5" fill="#fff4e8"/>
+                            <g fill="#f2a283"><circle cx="58" cy="30" r="4"/><circle cx="246" cy="26" r="3"/><circle cx="276" cy="196" r="3.5"/></g>
+                        </svg>
                         <div class="mj-muestra">
                             <strong>Tu negocio</strong>
                             <small>Tu lema, tu estilo</small>
@@ -55,61 +82,51 @@
                 <div class="mj-modulos">
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-qr"></i></i>
                         <h3>Menú digital con código QR</h3>
-                        <p>Publica el menú del día con precios y disponibilidad. Tus clientes lo abren escaneando
-                            un código QR, sin instalar ninguna aplicación, y ven marcados los platillos agotados.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-04 a HU-07</span></div>
+                        <p>Publica el menú del día con precios, fotos y disponibilidad. Tus clientes lo abren con un código QR, sin instalar nada.</p>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-estilo"></i></i>
                         <h3>Tu menú, a tu estilo</h3>
-                        <p>Elige el color de tu menú y escribe tu propio lema: cada negocio se ve como quiere
-                            que lo vean sus clientes.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>Personalización</span></div>
+                        <p>Elige el color de tu menú y escribe tu propio lema: cada negocio se ve como quiere que lo vean sus clientes.</p>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-usuarios"></i></i>
                         <h3>Cuentas y roles</h3>
-                        <p>El dueño da de alta a su personal y cada quien entra solo a lo que le corresponde:
-                            dueño, gerente, mesero y cliente.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-01 a HU-03</span></div>
+                        <p>El dueño da de alta a su personal y cada quien entra solo a lo que le corresponde: dueño, gerente, mesero y cliente.</p>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-comanda"></i></i>
                         <h3>Comandas digitales</h3>
-                        <p>Pedidos por mesa o para llevar, enviados directo a una pantalla compartida de cocina.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-08 a HU-10</span></div>
+                        <p>El mesero toma el pedido por mesa o para llevar y llega directo a una pantalla compartida de cocina.</p>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-caja"></i></i>
                         <h3>Control de caja</h3>
                         <p>Apertura con monto inicial, movimientos del día, corte y arqueo.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-11 y HU-12</span></div>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-apartado"></i></i>
                         <h3>Apartados</h3>
-                        <p>Tus clientes apartan desde su celular, el negocio registra su pago y ellos reciben un aviso
-                            cuando su pedido está listo para recogerlo con su código.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-13, HU-15 a HU-17</span></div>
+                        <p>Tus clientes apartan desde su celular con un anticipo, recogen con su código y reciben un aviso cuando su pedido está listo.</p>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-sucursal"></i></i>
                         <h3>Sucursales y gerentes</h3>
                         <p>Registra cada sucursal y asigna a un gerente que opere solo la suya.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-18 y HU-19</span></div>
                     </article>
 
                     <article class="mj-modulo">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-reporte"></i></i>
                         <h3>Reportes de ventas</h3>
                         <p>Ventas y ganancia por periodo, platillo y mesero, y un resumen de todas tus sucursales.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge ok">Disponible</span><span>HU-20 y HU-21</span></div>
-                    </article>
-
-                    <article class="mj-modulo pronto">
-                        <h3>Pago en línea y avisos por correo o mensaje</h3>
-                        <p>Cobrar el apartado con tarjeta desde el celular y recibir los avisos también por correo o SMS.</p>
-                        <div class="mj-modulo-pie"><span class="manjar-badge">Próximamente</span><span>HU-14 y HU-17</span></div>
                     </article>
                 </div>
 

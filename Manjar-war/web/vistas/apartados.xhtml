@@ -22,8 +22,8 @@
                         <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
                         <h1>Apartados</h1>
                         <p class="mj-lead">
-                            Pedidos que los clientes apartaron. Registra el pago cuando lo recibas, prepara los pagados,
-                            avisa cuando estén listos y entrégalos pidiendo el código del comprobante.
+                            Pedidos que los clientes apartaron. Registra el anticipo (#{apartadosBean.porcentajeAnticipo} %) cuando lo recibas, prepara los pagados,
+                            avisa cuando estén listos y entrégalos pidiendo el código del comprobante: ahí mismo cobras el resto.
                         </p>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                                             <ui:param name="ap" value="#{a}"/>
                                         </ui:include>
                                         <div class="mj-ticket-acc">
-                                            <p:commandButton value="Registrar pago" action="#{apartadosBean.abrirPago(a)}"
+                                            <p:commandButton value="#{a.conSaldo ? 'Registrar anticipo' : 'Registrar pago'}" action="#{apartadosBean.abrirPago(a)}"
                                                              process="@this" update=":formPago"
                                                              oncomplete="PF('dlgPago').show()"/>
                                             <p:commandButton value="Cancelar" styleClass="manjar-btn-peligro"
@@ -82,7 +82,7 @@
                                                 <span class="mj-codigo">#{a.codigoVisible}</span>
                                                 <span class="manjar-muted"><h:outputText value="#{a.clienteNombre}"/></span>
                                             </div>
-                                            <span class="mj-espera">recoge a las #{fmt.hora(a.horaRecoleccion)}</span>
+                                            <span class="mj-espera">hora: #{fmt.hora(a.horaRecoleccion)}</span>
                                         </header>
                                         <ui:include src="/WEB-INF/fragmentos/apartado-detalle.xhtml">
                                             <ui:param name="ap" value="#{a}"/>
@@ -107,15 +107,25 @@
                                             <div>
                                                 <span class="manjar-muted"><h:outputText value="#{a.clienteNombre}"/></span>
                                             </div>
-                                            <span class="mj-espera">recoge a las #{fmt.hora(a.horaRecoleccion)}</span>
+                                            <span class="mj-espera">hora: #{fmt.hora(a.horaRecoleccion)}</span>
                                         </header>
                                         <ui:include src="/WEB-INF/fragmentos/apartado-detalle.xhtml">
                                             <ui:param name="ap" value="#{a}"/>
                                         </ui:include>
+                                        <h:panelGroup layout="block" styleClass="mj-entrega-saldo" rendered="#{a.conSaldo}">
+                                            <span class="manjar-muted">Cobra el resto al entregar:</span>
+                                            <p:selectOneMenu value="#{apartadosBean.metodosSaldo[a.id]}" styleClass="mj-metodo">
+                                                <f:selectItem itemLabel="Efectivo" itemValue="EFECTIVO"/>
+                                                <f:selectItem itemLabel="Tarjeta" itemValue="TARJETA"/>
+                                                <f:selectItem itemLabel="Transferencia" itemValue="TRANSFERENCIA"/>
+                                            </p:selectOneMenu>
+                                            <p:inputText value="#{apartadosBean.referenciasSaldo[a.id]}" maxlength="80"
+                                                         placeholder="Referencia (transferencia)" styleClass="mj-referencia"/>
+                                        </h:panelGroup>
                                         <div class="mj-entrega">
                                             <p:inputText value="#{apartadosBean.codigos[a.id]}" maxlength="12"
                                                          placeholder="Código del cliente" styleClass="mj-codigo-entrada"/>
-                                            <p:commandButton value="Entregar" action="#{apartadosBean.entregar(a.id)}"
+                                            <p:commandButton value="#{a.conSaldo ? 'Cobrar resto y entregar' : 'Entregar'}" action="#{apartadosBean.entregar(a.id)}"
                                                              process="@form" update=":panelTablero"/>
                                         </div>
                                     </article>
@@ -130,16 +140,17 @@
                         <h:panelGroup layout="block" rendered="#{not empty apartadosBean.terminados}">
                             <table class="mj-tabla">
                                 <thead>
-                                    <tr><th>Código</th><th>Cliente</th><th>Estado</th><th>Pago</th><th class="num">Total</th></tr>
+                                    <tr><th>Código</th><th>Cliente</th><th>Tipo</th><th>Estado</th><th>Pago</th><th class="num">Total</th></tr>
                                 </thead>
                                 <tbody>
                                     <ui:repeat var="a" value="#{apartadosBean.terminados}">
                                         <tr>
                                             <td><strong>#{a.codigoVisible}</strong></td>
                                             <td><h:outputText value="#{a.clienteNombre}"/></td>
+                                            <td>#{a.tipoEntregaTexto}</td>
                                             <td><span class="mj-estado e-#{a.estado}">#{a.estadoTexto}</span>
                                                 <span class="manjar-muted"><h:outputText value=" · #{fmt.hora(a.fechaEntrega)}" rendered="#{a.entregado}"/></span></td>
-                                            <td>#{a.metodoPagoTexto}</td>
+                                            <td>#{a.metodoPagoTexto}<h:outputText value=" + #{a.metodoSaldoTexto}" rendered="#{a.entregado and a.conSaldo and not empty a.metodoSaldo}"/></td>
                                             <td class="num">$<h:outputText value="#{a.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></td>
                                         </tr>
                                     </ui:repeat>
@@ -150,7 +161,7 @@
                 </h:panelGroup>
 
                 <!-- Ventana para registrar el pago -->
-                <p:dialog id="dlgPago" widgetVar="dlgPago" header="Registrar pago del anticipo" modal="true"
+                <p:dialog id="dlgPago" widgetVar="dlgPago" header="Registrar anticipo" modal="true"
                           resizable="false" draggable="false" appendTo="@(body)" styleClass="mj-dialogo-pago">
                     <h:form id="formPago" styleClass="manjar-form">
                         <h:panelGroup layout="block" rendered="#{apartadosBean.seleccionado != null}">
@@ -159,6 +170,16 @@
                                 <strong><h:outputText value="#{apartadosBean.seleccionado.clienteNombre}"/></strong>:
                                 <strong>$<h:outputText value="#{apartadosBean.seleccionado.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
                             </p>
+                            <h:panelGroup layout="block" styleClass="mj-desglose" rendered="#{apartadosBean.seleccionado.conSaldo}">
+                                <div class="mj-desglose-fila destacada">
+                                    <span>Cobrar ahora (anticipo #{apartadosBean.porcentajeAnticipo}&#160;%)</span>
+                                    <strong>$<h:outputText value="#{apartadosBean.seleccionado.anticipo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                </div>
+                                <div class="mj-desglose-fila">
+                                    <span>Resto, al entregar</span>
+                                    <strong>$<h:outputText value="#{apartadosBean.seleccionado.saldo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                </div>
+                            </h:panelGroup>
                             <div class="manjar-field">
                                 <p:outputLabel for="metodo" value="¿Cómo pagó el cliente?"/>
                                 <p:selectOneRadio id="metodo" value="#{apartadosBean.metodo}" layout="lineDirection">
@@ -176,7 +197,7 @@
                             </h:panelGroup>
                             <p class="manjar-muted">El pago entra a la caja abierta de la sucursal.</p>
                             <div class="manjar-form-actions">
-                                <p:commandButton id="confirmarPago" value="Confirmar pago" action="#{apartadosBean.registrarPago}"
+                                <p:commandButton id="confirmarPago" value="#{apartadosBean.seleccionado.conSaldo ? 'Confirmar anticipo' : 'Confirmar pago'}" action="#{apartadosBean.registrarPago}"
                                                  process="@form" update=":panelTablero :formPago"
                                                  oncomplete="if (!args.validationFailed) { PF('dlgPago').hide(); }"/>
                                 <p:commandButton value="Cancelar" styleClass="manjar-btn-sec" type="button" onclick="PF('dlgPago').hide()"/>

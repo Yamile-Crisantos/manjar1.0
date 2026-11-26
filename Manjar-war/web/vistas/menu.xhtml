@@ -100,7 +100,13 @@
                         <h2 id="#{g.ancla}" class="mj-titulo-seccion"><h:outputText value="#{g.categoria}"/></h2>
                         <div class="mj-platos">
                             <ui:repeat value="#{g.platillos}" var="pl">
-                                <article class="mj-plato #{pl.estado == 1 ? '' : 'agotado'}">
+                                <article class="mj-plato #{pl.estado == 1 ? '' : 'agotado'} con-foto">
+                                    <h:panelGroup rendered="#{not empty fmt.imagen(pl.imagenurl)}">
+                                        <img class="mj-plato-foto" src="#{fmt.imagen(pl.imagenurl)}" alt="" loading="lazy"/>
+                                    </h:panelGroup>
+                                    <h:panelGroup layout="block" styleClass="mj-plato-foto mj-plato-ico" rendered="#{empty fmt.imagen(pl.imagenurl)}">
+                                        <i class="mj-ico i-#{fmt.icono(g.categoria)}" aria-hidden="true"></i>
+                                    </h:panelGroup>
                                     <div class="mj-plato-top">
                                         <h3><h:outputText value="#{pl.nombre}"/></h3>
                                         <span class="mj-precio">$<h:outputText value="#{pl.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>

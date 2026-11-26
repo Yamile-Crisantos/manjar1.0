@@ -29,8 +29,12 @@ import modelo.Usuario;
  * negocio registra el pago cuando lo recibe (efectivo, tarjeta con su terminal o transferencia).
  *
  * Flujo de un apartado:
- *   PENDIENTE (porciones retenidas, esperando pago) -> PAGADO -> LISTO -> ENTREGADO
+ *   PENDIENTE (porciones retenidas, esperando el anticipo) -> PAGADO -> LISTO -> ENTREGADO
  *   y, aparte, CANCELADO (el cliente o el negocio, solo antes de pagar) o VENCIDO (no se pagó a tiempo).
+ *
+ * Pago con anticipo: al apartar el cliente solo paga el {@link #ANTICIPO_PCT} % del total (el anticipo). El
+ * resto (el saldo) se cobra en la caja al entregar el pedido, con el código del comprobante. Si el porcentaje
+ * es 100 el apartado se paga completo al apartar, como antes.
  *
  * Reglas:
  *  - Solo un cliente crea apartados, y solo ve y cancela los suyos. El Dueño o el Gerente de la sucursal
@@ -41,7 +45,9 @@ import modelo.Usuario;
  *  - Se recoge hoy, con al menos {@link #ANTICIPACION_MIN} minutos de anticipación.
  *  - El pago se registra en la caja abierta de la sucursal (HU-11), así el corte lo incluye.
  *  - La entrega pide el código del comprobante y debe coincidir.
- *  - Después de pagar ya no se cancela (no hay reembolsos en esta versión).
+ *  - Después de pagar el anticipo ya no se cancela (no hay reembolsos en esta versión).
+ *  - Entregar exige la caja abierta si queda saldo, porque ese cobro entra a la caja de ese día.
+ *  - El apartado puede ser para llevar o para comer en el negocio; en ambos casos no se asigna mesa.
  *  - Cada cambio importante deja un aviso al cliente (HU-17), dentro de la aplicación.
  */
 @Stateless
@@ -56,6 +62,8 @@ public class MApartado {
     public static final int MAX_LINEAS = 20;
     public static final int MAX_CANTIDAD = 99;
     public static final int REFERENCIA_MAX = 80;
+    /** Porcentaje del total que se paga al apartar (se puede cambiar con -Dmanjar.apartado.anticipo.pct, de 1 a 100). */
+    public static final int ANTICIPO_PCT = Math.max(1, Math.min(100, Integer.getInteger("manjar.apartado.anticipo.pct", 50)));
 
     private static final String ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     private static final SecureRandom AZAR = new SecureRandom();
@@ -75,9 +83,23 @@ public class MApartado {
     // ------------------------------------------------------------------
     // Cliente (HU-13, HU-17)
     // ------------------------------------------------------------------
-    /** Aparta platillos de un negocio para recogerlos hoy a la hora indicada. */
+    /** Aparta platillos para llevar (la forma de siempre). */
     public ApartadoVista crear(Integer clienteId, Integer establecimientoId, List<LineaPedido> pedido, Date horaRecoleccion)
             throws ReglaNegocioException {
+        return crear(clienteId, establecimientoId, pedido, horaRecoleccion, Constantes.ENTREGA_LLEVAR);
+    }
+
+    /**
+     * Aparta platillos de un negocio para recogerlos hoy a la hora indicada.
+     *
+     * @param tipoEntrega LLEVAR (se recoge para llevar) o AQUI (se come en el negocio; no se asigna mesa)
+     */
+    public ApartadoVista crear(Integer clienteId, Integer establecimientoId, List<LineaPedido> pedido, Date horaRecoleccion,
+            String tipoEntrega) throws ReglaNegocioException {
+        String entrega = tipoEntrega == null ? "" : tipoEntrega.trim().toUpperCase();
+        if (!Constantes.ENTREGA_LLEVAR.equals(entrega) && !Constantes.ENTREGA_AQUI.equals(entrega)) {
+            throw new ReglaNegocioException("Elige si lo recoges para llevar o lo comes en el negocio.");
+        }
         Usuario cliente = mAcceso.cliente(clienteId);
         Establecimiento est = mAcceso.establecimiento(establecimientoId);
         Date ahora = new Date();
@@ -106,6 +128,7 @@ public class MApartado {
         a.setHorarecoleccion(horaRecoleccion);
         a.setEstado(Constantes.APARTADO_PENDIENTE);
         a.setCodigocomprobante(nuevoCodigo());
+        a.setTipoentrega(entrega);
         BigDecimal total = BigDecimal.ZERO;
         List<Detalleapartado> detalles = new ArrayList<>();
         for (Map.Entry<Integer, Integer> e : porPlatillo.entrySet()) {
@@ -121,6 +144,7 @@ public class MApartado {
         }
         a.setDetalleapartadoList(detalles);
         a.setTotal(total.setScale(2, RoundingMode.HALF_UP));
+        a.setAnticipo(anticipoDe(a.getTotal()));
         em.persist(a);
         em.flush();
         return vista(a, ahora);
@@ -134,6 +158,26 @@ public class MApartado {
                 "SELECT a FROM Apartado a WHERE a.clienteid.id = :c ORDER BY a.fechacreacion DESC, a.id DESC", Apartado.class)
                 .setParameter("c", clienteId).setMaxResults(50).getResultList();
         return vistas(r);
+    }
+
+    /**
+     * Los negocios donde el cliente ya apartó (el más reciente primero): su atajo para volver a apartar sin
+     * escanear el QR otra vez. No es un directorio: solo aparecen negocios donde esa persona ya tiene un apartado.
+     */
+    public List<NegocioVista> negociosDelCliente(Integer clienteId) throws ReglaNegocioException {
+        mAcceso.cliente(clienteId);
+        List<Object[]> filas = em.createQuery(
+                "SELECT a.establecimientoid.id, MAX(a.fechacreacion), COUNT(a) FROM Apartado a WHERE a.clienteid.id = :c "
+                + "GROUP BY a.establecimientoid.id ORDER BY MAX(a.fechacreacion) DESC", Object[].class)
+                .setParameter("c", clienteId).setMaxResults(8).getResultList();
+        List<NegocioVista> salida = new ArrayList<>();
+        for (Object[] f : filas) {
+            Establecimiento e = em.find(Establecimiento.class, (Integer) f[0]);
+            if (e != null && e.getCodigoQR() != null) {
+                salida.add(new NegocioVista(e.getId(), e.getNombre(), e.getCodigoQR(), ((Number) f[2]).intValue()));
+            }
+        }
+        return salida;
     }
 
     /** El cliente cancela un apartado suyo que todavía no se paga. */
@@ -225,7 +269,7 @@ public class MApartado {
         return vistas(r);
     }
 
-    /** El negocio recibió el pago del anticipo: se registra y el apartado queda pagado (HU-13). */
+    /** El negocio recibió el anticipo: se registra y el apartado queda pagado, en preparación (HU-13). */
     public ApartadoVista registrarPago(Integer establecimientoId, Integer usuarioId, Integer apartadoId, String metodo,
             String referencia) throws ReglaNegocioException {
         Usuario u = mAcceso.administrador(establecimientoId, usuarioId);
@@ -252,10 +296,12 @@ public class MApartado {
             throw new ReglaNegocioException("La referencia puede tener hasta " + REFERENCIA_MAX + " caracteres.");
         }
         // Primero la caja (si está cerrada se detiene aquí y no queda nada a medias)
-        mCaja.ingresoDeApartado(est, u, a, m, a.getTotal(), ahora);
+        BigDecimal monto = a.getAnticipo();
+        mCaja.ingresoDeApartado(est, u, a, m, monto, ahora, "Anticipo del apartado " + a.getCodigocomprobante());
         Pago p = new Pago();
         p.setApartadoid(a);
-        p.setMonto(a.getTotal());
+        p.setMonto(monto);
+        p.setConcepto(Constantes.PAGO_ANTICIPO);
         p.setMetodo(m);
         p.setReferencia(ref);
         p.setEstado(Constantes.PAGO_CONFIRMADO);
@@ -266,8 +312,12 @@ public class MApartado {
             a.getPagoList().add(p);
         }
         a.setEstado(Constantes.APARTADO_PAGADO);
-        notificar(a, Constantes.NOTIF_PAGO, "Recibimos tu pago de $" + a.getTotal().setScale(2, RoundingMode.HALF_UP).toPlainString() + ". Tu apartado "
-                + codigoVisible(a) + " en " + est.getNombre() + " está confirmado; te avisaremos cuando esté listo.", ahora);
+        BigDecimal saldo = saldoDe(a);
+        notificar(a, Constantes.NOTIF_PAGO, (saldo.signum() > 0 ? "Recibimos tu anticipo de $" : "Recibimos tu pago de $")
+                + monto.setScale(2, RoundingMode.HALF_UP).toPlainString() + ". Tu apartado "
+                + codigoVisible(a) + " en " + est.getNombre() + " está confirmado; te avisaremos cuando esté listo."
+                + (saldo.signum() > 0 ? " El resto ($" + saldo.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                        + ") se paga al recogerlo." : ""), ahora);
         em.flush();
         return vista(a, ahora);
     }
@@ -290,10 +340,21 @@ public class MApartado {
         return vista(a, ahora);
     }
 
-    /** Entrega el pedido al cliente. Hay que escribir el código del comprobante y debe coincidir (HU-16). */
+    /** Entrega un apartado que ya no debe saldo (compatibilidad). */
     public ApartadoVista entregar(Integer establecimientoId, Integer usuarioId, Integer apartadoId, String codigo)
             throws ReglaNegocioException {
+        return entregar(establecimientoId, usuarioId, apartadoId, codigo, null, null);
+    }
+
+    /**
+     * Entrega el pedido al cliente (HU-16). Hay que escribir el código del comprobante y debe coincidir. Si queda
+     * saldo por cobrar, se cobra en ese momento con el método indicado y entra a la caja abierta.
+     */
+    public ApartadoVista entregar(Integer establecimientoId, Integer usuarioId, Integer apartadoId, String codigo,
+            String metodoSaldo, String referenciaSaldo) throws ReglaNegocioException {
         Usuario u = mAcceso.administrador(establecimientoId, usuarioId);
+        // Misma secuencia de bloqueos que registrarPago (primero la sucursal, luego el apartado): sin interbloqueos
+        Establecimiento est = em.find(Establecimiento.class, establecimientoId, LockModeType.PESSIMISTIC_WRITE);
         Apartado a = delNegocio(establecimientoId, apartadoId, true);
         if (!Constantes.APARTADO_LISTO.equals(a.getEstado())) {
             throw new ReglaNegocioException(Constantes.APARTADO_ENTREGADO.equals(a.getEstado())
@@ -307,6 +368,37 @@ public class MApartado {
             throw new ReglaNegocioException("El código no coincide con el de este apartado.");
         }
         Date ahora = new Date();
+        BigDecimal saldo = saldoDe(a);
+        if (saldo.signum() > 0) {
+            String m = metodoSaldo == null ? "" : metodoSaldo.trim().toUpperCase();
+            if (!Constantes.METODO_EFECTIVO.equals(m) && !Constantes.METODO_TARJETA.equals(m)
+                    && !Constantes.METODO_TRANSFERENCIA.equals(m)) {
+                throw new ReglaNegocioException("Elige cómo paga el resto ($" + saldo.toPlainString()
+                        + "): efectivo, tarjeta o transferencia.");
+            }
+            String ref = MComanda.limpiar(referenciaSaldo);
+            if (Constantes.METODO_TRANSFERENCIA.equals(m) && ref == null) {
+                throw new ReglaNegocioException("Escribe la referencia o clave de rastreo de la transferencia.");
+            }
+            if (ref != null && ref.length() > REFERENCIA_MAX) {
+                throw new ReglaNegocioException("La referencia puede tener hasta " + REFERENCIA_MAX + " caracteres.");
+            }
+            // Primero la caja: si está cerrada se detiene aquí y no queda nada a medias
+            mCaja.ingresoDeApartado(est, u, a, m, saldo, ahora, "Saldo del apartado " + a.getCodigocomprobante());
+            Pago p = new Pago();
+            p.setApartadoid(a);
+            p.setMonto(saldo);
+            p.setConcepto(Constantes.PAGO_SALDO);
+            p.setMetodo(m);
+            p.setReferencia(ref);
+            p.setEstado(Constantes.PAGO_CONFIRMADO);
+            p.setFecha(ahora);
+            p.setRegistradoporid(u);
+            em.persist(p);
+            if (a.getPagoList() != null) {
+                a.getPagoList().add(p);
+            }
+        }
         a.setEstado(Constantes.APARTADO_ENTREGADO);
         a.setFechaentrega(ahora);
         a.setEntregadoporid(u);
@@ -482,6 +574,26 @@ public class MApartado {
         return codigo.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
     }
 
+    /** El anticipo de un total: el {@link #ANTICIPO_PCT} %, a centavos (al medio centavo se sube). */
+    public static BigDecimal anticipoDe(BigDecimal total) {
+        BigDecimal t = total.setScale(2, RoundingMode.HALF_UP);
+        if (ANTICIPO_PCT >= 100) {
+            return t;
+        }
+        BigDecimal a = t.multiply(BigDecimal.valueOf(ANTICIPO_PCT)).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        if (a.signum() == 0 && t.signum() > 0) {
+            a = new BigDecimal("0.01");
+        }
+        return a;
+    }
+
+    /** Lo que se cobra al entregar: el total menos el anticipo. */
+    private BigDecimal saldoDe(Apartado a) {
+        BigDecimal anticipo = a.getAnticipo() == null ? a.getTotal() : a.getAnticipo();
+        BigDecimal debe = a.getTotal().subtract(anticipo);
+        return debe.signum() < 0 ? BigDecimal.ZERO : debe.setScale(2, RoundingMode.HALF_UP);
+    }
+
     private String codigoVisible(Apartado a) {
         String c = a.getCodigocomprobante();
         return c.length() > 3 ? c.substring(0, 3) + "-" + c.substring(3) : c;
@@ -507,6 +619,8 @@ public class MApartado {
         v.setFechaCreacion(a.getFechacreacion());
         v.setHoraRecoleccion(a.getHorarecoleccion());
         v.setTotal(a.getTotal());
+        v.setAnticipo(a.getAnticipo());
+        v.setTipoEntrega(a.getTipoentrega());
         v.setFechaEntrega(a.getFechaentrega());
         v.setEntregadoPor(a.getEntregadoporid() == null ? null : a.getEntregadoporid().getNombre());
         if (Constantes.APARTADO_PENDIENTE.equals(a.getEstado()) && a.getFechacreacion() != null) {
@@ -522,7 +636,14 @@ public class MApartado {
         }
         if (a.getPagoList() != null) {
             for (Pago p : a.getPagoList()) {
-                if (Constantes.PAGO_CONFIRMADO.equals(p.getEstado())) {
+                if (!Constantes.PAGO_CONFIRMADO.equals(p.getEstado())) {
+                    continue;
+                }
+                if (Constantes.PAGO_SALDO.equals(p.getConcepto())) {
+                    v.setMetodoSaldo(p.getMetodo());
+                    v.setReferenciaSaldo(p.getReferencia());
+                    v.setFechaSaldo(p.getFecha());
+                } else {
                     v.setMetodoPago(p.getMetodo());
                     v.setReferenciaPago(p.getReferencia());
                     v.setFechaPago(p.getFecha());

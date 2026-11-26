@@ -222,6 +222,7 @@ public class ComandasBean implements Serializable {
             mesa = null;
         } catch (ReglaNegocioException e) {
             Mensajes.error(e.getMessage());
+            Mensajes.marcarFallo(); // el pedido se queda abierto para corregirlo
         }
         refrescar();
     }
@@ -275,6 +276,28 @@ public class ComandasBean implements Serializable {
         int n = 0;
         for (LineaCarrito l : carrito) {
             n += l.cantidad;
+        }
+        return n;
+    }
+
+    /** Cuántas porciones de ese platillo lleva el pedido que se está armando (para la insignia de la carta). */
+    public int cantidadEnPedido(Integer platilloId) {
+        LineaCarrito l = buscarLinea(platilloId);
+        return l == null ? 0 : l.cantidad;
+    }
+
+    /** Comandas en curso (en la pestaña "Comandas"). */
+    public int getTotalActivas() {
+        return activas.size();
+    }
+
+    /** Comandas que cocina ya terminó y falta llevar a la mesa: el aviso de la pestaña. */
+    public int getTotalListas() {
+        int n = 0;
+        for (ComandaVista c : activas) {
+            if (c.isLista()) {
+                n++;
+            }
         }
         return n;
     }

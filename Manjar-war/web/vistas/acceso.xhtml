@@ -62,8 +62,8 @@
                             <h:link value="Registra tu negocio" outcome="/vistas/registro-negocio"/>
                         </h:panelGroup>
 
-                        <h:panelGroup layout="block" styleClass="manjar-hint" rendered="#{accesoBean.modoDesarrollo}">
-                            <strong>Cuentas de prueba (solo en desarrollo)</strong>
+                        <h:panelGroup layout="block" styleClass="manjar-hint" rendered="#{accesoBean.modoDemo}">
+                            <strong>Cuentas de demostración</strong>
                             Toca una para llenar el formulario. Contraseña de todas: <code>Manjar123</code>
                             <div class="mj-rapido">
                                 <button type="button" onclick="mjRellenar('dueno@manjar.test')">Dueño</button>

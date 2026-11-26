@@ -19,6 +19,7 @@
             <ui:define name="contenido">
                 <h:outputScript library="js" name="qrcode.js"/>
                 <h:outputScript library="js" name="mj-qr.js"/>
+                <h:outputScript library="js" name="mj-copiar.js"/>
 
                 <div class="mj-pagina-cab">
                     <div>
@@ -28,7 +29,7 @@
                     </div>
                 </div>
 
-                <div id="mj-qr-datos" data-ruta="#{qrBean.rutaMenu}" data-codigo="#{qrBean.codigo}"></div>
+                <div id="mj-qr-datos" data-ruta="#{qrBean.rutaMenu}" data-codigo="#{qrBean.codigo}" data-base="#{qrBean.urlPublica}"></div>
 
                 <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty qrBean.codigo}">
                     Tu cuenta todavía no tiene un negocio asignado.
@@ -51,14 +52,26 @@
                                 <span class="mj-ayuda">Es la dirección desde la que tus clientes abren Manjar. El QR lleva esta dirección más la de tu menú.</span>
                             </div>
                             <p id="mj-qr-aviso" class="manjar-aviso warn" style="display:none"></p>
-                            <p id="mj-qr-local" class="manjar-aviso warn" style="display:none">
-                                Esta dirección es de tu propia computadora (localhost): el QR solo funcionará en ella.
-                                Para probarlo con un celular conectado a la misma red, escribe aquí la dirección de tu
-                                computadora, por ejemplo <code>http://192.168.1.20:8080</code>.
-                            </p>
+                            <div id="mj-qr-local" class="manjar-aviso warn" style="display:none">
+                                <strong>Este QR todavía no se puede abrir desde un celular.</strong>
+                                Ahora lleva la dirección de esta computadora (localhost) y solo funciona en ella.
+                                <h:panelGroup rendered="#{not empty qrBean.direccionesRed}">
+                                    Si el celular está conectado a la misma red Wi‑Fi, elige una de estas direcciones:
+                                    <span class="mj-qr-redes">
+                                        <ui:repeat var="d" value="#{qrBean.direccionesRed}">
+                                            <button type="button" class="manjar-btn manjar-btn-sec mj-qr-red" data-url="#{d}">#{d}</button>
+                                        </ui:repeat>
+                                    </span>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{empty qrBean.direccionesRed}">
+                                    Escribe arriba la dirección de esta computadora en la red, por ejemplo <code>http://192.168.1.20:8080</code>.
+                                </h:panelGroup>
+                                Cuando Manjar esté publicado en internet, el QR llevará la dirección pública de tu negocio.
+                            </div>
                             <div class="manjar-actions">
                                 <button type="button" class="mj-boton" onclick="mjDescargarQr()">Descargar imagen (PNG)</button>
                                 <button type="button" class="mj-boton sec" onclick="mjImprimirQr()">Imprimir</button>
+                                <button type="button" class="mj-boton sec" data-copiar-de="mj-qr-enlace" id="mj-qr-copiar">Copiar enlace</button>
                                 <a id="mj-qr-abrir" class="manjar-btn manjar-btn-sec" href="#" target="_blank" rel="noopener">Abrir el menú</a>
                             </div>
                         </div>

@@ -95,6 +95,19 @@ public class Apartado implements Serializable {
     @ManyToOne
     private Usuario entregadoporid;
 
+    /** Lo que se paga al apartar (por omisión el 50 % del total); el resto se cobra al entregar. */
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "ANTICIPO")
+    private BigDecimal anticipo;
+
+    /** LLEVAR (se recoge para llevar) o AQUI (se come en el negocio, sin mesa asignada). */
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 10)
+    @Column(name = "TIPOENTREGA")
+    private String tipoentrega;
+
     public Apartado() {
     }
 
@@ -206,6 +219,22 @@ public class Apartado implements Serializable {
 
     public void setFechaentrega(Date fechaentrega) {
         this.fechaentrega = fechaentrega;
+    }
+
+    public BigDecimal getAnticipo() {
+        return anticipo;
+    }
+
+    public void setAnticipo(BigDecimal anticipo) {
+        this.anticipo = anticipo;
+    }
+
+    public String getTipoentrega() {
+        return tipoentrega;
+    }
+
+    public void setTipoentrega(String tipoentrega) {
+        this.tipoentrega = tipoentrega;
     }
 
     public Usuario getEntregadoporid() {

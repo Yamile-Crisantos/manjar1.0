@@ -21,10 +21,15 @@ public class ApartadoVista implements Serializable {
     private Date horaRecoleccion;
     private Date venceEn;
     private BigDecimal total = BigDecimal.ZERO;
+    private BigDecimal anticipo = BigDecimal.ZERO;
+    private String tipoEntrega = Constantes.ENTREGA_LLEVAR;
     private final List<ComandaVista.Linea> lineas = new ArrayList<>();
     private String metodoPago;
     private String referenciaPago;
     private Date fechaPago;
+    private String metodoSaldo;
+    private String referenciaSaldo;
+    private Date fechaSaldo;
     private Date fechaEntrega;
     private String entregadoPor;
     private int minutosParaVencer;
@@ -68,10 +73,10 @@ public class ApartadoVista implements Serializable {
 
     public String getEstadoTexto() {
         if (isPendiente()) {
-            return "Esperando pago";
+            return isConSaldo() ? "Esperando anticipo" : "Esperando pago";
         }
         if (isPagado()) {
-            return "Pagado";
+            return "En preparación";
         }
         if (isListo()) {
             return "Listo para recoger";
@@ -86,6 +91,49 @@ public class ApartadoVista implements Serializable {
             return "Venció sin pago";
         }
         return estado;
+    }
+
+    /** Lo que falta por pagar y se cobra al entregar (el total menos el anticipo). */
+    public BigDecimal getSaldo() {
+        BigDecimal s = total.subtract(anticipo);
+        return s.signum() < 0 ? BigDecimal.ZERO : s;
+    }
+
+    /** true si el cliente todavía debe un resto que se cobra al entregar. */
+    public boolean isPorCobrarAlEntregar() {
+        return getSaldo().signum() > 0 && fechaSaldo == null && (isPendiente() || isPagado() || isListo());
+    }
+
+    public boolean isConSaldo() {
+        return getSaldo().signum() > 0;
+    }
+
+    public boolean isAqui() {
+        return Constantes.ENTREGA_AQUI.equals(tipoEntrega);
+    }
+
+    public String getTipoEntregaTexto() {
+        return isAqui() ? "Comer aquí" : "Para llevar";
+    }
+
+    /**
+     * Paso de la barra de avance que ve el cliente: 1 Pedido tomado, 2 En preparación (ya pagó el anticipo),
+     * 3 Listo para recoger, 4 Entregado. 0 si se canceló o venció (no avanza).
+     */
+    public int getPaso() {
+        if (isPendiente()) {
+            return 1;
+        }
+        if (isPagado()) {
+            return 2;
+        }
+        if (isListo()) {
+            return 3;
+        }
+        if (isEntregado()) {
+            return 4;
+        }
+        return 0;
     }
 
     public int getPorciones() {
@@ -174,6 +222,56 @@ public class ApartadoVista implements Serializable {
 
     public void setTotal(BigDecimal total) {
         this.total = total == null ? BigDecimal.ZERO : total;
+    }
+
+    public BigDecimal getAnticipo() {
+        return anticipo;
+    }
+
+    public void setAnticipo(BigDecimal anticipo) {
+        this.anticipo = anticipo == null ? BigDecimal.ZERO : anticipo;
+    }
+
+    public String getTipoEntrega() {
+        return tipoEntrega;
+    }
+
+    public void setTipoEntrega(String tipoEntrega) {
+        this.tipoEntrega = tipoEntrega;
+    }
+
+    public String getMetodoSaldo() {
+        return metodoSaldo;
+    }
+
+    public void setMetodoSaldo(String metodoSaldo) {
+        this.metodoSaldo = metodoSaldo;
+    }
+
+    public String getMetodoSaldoTexto() {
+        if (Constantes.METODO_TARJETA.equals(metodoSaldo)) {
+            return "Tarjeta";
+        }
+        if (Constantes.METODO_TRANSFERENCIA.equals(metodoSaldo)) {
+            return "Transferencia";
+        }
+        return metodoSaldo == null ? "" : "Efectivo";
+    }
+
+    public String getReferenciaSaldo() {
+        return referenciaSaldo;
+    }
+
+    public void setReferenciaSaldo(String referenciaSaldo) {
+        this.referenciaSaldo = referenciaSaldo;
+    }
+
+    public Date getFechaSaldo() {
+        return fechaSaldo;
+    }
+
+    public void setFechaSaldo(Date fechaSaldo) {
+        this.fechaSaldo = fechaSaldo;
     }
 
     public List<ComandaVista.Linea> getLineas() {

@@ -7,6 +7,10 @@
     <body>
         <!-- Platillos y total de un apartado. Parámetro: ap = el apartado (ApartadoVista) -->
         <ui:composition>
+            <div class="mj-apartado-chips">
+                <span class="mj-chip-tipo #{ap.aqui ? 'aqui' : ''}">#{ap.tipoEntregaTexto}</span>
+                <span class="manjar-muted">Recoge a las <strong>#{fmt.hora(ap.horaRecoleccion)}</strong></span>
+            </div>
             <ul class="mj-ticket-lineas">
                 <ui:repeat var="l" value="#{ap.lineas}">
                     <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/></li>
@@ -14,12 +18,22 @@
             </ul>
             <footer class="mj-ticket-pie">
                 <span class="manjar-muted">
-                    <h:outputText value="#{ap.metodoPagoTexto}" rendered="#{not empty ap.metodoPago}"/>
+                    <h:outputText value="Anticipo: #{ap.metodoPagoTexto}" rendered="#{not empty ap.metodoPago and ap.conSaldo}"/>
+                    <h:outputText value="#{ap.metodoPagoTexto}" rendered="#{not empty ap.metodoPago and not ap.conSaldo}"/>
                     <h:outputText value=" · ref. #{ap.referenciaPago}" rendered="#{not empty ap.referenciaPago}"/>
-                    <h:outputText value="Recoge a las #{fmt.hora(ap.horaRecoleccion)}" rendered="#{empty ap.metodoPago}"/>
                 </span>
                 <strong>$<h:outputText value="#{ap.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
             </footer>
+            <h:panelGroup layout="block" styleClass="mj-desglose" rendered="#{ap.conSaldo}">
+                <div class="mj-desglose-fila #{ap.pendiente ? 'destacada' : ''}">
+                    <span>#{ap.pendiente ? 'Anticipo por cobrar' : 'Anticipo cobrado'}</span>
+                    <strong>$<h:outputText value="#{ap.anticipo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                </div>
+                <div class="mj-desglose-fila #{ap.listo ? 'destacada' : ''}">
+                    <span>#{ap.pendiente or ap.pagado or ap.listo ? 'Resto por cobrar al entregar' : 'Resto cobrado'}</span>
+                    <strong>$<h:outputText value="#{ap.saldo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                </div>
+            </h:panelGroup>
         </ui:composition>
     </body>
 </html>

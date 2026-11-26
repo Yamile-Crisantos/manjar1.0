@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
     <body>
         <ui:composition template="/plantillas/plantilla.xhtml">
 
@@ -26,17 +27,29 @@
                     Tu rol (#{sesion.rolNombre}) no tiene permiso para abrir esa sección.
                 </h:panelGroup>
 
-                <h1>Hola, #{sesion.nombre}</h1>
-                <p class="mj-lead">
-                    #{sesion.rolNombre}<h:outputText value=" · #{sesion.establecimientoNombre}" rendered="#{not empty sesion.establecimientoNombre}"/>
-                </p>
+                <div class="mj-saludo">
+                    <i class="mj-ico i-plato mj-saludo-ico" aria-hidden="true"></i>
+                    <h1>Hola, #{sesion.nombre}</h1>
+                    <p class="mj-lead">
+                        #{sesion.rolNombre}<h:outputText value=" · #{sesion.establecimientoNombre}" rendered="#{not empty sesion.establecimientoNombre}"/>
+                    </p>
+                </div>
+
+                <!-- Cliente: lo primero que debe ver es si su pedido ya está listo -->
+                <h:panelGroup layout="block" styleClass="mj-banner-listo" rendered="#{sesion.cliente and panelBean.apartadosListos gt 0}">
+                    <div>
+                        <strong>¡Tienes #{panelBean.apartadosListos} pedido#{panelBean.apartadosListos == 1 ? '' : 's'} listo#{panelBean.apartadosListos == 1 ? '' : 's'} para recoger!</strong>
+                        <span>Muestra tu código en el negocio y paga el resto si te queda saldo.</span>
+                    </div>
+                    <h:link value="Ver mis apartados" outcome="/vistas/apartar" styleClass="manjar-btn"/>
+                </h:panelGroup>
 
                 <h:panelGroup layout="block" styleClass="manjar-stats" rendered="#{sesion.personal}">
-                    <div class="manjar-stat"><b>#{panelBean.totalPlatillos}</b><span>Platillos en el menú</span></div>
-                    <div class="manjar-stat ok"><b>#{panelBean.platillosDisponibles}</b><span>Disponibles</span></div>
-                    <div class="manjar-stat off"><b>#{panelBean.platillosAgotados}</b><span>Agotados</span></div>
+                    <div class="manjar-stat"><i class="mj-chip-ico sm" aria-hidden="true"><i class="mj-ico i-cubiertos"></i></i><div><b>#{panelBean.totalPlatillos}</b><span>Platillos en el menú</span></div></div>
+                    <div class="manjar-stat ok"><i class="mj-chip-ico sm" aria-hidden="true"><i class="mj-ico i-check"></i></i><div><b>#{panelBean.platillosDisponibles}</b><span>Disponibles</span></div></div>
+                    <div class="manjar-stat off"><i class="mj-chip-ico sm" aria-hidden="true"><i class="mj-ico i-reloj"></i></i><div><b>#{panelBean.platillosAgotados}</b><span>Agotados</span></div></div>
                     <h:panelGroup layout="block" styleClass="manjar-stat" rendered="#{sesion.dueno}">
-                        <b>#{panelBean.personalActivo}</b><span>Personal activo</span>
+                        <i class="mj-chip-ico sm" aria-hidden="true"><i class="mj-ico i-usuarios"></i></i><div><b>#{panelBean.personalActivo}</b><span>Personal activo</span></div>
                     </h:panelGroup>
                 </h:panelGroup>
 
@@ -58,83 +71,109 @@
                 <div class="mj-acciones">
 
                     <h:link outcome="/vistas/platillos" styleClass="mj-accion" rendered="#{sesion.administra}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-cubiertos"></i></i>
                         <strong>Menú y disponibilidad</strong>
                         <span>Crea platillos, cambia precios y controla las porciones del día.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/negocio" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-estilo"></i></i>
                         <strong>Mi negocio</strong>
                         <span>Personaliza el color y el lema de tu menú público.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/qr" styleClass="mj-accion" rendered="#{sesion.administra}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-qr"></i></i>
                         <strong>Código QR</strong>
                         <span>Descarga o imprime el QR que lleva a tu menú.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/personal" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-usuarios"></i></i>
                         <strong>Personal</strong>
                         <span>Da de alta cuentas de gerente y meseros para tu negocio.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/comandas" styleClass="mj-accion" rendered="#{sesion.personal}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-comanda"></i></i>
                         <strong>Comandas</strong>
                         <span>Registra pedidos por mesa y sigue su avance hasta la entrega.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/caja" styleClass="mj-accion" rendered="#{sesion.administra}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-caja"></i></i>
                         <strong>Caja</strong>
                         <span>Apertura, cobro de cuentas, retiros y gastos, y corte del día.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/apartados" styleClass="mj-accion" rendered="#{sesion.administra}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-apartado"></i></i>
                         <strong>Apartados</strong>
                         <span>Registra el pago de los apartados, márcalos listos y entrégalos con su código.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/sucursales" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-sucursal"></i></i>
                         <strong>Sucursales</strong>
                         <span>Registra sucursales, asigna a su gerente y elige cuál operas.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/reportes" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-reporte"></i></i>
                         <strong>Reportes</strong>
                         <span>Ventas y ganancia por periodo, platillo y mesero.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/consolidado" styleClass="mj-accion" rendered="#{sesion.dueno}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-tienda"></i></i>
                         <strong>Vista consolidada</strong>
                         <span>Todas tus sucursales en una sola pantalla.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/menu" styleClass="mj-accion" rendered="#{sesion.personal}">
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-plato"></i></i>
                         <strong>Mi menú público</strong>
                         <span>Así lo ven tus clientes cuando escanean el QR.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/menu" styleClass="mj-accion" rendered="#{sesion.cliente and sesion.menuReciente}">
                         <f:param name="q" value="#{sesion.ultimoMenuCodigo}"/>
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-plato"></i></i>
                         <strong>El menú que viste</strong>
                         <span><h:outputText value="#{sesion.ultimoMenuNombre}"/>: qué hay hoy y qué platillos ya se agotaron.</span>
                     </h:link>
 
                     <h:link outcome="/vistas/apartar" styleClass="mj-accion" rendered="#{sesion.cliente}">
-                        <strong>Mis apartados</strong>
-                        <span>Aparta y paga por adelantado tus platillos.</span>
+                        <i class="mj-chip-ico" aria-hidden="true"><i class="mj-ico i-bolsa"></i></i>
+                        <strong>Apartar y mis pedidos</strong>
+                        <span>
+                            <h:outputText value="Tienes #{panelBean.apartadosActivos} en curso: mira cómo avanzan."
+                                          rendered="#{panelBean.apartadosActivos gt 0}"/>
+                            <h:outputText value="Aparta para llevar o para comer en el negocio; pagas un anticipo y el resto al recoger."
+                                          rendered="#{panelBean.apartadosActivos == 0}"/>
+                        </span>
                     </h:link>
 
                 </div>
 
-                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{sesion.cliente and not sesion.menuReciente}">
-                    Cada negocio comparte su menú con su propio código QR: escanéalo con tu celular para ver qué hay hoy y apartar platillos.
+                <!-- Cliente: llegar a un negocio sin escanear de nuevo su QR (sus negocios o el código del negocio) -->
+                <h:panelGroup layout="block" styleClass="mj-elegir mj-elegir-panel" rendered="#{sesion.cliente}">
+                    <h2 class="mj-titulo-seccion">Mis negocios</h2>
+                    <p class="mj-lead" style="margin-top:0">
+                        Cada negocio comparte su menú con su propio código QR. Aquí quedan los negocios donde ya apartaste, y también
+                        puedes escribir el código de otro.
+                    </p>
+                    <ui:include src="/WEB-INF/fragmentos/elegir-negocio.xhtml"/>
                 </h:panelGroup>
 
                 <h:panelGroup layout="block" styleClass="mj-linkbox" rendered="#{sesion.administra}">
                     <div>
                         <strong>Enlace público de tu menú</strong>
-                        <code>#{panelBean.enlaceMenu}</code>
+                        <code id="mj-enlace-menu">#{panelBean.enlaceMenu}</code>
                         <span class="manjar-muted">Es el que lleva tu código QR. <h:link value="Descargar o imprimir el QR" outcome="/vistas/qr"/></span>
                     </div>
+                    <button type="button" class="manjar-btn manjar-btn-sec" data-copiar-de="mj-enlace-menu">Copiar enlace</button>
+                    <h:outputScript library="js" name="mj-copiar.js"/>
                 </h:panelGroup>
             </ui:define>
 

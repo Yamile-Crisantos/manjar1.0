@@ -147,13 +147,28 @@ public class ComandaVista implements Serializable {
     // ------------------------------------------------------------------
     // Derivados para la pantalla
     // ------------------------------------------------------------------
-    /** "Mesa 4" o "Para llevar · Ana". */
+    /** "Mesa 4", "Comer aquí · Juan" o "Para llevar · Ana". */
     public String getEtiqueta() {
-        boolean llevar = Constantes.TIPO_LLEVAR.equals(tipo);
-        if (llevar) {
-            return mesa == null || mesa.isEmpty() ? "Para llevar" : "Para llevar · " + mesa;
+        return etiqueta(tipo, mesa);
+    }
+
+    /**
+     * Cómo se nombra una comanda: "Para llevar · Ana", "Mesa 4", "Mesa Terraza 2" o, si lo escrito no tiene
+     * ningún número (un nombre), "Comer aquí · Juan". El campo se llama "Mesa o nombre".
+     */
+    public static String etiqueta(String tipo, String mesa) {
+        boolean vacia = mesa == null || mesa.trim().isEmpty();
+        if (Constantes.TIPO_LLEVAR.equals(tipo)) {
+            return vacia ? "Para llevar" : "Para llevar · " + mesa;
         }
-        return mesa == null || mesa.isEmpty() ? "Mesa" : "Mesa " + mesa;
+        if (vacia) {
+            return "Comer aquí";
+        }
+        String m = mesa.trim();
+        if (m.toLowerCase().startsWith("mesa")) {
+            return m;
+        }
+        return m.matches(".*\\d.*") ? "Mesa " + m : "Comer aquí · " + m;
     }
 
     public boolean isLlevar() {
