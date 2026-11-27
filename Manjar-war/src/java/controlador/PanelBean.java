@@ -4,6 +4,9 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.List;
+import logicaneg.ApartadoVista;
+import logicaneg.MApartado;
 import logicaneg.MEstablecimiento;
 import logicaneg.MPlatillo;
 import logicaneg.MUsuario;
@@ -25,6 +28,9 @@ public class PanelBean {
     @EJB
     private MEstablecimiento mEstablecimiento;
 
+    @EJB
+    private MApartado mApartado;
+
     @Inject
     private SesionBean sesion;
 
@@ -33,6 +39,7 @@ public class PanelBean {
 
     private Long totalPlatillos;
     private Long platillosDisponibles;
+    private List<ApartadoVista> apartadosCliente;
 
     public boolean isAccesoDenegado() {
         return "denegado".equals(acceso);
@@ -87,6 +94,45 @@ public class PanelBean {
         }
         String codigo = mEstablecimiento.codigoQR(sesion.getEstablecimientoId());
         return codigo == null ? "" : Enlaces.menuCompleto(codigo);
+    }
+
+    // ------------------------------------------------------------------
+    // Panel del cliente: lo que le interesa saber al entrar
+    // ------------------------------------------------------------------
+    private List<ApartadoVista> apartadosCliente() {
+        if (apartadosCliente == null) {
+            apartadosCliente = new java.util.ArrayList<>();
+            if (sesion.isCliente()) {
+                try {
+                    apartadosCliente = mApartado.delCliente(sesion.getUsuarioId());
+                } catch (ReglaNegocioException e) {
+                    // sin datos: el panel se muestra sin el resumen
+                }
+            }
+        }
+        return apartadosCliente;
+    }
+
+    /** Apartados en curso (por pagar, pagados o listos). */
+    public int getApartadosActivos() {
+        int n = 0;
+        for (ApartadoVista a : apartadosCliente()) {
+            if (a.isActivo()) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** Apartados que ya se pueden recoger: el aviso más importante del panel. */
+    public int getApartadosListos() {
+        int n = 0;
+        for (ApartadoVista a : apartadosCliente()) {
+            if (a.isListo()) {
+                n++;
+            }
+        }
+        return n;
     }
 
     public String getAcceso() {

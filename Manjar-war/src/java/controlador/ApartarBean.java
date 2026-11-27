@@ -14,6 +14,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import logicaneg.ApartadoVista;
+import logicaneg.Constantes;
 import logicaneg.ItemMenu;
 import logicaneg.LineaPedido;
 import logicaneg.MApartado;
@@ -113,6 +114,8 @@ public class ApartarBean implements Serializable {
     private final Map<Integer, ItemMenu> menuPorId = new LinkedHashMap<>();
     private List<String> horas = new ArrayList<>();
     private String hora;
+    /** LLEVAR (se recoge para llevar) o AQUI (se come en el negocio, sin mesa). */
+    private String tipoEntrega = Constantes.ENTREGA_LLEVAR;
 
     private List<ApartadoVista> misApartados = new ArrayList<>();
     private List<NotificacionVista> avisos = new ArrayList<>();
@@ -237,12 +240,13 @@ public class ApartarBean implements Serializable {
             pedido.add(new LineaPedido(l.platilloId, l.cantidad, null));
         }
         try {
-            ApartadoVista a = mApartado.crear(sesion.getUsuarioId(), negocioId, pedido, fechaDeHora(hora));
+            ApartadoVista a = mApartado.crear(sesion.getUsuarioId(), negocioId, pedido, fechaDeHora(hora), tipoEntrega);
             recienCreado = a.getId();
             carrito.clear();
             Mensajes.info("Apartado creado. Tu código es " + a.getCodigoVisible() + ".");
         } catch (ReglaNegocioException e) {
             Mensajes.error(e.getMessage());
+            Mensajes.marcarFallo(); // la pantalla se queda en el pedido para corregirlo
         }
         refrescarMenu();
         refrescarMis();
@@ -339,6 +343,65 @@ public class ApartarBean implements Serializable {
             n += l.cantidad;
         }
         return n;
+    }
+
+    /** Lo que se paga al apartar (el anticipo) del pedido que se está armando. */
+    public BigDecimal getAnticipoCarrito() {
+        return MApartado.anticipoDe(getTotalCarrito());
+    }
+
+    /** Lo que se paga al recoger: el total menos el anticipo. */
+    public BigDecimal getSaldoCarrito() {
+        return getTotalCarrito().subtract(getAnticipoCarrito());
+    }
+
+    public int getPorcentajeAnticipo() {
+        return MApartado.ANTICIPO_PCT;
+    }
+
+    /** true si el apartado se paga por partes (anticipo y resto al recoger). */
+    public boolean isConAnticipo() {
+        return MApartado.ANTICIPO_PCT < 100;
+    }
+
+    /** Cuántas porciones de ese platillo lleva el pedido (para la insignia de la carta). */
+    public int cantidadEnPedido(Integer platilloId) {
+        Linea l = buscarLinea(platilloId);
+        return l == null ? 0 : l.cantidad;
+    }
+
+    /** Apartados en curso del cliente (en la pestaña "Mis apartados"). */
+    public int getTotalActivos() {
+        int n = 0;
+        for (ApartadoVista a : misApartados) {
+            if (a.isActivo()) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /** Apartados que ya están listos para recoger: el aviso de la pestaña. */
+    public int getTotalListos() {
+        int n = 0;
+        for (ApartadoVista a : misApartados) {
+            if (a.isListo()) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    public boolean isAqui() {
+        return Constantes.ENTREGA_AQUI.equals(tipoEntrega);
+    }
+
+    public String getTipoEntrega() {
+        return tipoEntrega;
+    }
+
+    public void setTipoEntrega(String tipoEntrega) {
+        this.tipoEntrega = tipoEntrega;
     }
 
     public int getMinutosRetencion() {

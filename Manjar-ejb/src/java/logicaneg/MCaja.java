@@ -200,17 +200,22 @@ public class MCaja {
     }
 
     /**
-     * Para los apartados (HU-13/15): el pago en efectivo de un apartado entra a la caja abierta de la sucursal.
+     * Para los apartados (HU-13/15/16): el anticipo o el saldo de un apartado entra a la caja abierta de la sucursal.
      * No es público para las pantallas: lo llama MApartado, que ya revisó quién es quién.
      */
     public Movimientocaja ingresoDeApartado(Establecimiento est, Usuario quien, modelo.Apartado apartado,
             String metodo, BigDecimal monto, Date ahora) throws ReglaNegocioException {
+        return ingresoDeApartado(est, quien, apartado, metodo, monto, ahora, "Pago del apartado " + apartado.getCodigocomprobante());
+    }
+
+    public Movimientocaja ingresoDeApartado(Establecimiento est, Usuario quien, modelo.Apartado apartado,
+            String metodo, BigDecimal monto, Date ahora, String concepto) throws ReglaNegocioException {
         Caja caja = cajaAbierta(est.getId());
         if (caja == null) {
             throw new ReglaNegocioException("Abre la caja antes de registrar este pago.");
         }
         Movimientocaja mov = nuevoMovimiento(caja, quien, Constantes.MOV_INGRESO, Constantes.CLASE_APARTADO, metodo(metodo),
-                monto, "Pago del apartado " + apartado.getCodigocomprobante(), ahora);
+                monto, concepto, ahora);
         mov.setApartadoid(apartado);
         em.persist(mov);
         return mov;
@@ -351,11 +356,7 @@ public class MCaja {
     }
 
     private String etiqueta(Comanda c) {
-        String mesa = MComanda.limpiar(c.getMesa());
-        if (Constantes.TIPO_LLEVAR.equals(c.getTipo())) {
-            return "comanda " + c.getId() + " (para llevar" + (mesa == null ? "" : " · " + mesa) + ")";
-        }
-        return "comanda " + c.getId() + " (mesa " + (mesa == null ? "" : mesa) + ")";
+        return "comanda " + c.getId() + " (" + ComandaVista.etiqueta(c.getTipo(), MComanda.limpiar(c.getMesa())) + ")";
     }
 
     /** Totales de una caja: suma los movimientos agrupándolos por tipo y forma de pago. */

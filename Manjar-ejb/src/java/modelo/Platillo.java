@@ -71,6 +71,10 @@ public class Platillo implements Serializable {
     private Integer estado;
     @Column(name = "COSTO")
     private BigDecimal costo;
+    /** Foto del platillo: un enlace http/https o la ruta interna "imagen/platillo/<id>?v=<n>" de una foto subida. */
+    @Size(max = 500)
+    @Column(name = "IMAGENURL")
+    private String imagenurl;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "platilloid")
     private List<Detalleapartado> detalleapartadoList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "platilloid")
@@ -93,6 +97,14 @@ public class Platillo implements Serializable {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
+    }
+
+    public String getImagenurl() {
+        return imagenurl;
+    }
+
+    public void setImagenurl(String imagenurl) {
+        this.imagenurl = imagenurl;
     }
 
     public Integer getId() {

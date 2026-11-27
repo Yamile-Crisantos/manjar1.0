@@ -15,6 +15,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import modelo.Categoria;
 import modelo.Establecimiento;
+import modelo.Imagenplatillo;
 import modelo.Platillo;
 
 /**
@@ -38,6 +39,9 @@ import modelo.Platillo;
 public class MPlatillo {
 
     private static final BigDecimal PRECIO_MAXIMO = new BigDecimal("99999999.99");
+
+    /** Ruta (dentro de la aplicación) de las fotos que sube el dueño: imagen/platillo/<id>?v=<n>. */
+    public static final String RUTA_IMAGEN = "imagen/platillo/";
 
     @PersistenceContext(unitName = "Manjar-ejbPU")
     private EntityManager em;
@@ -80,7 +84,8 @@ public class MPlatillo {
                 continue;
             }
             items.add(new ItemMenu(p.getId(), p.getNombre(), p.getDescripcion(),
-                    p.getCategoriaid() == null ? "" : p.getCategoriaid().getNombre(), p.getPrecio(), restante));
+                    p.getCategoriaid() == null ? "" : p.getCategoriaid().getNombre(), p.getPrecio(), restante,
+                    p.getImagenurl()));
         }
         return items;
     }
@@ -165,12 +170,25 @@ public class MPlatillo {
      */
     public Platillo guardar(Integer establecimientoId, Integer usuarioId, Integer categoriaId, Platillo datos,
             boolean disponible) throws ReglaNegocioException {
-        mAcceso.administrador(establecimientoId, usuarioId);
-        return guardar(establecimientoId, categoriaId, datos, disponible);
+        return guardar(establecimientoId, usuarioId, categoriaId, datos, disponible, null, false);
     }
 
-    private Platillo guardar(Integer establecimientoId, Integer categoriaId, Platillo datos, boolean disponible)
-            throws ReglaNegocioException {
+    /**
+     * Igual que {@link #guardar(Integer, Integer, Integer, Platillo, boolean)} y además maneja la foto del platillo:
+     *  - imagenArchivo: foto que subió el dueño ("data:image/jpeg;base64,..."); gana sobre el enlace;
+     *  - datos.getImagenurl(): enlace http/https a una foto (si se manda, reemplaza la foto subida);
+     *  - quitarImagen: borra la foto (subida o enlace);
+     *  - si no se manda nada de lo anterior, la foto actual no cambia.
+     * La foto y el enlace se validan antes de tocar el platillo: si algo falla no se guarda nada.
+     */
+    public Platillo guardar(Integer establecimientoId, Integer usuarioId, Integer categoriaId, Platillo datos,
+            boolean disponible, String imagenArchivo, boolean quitarImagen) throws ReglaNegocioException {
+        mAcceso.administrador(establecimientoId, usuarioId);
+        return guardar(establecimientoId, categoriaId, datos, disponible, imagenArchivo, quitarImagen);
+    }
+
+    private Platillo guardar(Integer establecimientoId, Integer categoriaId, Platillo datos, boolean disponible,
+            String imagenArchivo, boolean quitarImagen) throws ReglaNegocioException {
         Establecimiento est = buscarEstablecimiento(establecimientoId);
 
         // --- validaciones ---
@@ -201,6 +219,9 @@ public class MPlatillo {
                 || !categoria.getEstablecimientoid().getId().equals(establecimientoId)) {
             throw new ReglaNegocioException("Elige una categoría de tu negocio.");
         }
+        // La foto se valida antes de guardar nada
+        String enlace = ImagenUtil.validarEnlace(datos.getImagenurl());
+        byte[] foto = imagenArchivo == null || imagenArchivo.trim().isEmpty() ? null : ImagenUtil.normalizarJpeg(imagenArchivo);
 
         // --- crear o localizar ---
         boolean nuevo = datos.getId() == null;
@@ -248,7 +269,52 @@ public class MPlatillo {
         } else {
             platilloFacade.edit(p);
         }
+        if (foto != null) {
+            guardarFoto(p, foto);
+        } else if (quitarImagen) {
+            borrarFoto(p);
+            p.setImagenurl(null);
+        } else if (enlace != null) {
+            borrarFoto(p);
+            p.setImagenurl(enlace);
+        }
         return p;
+    }
+
+    // ------------------------------------------------------------------
+    // Fotos de los platillos
+    // ------------------------------------------------------------------
+    /** La foto subida de un platillo, para servirla a los clientes (el menú es público). null si no tiene. */
+    public FotoPlatillo foto(Integer platilloId) {
+        if (platilloId == null) {
+            return null;
+        }
+        List<Imagenplatillo> r = em.createQuery("SELECT i FROM Imagenplatillo i WHERE i.platilloid.id = :p", Imagenplatillo.class)
+                .setParameter("p", platilloId).setMaxResults(1).getResultList();
+        if (r.isEmpty()) {
+            return null;
+        }
+        Imagenplatillo i = r.get(0);
+        return new FotoPlatillo(i.getTipomime(), i.getDatos(), i.getFecha());
+    }
+
+    private void guardarFoto(Platillo p, byte[] foto) {
+        List<Imagenplatillo> r = em.createQuery("SELECT i FROM Imagenplatillo i WHERE i.platilloid.id = :p", Imagenplatillo.class)
+                .setParameter("p", p.getId()).setMaxResults(1).getResultList();
+        Imagenplatillo i = r.isEmpty() ? new Imagenplatillo() : r.get(0);
+        i.setPlatilloid(p);
+        i.setTipomime("image/jpeg");
+        i.setDatos(foto);
+        i.setTamano(foto.length);
+        i.setFecha(new Date());
+        if (r.isEmpty()) {
+            em.persist(i);
+        }
+        p.setImagenurl(RUTA_IMAGEN + p.getId() + "?v=" + System.currentTimeMillis());
+    }
+
+    private void borrarFoto(Platillo p) {
+        em.createQuery("DELETE FROM Imagenplatillo i WHERE i.platilloid.id = :p").setParameter("p", p.getId()).executeUpdate();
     }
 
     public void eliminar(Integer establecimientoId, Integer usuarioId, Integer platilloId) throws ReglaNegocioException {
@@ -268,6 +334,7 @@ public class MPlatillo {
             throw new ReglaNegocioException("No se puede eliminar: el platillo ya tiene pedidos. "
                     + "Márcalo como agotado para ocultarlo del menú.");
         }
+        borrarFoto(p);
         platilloFacade.remove(p);
     }
 

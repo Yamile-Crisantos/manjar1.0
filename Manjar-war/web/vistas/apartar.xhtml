@@ -22,18 +22,20 @@
 
             <ui:define name="ruta">
                 <ui:include src="/plantillas/migas.xhtml">
-                    <ui:param name="actual" value="Apartar"/>
+                    <ui:param name="actual" value="Apartar y mis pedidos"/>
                 </ui:include>
             </ui:define>
 
             <ui:define name="contenido">
+                <h:outputScript library="js" name="mj-pos.js"/>
+
                 <div class="mj-pagina-cab">
                     <div>
-                        <h1>Apartar platillos</h1>
+                        <h1>Apartar y mis pedidos</h1>
                         <p class="mj-lead">
-                            Hola, <h:outputText value="#{sesion.nombre}"/>. Elige tus platillos y la hora a la que pasas por ellos;
-                            te damos un código de comprobante. El negocio confirma tu apartado cuando recibe el pago
-                            y te avisa aquí mismo cuando esté listo.
+                            Hola, <h:outputText value="#{sesion.nombre}"/>. Elige tus platillos, di si es para llevar o para comer
+                            en el negocio y a qué hora pasas. Pagas un anticipo de #{apartarBean.porcentajeAnticipo} % para
+                            confirmarlo y el resto al recogerlo; te avisamos aquí cuando esté listo.
                         </p>
                     </div>
                     <h:link value="Volver al menú" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"
@@ -44,97 +46,192 @@
 
                 <!-- Actualización automática: estados, avisos y porciones, sin tocar el pedido que se está armando -->
                 <h:form id="formSondeo">
-                    <p:poll interval="15" listener="#{apartarBean.sondear}" process="@this" update=":panelMis :panelCarta"/>
+                    <p:poll interval="15" listener="#{apartarBean.sondear}" process="@this"
+                            update=":panelMis :panelCarta :panelContadores"/>
                 </h:form>
 
-                <div class="mj-op-cols">
+                <div class="mj-pos mj-cli" id="mjPos" data-vista="pedido">
 
-                    <!-- ============ Nuevo apartado ============ -->
-                    <section class="mj-op-col">
-                        <h2 class="mj-op-titulo">Nuevo apartado</h2>
+                    <h:panelGroup id="panelContadores" layout="block" styleClass="mj-pos-tabs">
+                        <button type="button" class="mj-pos-tab activa" data-vista="pedido">Apartar</button>
+                        <button type="button" class="mj-pos-tab" data-vista="estado">
+                            Mis apartados
+                            <h:outputText value="#{apartarBean.totalActivos}" styleClass="mj-contador" rendered="#{apartarBean.totalActivos gt 0}"/>
+                            <h:outputText value="#{apartarBean.totalListos} listo#{apartarBean.totalListos == 1 ? '' : 's'}"
+                                          styleClass="mj-contador listas" rendered="#{apartarBean.totalListos gt 0}"/>
+                        </button>
+                    </h:panelGroup>
 
-                        <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{not apartarBean.hayNegocio}">
-                            Para apartar, abre el menú de un negocio escaneando su código QR y presiona "Apartar platillos".
+                    <!-- ============ Apartar ============ -->
+                    <section class="mj-pos-pedido" aria-label="Nuevo apartado">
+
+                        <!-- Sin negocio: nunca es un callejón sin salida -->
+                        <h:panelGroup layout="block" styleClass="mj-elegir" rendered="#{not apartarBean.hayNegocio}">
+                            <h2 class="mj-op-titulo">¿Dónde quieres apartar?</h2>
+                            <p class="mj-lead">
+                                Cada negocio comparte su menú con su código QR. Si ya apartaste en alguno, lo encuentras abajo;
+                                si no, escribe su código.
+                            </p>
+                            <ui:include src="/WEB-INF/fragmentos/elegir-negocio.xhtml"/>
                         </h:panelGroup>
 
-                        <h:panelGroup layout="block" rendered="#{apartarBean.hayNegocio}">
-                            <p class="mj-negocio-apartar">En <strong><h:outputText value="#{apartarBean.negocioNombre}"/></strong></p>
-
-                            <h:form id="formApartado" styleClass="manjar-form mj-panel">
-                                <h:panelGroup id="panelCarrito" layout="block" styleClass="mj-carrito">
-                                    <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartarBean.carrito}">
-                                        Aún no has elegido platillos. Usa el botón + de la lista de abajo.
-                                    </h:panelGroup>
-                                    <ui:repeat var="l" value="#{apartarBean.carrito}">
-                                        <div class="mj-linea">
-                                            <div class="mj-linea-cab">
-                                                <strong><h:outputText value="#{l.nombre}"/></strong>
-                                                <span class="mj-linea-sub">$<h:outputText value="#{l.subtotal}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
-                                            </div>
-                                            <div class="mj-linea-ctl">
-                                                <p:commandButton icon="ui-icon-minus" title="Quitar una" styleClass="manjar-btn-sec"
-                                                                 action="#{apartarBean.menos(l)}" process="@this" update=":formApartado:panelCarrito"/>
-                                                <span class="mj-cant"><h:outputText value="#{l.cantidad}"/></span>
-                                                <p:commandButton icon="ui-icon-plus" title="Agregar una" styleClass="manjar-btn-sec"
-                                                                 action="#{apartarBean.mas(l)}" process="@this" update=":formApartado:panelCarrito"/>
-                                                <p:commandButton icon="ui-icon-trash" title="Quitar del apartado" styleClass="manjar-btn-peligro"
-                                                                 action="#{apartarBean.quitar(l)}" process="@this" update=":formApartado:panelCarrito"/>
-                                            </div>
-                                        </div>
-                                    </ui:repeat>
-                                    <h:panelGroup layout="block" styleClass="mj-total" rendered="#{not empty apartarBean.carrito}">
-                                        <span>#{apartarBean.porcionesCarrito} porciones</span>
-                                        <strong>Total: $<h:outputText value="#{apartarBean.totalCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
-                                    </h:panelGroup>
-                                </h:panelGroup>
-
-                                <div class="manjar-field">
-                                    <p:outputLabel for="hora" value="Hora a la que pasas por tu pedido (hoy)"/>
-                                    <p:selectOneMenu id="hora" value="#{apartarBean.hora}">
-                                        <f:selectItems value="#{apartarBean.horas}"/>
-                                    </p:selectOneMenu>
-                                    <h:panelGroup layout="block" styleClass="manjar-muted" rendered="#{empty apartarBean.horas}">
-                                        Ya no hay horarios disponibles para recoger hoy. Vuelve a apartar mañana.
-                                    </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="mj-pos-menu" rendered="#{apartarBean.hayNegocio}">
+                            <div class="mj-negocio-barra">
+                                <div>
+                                    <span class="mj-eyebrow">Apartando en</span>
+                                    <strong class="mj-negocio-apartar"><h:outputText value="#{apartarBean.negocioNombre}"/></strong>
                                 </div>
-                                <p class="manjar-muted">
-                                    Tu apartado se libera solo si el negocio no recibe el pago en #{apartarBean.minutosRetencion} minutos.
-                                </p>
-                                <div class="manjar-form-actions">
-                                    <p:commandButton id="apartar" value="Apartar" action="#{apartarBean.apartar}"
-                                                     process="@form" update=":formApartado :panelMis :panelCarta"/>
-                                </div>
-                            </h:form>
+                                <details class="mj-cambiar">
+                                    <summary>Cambiar de negocio</summary>
+                                    <ui:include src="/WEB-INF/fragmentos/elegir-negocio.xhtml">
+                                        <ui:param name="sufijo" value="Otro"/>
+                                    </ui:include>
+                                </details>
+                            </div>
+
+                            <div class="mj-buscador">
+                                <input type="search" id="mjBuscar" placeholder="Buscar platillo…" autocomplete="off"
+                                       aria-label="Buscar platillo"/>
+                            </div>
 
                             <h:panelGroup id="panelCarta" layout="block" styleClass="mj-carta">
+                                <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartarBean.grupos}">
+                                    No hay platillos disponibles por ahora.
+                                </h:panelGroup>
+
+                                <h:panelGroup layout="block" styleClass="mj-chips" rendered="#{apartarBean.grupos.size() gt 1}">
+                                    <button type="button" class="mj-chip activo" data-cat="*">Todos</button>
+                                    <ui:repeat var="g" value="#{apartarBean.grupos}" varStatus="gs">
+                                        <button type="button" class="mj-chip" data-cat="#{gs.index}"><h:outputText value="#{g.categoria}"/></button>
+                                    </ui:repeat>
+                                </h:panelGroup>
+
                                 <h:form id="formCarta">
-                                    <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartarBean.grupos}">
-                                        No hay platillos disponibles por ahora.
-                                    </h:panelGroup>
-                                    <ui:repeat var="g" value="#{apartarBean.grupos}">
-                                        <h3 class="mj-carta-cat"><h:outputText value="#{g.categoria}"/></h3>
-                                        <ui:repeat var="it" value="#{g.items}">
-                                            <div class="mj-carta-item">
-                                                <div class="mj-carta-txt">
-                                                    <strong><h:outputText value="#{it.nombre}"/></strong>
-                                                    <span class="manjar-muted">
-                                                        $<h:outputText value="#{it.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
-                                                        <h:outputText value=" · quedan #{it.restante}" rendered="#{it.conControl}"/>
-                                                    </span>
-                                                </div>
-                                                <p:commandButton icon="ui-icon-plus" title="Agregar #{it.nombre}"
-                                                                 action="#{apartarBean.agregar(it.id)}" process="@this"
-                                                                 update=":formApartado:panelCarrito"/>
+                                    <ui:repeat var="g" value="#{apartarBean.grupos}" varStatus="gs">
+                                        <section class="mj-carta-grupo" data-cat="#{gs.index}">
+                                            <h3 class="mj-carta-cat"><h:outputText value="#{g.categoria}"/></h3>
+                                            <div class="mj-carta-grid">
+                                                <ui:repeat var="it" value="#{g.items}">
+                                                    <div class="mj-plato #{apartarBean.cantidadEnPedido(it.id) gt 0 ? 'en-pedido' : ''}">
+                                                        <p:commandLink styleClass="mj-plato-toque" title="Agregar #{it.nombre}"
+                                                                       action="#{apartarBean.agregar(it.id)}" process="@this"
+                                                                       update=":formApartado:panelResumen :formApartado:panelCarrito :panelCarta">
+                                                            <h:panelGroup rendered="#{it.conImagen}">
+                                                                <img class="mj-plato-foto" src="#{fmt.imagen(it.imagenUrl)}" alt="" loading="lazy"/>
+                                                            </h:panelGroup>
+                                                            <h:panelGroup rendered="#{not it.conImagen}">
+                                                                <span class="mj-plato-foto mj-plato-ico" aria-hidden="true"><i class="mj-ico i-#{fmt.icono(it.categoria)}"></i></span>
+                                                            </h:panelGroup>
+                                                            <span class="mj-plato-txt">
+                                                                <strong><h:outputText value="#{it.nombre}"/></strong>
+                                                                <span class="manjar-muted">
+                                                                    $<h:outputText value="#{it.precio}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                                                                    <h:outputText value=" · quedan #{it.restante}" rendered="#{it.conControl}"/>
+                                                                </span>
+                                                            </span>
+                                                            <span class="mj-plato-mas" aria-hidden="true">+</span>
+                                                            <h:outputText value="#{apartarBean.cantidadEnPedido(it.id)}" styleClass="mj-plato-cant"
+                                                                          rendered="#{apartarBean.cantidadEnPedido(it.id) gt 0}"/>
+                                                        </p:commandLink>
+                                                    </div>
+                                                </ui:repeat>
                                             </div>
-                                        </ui:repeat>
+                                        </section>
                                     </ui:repeat>
                                 </h:form>
+                                <p class="mj-vacio mj-sin-resultados oculto">Ningún platillo coincide con tu búsqueda.</p>
                             </h:panelGroup>
                         </h:panelGroup>
+
+                        <!-- Tu apartado: columna fija junto al menú; en el celular es una barra inferior que se abre -->
+                        <ui:fragment rendered="#{apartarBean.hayNegocio}">
+                            <aside class="mj-pos-carrito" id="mjCarrito" aria-label="Tu apartado">
+                                <h:form id="formApartado" styleClass="manjar-form">
+
+                                    <h:panelGroup id="panelResumen" layout="block" styleClass="mj-pedido-resumen">
+                                        <span class="mj-pedido-titulo">Tu apartado</span>
+                                        <span class="mj-pedido-cifras">
+                                            <b>#{apartarBean.porcionesCarrito}</b> porciones ·
+                                            <strong>$<h:outputText value="#{apartarBean.totalCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                        </span>
+                                        <span class="mj-pedido-abrir" aria-hidden="true"></span>
+                                    </h:panelGroup>
+
+                                    <div class="mj-pedido-cuerpo">
+                                        <div class="mj-tipo">
+                                            <p:selectOneButton id="tipoEntrega" value="#{apartarBean.tipoEntrega}">
+                                                <f:selectItem itemLabel="Para llevar" itemValue="LLEVAR"/>
+                                                <f:selectItem itemLabel="Comer aquí" itemValue="AQUI"/>
+                                            </p:selectOneButton>
+                                            <span class="mj-ayuda">Si comes en el negocio no necesitas mesa: te la asignan al llegar.</span>
+                                        </div>
+
+                                        <div class="manjar-field mj-hora">
+                                            <p:outputLabel for="hora" value="¿A qué hora pasas por tu pedido? (hoy)"/>
+                                            <p:selectOneMenu id="hora" value="#{apartarBean.hora}">
+                                                <f:selectItems value="#{apartarBean.horas}"/>
+                                            </p:selectOneMenu>
+                                            <h:panelGroup layout="block" styleClass="manjar-muted" rendered="#{empty apartarBean.horas}">
+                                                Ya no hay horarios disponibles para recoger hoy. Vuelve a apartar mañana.
+                                            </h:panelGroup>
+                                        </div>
+
+                                        <h:panelGroup id="panelCarrito" layout="block" styleClass="mj-carrito">
+                                            <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartarBean.carrito}">
+                                                Aún no has elegido platillos. Toca uno del menú para agregarlo.
+                                            </h:panelGroup>
+                                            <ui:repeat var="l" value="#{apartarBean.carrito}">
+                                                <div class="mj-linea">
+                                                    <div class="mj-linea-cab">
+                                                        <strong><h:outputText value="#{l.nombre}"/></strong>
+                                                        <span class="mj-linea-sub">$<h:outputText value="#{l.subtotal}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></span>
+                                                    </div>
+                                                    <div class="mj-linea-ctl">
+                                                        <p:commandButton icon="ui-icon-minus" title="Quitar una" styleClass="manjar-btn-sec"
+                                                                         action="#{apartarBean.menos(l)}" process="@this"
+                                                                         update=":formApartado:panelResumen :formApartado:panelCarrito :panelCarta"/>
+                                                        <span class="mj-cant"><h:outputText value="#{l.cantidad}"/></span>
+                                                        <p:commandButton icon="ui-icon-plus" title="Agregar una" styleClass="manjar-btn-sec"
+                                                                         action="#{apartarBean.mas(l)}" process="@this"
+                                                                         update=":formApartado:panelResumen :formApartado:panelCarrito :panelCarta"/>
+                                                        <p:commandButton icon="ui-icon-trash" title="Quitar del apartado" styleClass="manjar-btn-peligro"
+                                                                         action="#{apartarBean.quitar(l)}" process="@this"
+                                                                         update=":formApartado:panelResumen :formApartado:panelCarrito :panelCarta"/>
+                                                    </div>
+                                                </div>
+                                            </ui:repeat>
+                                            <h:panelGroup layout="block" styleClass="mj-total" rendered="#{not empty apartarBean.carrito}">
+                                                <span>#{apartarBean.porcionesCarrito} porciones</span>
+                                                <strong>Total: $<h:outputText value="#{apartarBean.totalCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                            </h:panelGroup>
+                                            <h:panelGroup layout="block" styleClass="mj-desglose" rendered="#{not empty apartarBean.carrito and apartarBean.conAnticipo}">
+                                                <div class="mj-desglose-fila destacada">
+                                                    <span>Anticipo (#{apartarBean.porcentajeAnticipo}&#160;%) para confirmar</span>
+                                                    <strong>$<h:outputText value="#{apartarBean.anticipoCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </div>
+                                                <div class="mj-desglose-fila">
+                                                    <span>Resto al recoger</span>
+                                                    <strong>$<h:outputText value="#{apartarBean.saldoCarrito}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </div>
+                                            </h:panelGroup>
+                                        </h:panelGroup>
+
+                                        <p class="manjar-muted mj-retencion">
+                                            Tu apartado se libera solo si el negocio no recibe el anticipo en #{apartarBean.minutosRetencion} minutos.
+                                        </p>
+                                        <div class="manjar-form-actions">
+                                            <p:commandButton id="apartar" value="Apartar" action="#{apartarBean.apartar}"
+                                                             process="@form" update=":formApartado :panelMis :panelCarta :panelContadores"
+                                                             oncomplete="if (!args.validationFailed) { mjPos.cerrarPedido(); mjPos.mostrar('estado'); }"/>
+                                        </div>
+                                    </div>
+                                </h:form>
+                            </aside>
+                        </ui:fragment>
                     </section>
 
                     <!-- ============ Mis apartados ============ -->
-                    <section class="mj-op-col">
+                    <section class="mj-pos-estado" aria-label="Mis apartados">
                         <h2 class="mj-op-titulo">Mis apartados</h2>
 
                         <h:panelGroup id="panelMis" layout="block">
@@ -158,50 +255,86 @@
                                 </h:panelGroup>
 
                                 <h:panelGroup layout="block" styleClass="mj-vacio" rendered="#{empty apartarBean.misApartados}">
-                                    Todavía no tienes apartados.
+                                    Todavía no tienes apartados. Cuando apartes tu primer pedido, aquí verás cómo avanza.
                                 </h:panelGroup>
 
-                                <ui:repeat var="a" value="#{apartarBean.misApartados}">
-                                    <article class="mj-apartado e-#{a.estado} #{a.id == apartarBean.recienCreado ? 'reciente' : ''}">
-                                        <header class="mj-apartado-cab">
-                                            <div>
-                                                <span class="mj-codigo">#{a.codigoVisible}</span>
-                                                <span class="manjar-muted"><h:outputText value="#{a.negocioNombre}"/></span>
+                                <div class="mj-tickets">
+                                    <ui:repeat var="a" value="#{apartarBean.misApartados}">
+                                        <article class="mj-apartado e-#{a.estado} #{a.id == apartarBean.recienCreado ? 'reciente' : ''}">
+                                            <header class="mj-apartado-cab">
+                                                <div>
+                                                    <span class="mj-codigo">#{a.codigoVisible}</span>
+                                                    <span class="manjar-muted"><h:outputText value="#{a.negocioNombre}"/></span>
+                                                </div>
+                                                <span class="mj-estado e-#{a.estado}">#{a.estadoTexto}</span>
+                                            </header>
+
+                                            <!-- Barra de avance: pedido tomado, en preparación, listo, entregado -->
+                                            <h:panelGroup layout="block" styleClass="mj-progreso" rendered="#{a.paso gt 0}">
+                                                <ol class="mj-pasos-barra paso-#{a.paso}">
+                                                    <li class="#{a.paso gt 1 ? 'hecho' : 'actual'}"><span>Pedido tomado</span></li>
+                                                    <li class="#{a.paso gt 2 ? 'hecho' : (a.paso == 2 ? 'actual' : '')}"><span>En preparación</span></li>
+                                                    <li class="#{a.paso gt 3 ? 'hecho' : (a.paso == 3 ? 'actual' : '')}"><span>Listo</span></li>
+                                                    <li class="#{a.paso ge 4 ? 'hecho' : ''}"><span>Entregado</span></li>
+                                                </ol>
+                                            </h:panelGroup>
+
+                                            <div class="mj-apartado-hora">
+                                                <span>
+                                                    <h:outputText value="#{a.entregado ? 'Entregado' : 'Recoges hoy a las'}"/>
+                                                    <strong>#{fmt.hora(a.entregado ? a.fechaEntrega : a.horaRecoleccion)}</strong>
+                                                </span>
+                                                <span class="mj-chip-tipo #{a.aqui ? 'aqui' : ''}">#{a.tipoEntregaTexto}</span>
                                             </div>
-                                            <span class="mj-estado e-#{a.estado}">#{a.estadoTexto}</span>
-                                        </header>
-                                        <ul class="mj-ticket-lineas">
-                                            <ui:repeat var="l" value="#{a.lineas}">
-                                                <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/></li>
-                                            </ui:repeat>
-                                        </ul>
-                                        <footer class="mj-ticket-pie">
-                                            <span class="manjar-muted">Recoges hoy a las #{fmt.hora(a.horaRecoleccion)}</span>
-                                            <strong>Total: $<h:outputText value="#{a.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
-                                        </footer>
 
-                                        <h:panelGroup layout="block" styleClass="mj-apartado-nota" rendered="#{a.pendiente}">
-                                            Para confirmarlo, paga $<h:outputText value="#{a.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
-                                            en <h:outputText value="#{a.negocioNombre}"/> (efectivo, tarjeta o transferencia) y muestra este código.
-                                            Se libera en #{a.minutosParaVencer} min si no se paga.
-                                        </h:panelGroup>
-                                        <h:panelGroup layout="block" styleClass="mj-apartado-nota ok" rendered="#{a.pagado}">
-                                            Pago recibido. Te avisaremos aquí cuando tu pedido esté listo.
-                                        </h:panelGroup>
-                                        <h:panelGroup layout="block" styleClass="mj-apartado-nota ok" rendered="#{a.listo}">
-                                            ¡Tu pedido está listo! Muestra el código <strong>#{a.codigoVisible}</strong> al recogerlo.
-                                        </h:panelGroup>
+                                            <ul class="mj-ticket-lineas">
+                                                <ui:repeat var="l" value="#{a.lineas}">
+                                                    <li><b>#{l.cantidad} ×</b> <h:outputText value="#{l.nombre}"/></li>
+                                                </ui:repeat>
+                                            </ul>
 
-                                        <div class="mj-ticket-acc">
-                                            <p:commandButton value="Cancelar apartado" styleClass="manjar-btn-peligro" rendered="#{a.pendiente}"
-                                                             action="#{apartarBean.cancelar(a.id)}" process="@this"
-                                                             update=":panelMis :panelCarta">
-                                                <p:confirm header="Cancelar apartado" icon="ui-icon-alert"
-                                                           message="¿Cancelar el apartado #{a.codigoVisible}? Las porciones regresarán al menú."/>
-                                            </p:commandButton>
-                                        </div>
-                                    </article>
-                                </ui:repeat>
+                                            <div class="mj-desglose">
+                                                <div class="mj-desglose-fila">
+                                                    <span>Total</span>
+                                                    <strong>$<h:outputText value="#{a.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </div>
+                                                <h:panelGroup layout="block" styleClass="mj-desglose-fila" rendered="#{a.conSaldo and (a.pendiente or a.pagado or a.listo or a.entregado)}">
+                                                    <span>#{a.pendiente ? 'Anticipo por pagar' : 'Anticipo pagado'}</span>
+                                                    <strong>$<h:outputText value="#{a.anticipo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </h:panelGroup>
+                                                <h:panelGroup layout="block" styleClass="mj-desglose-fila" rendered="#{a.conSaldo and (a.pendiente or a.pagado or a.listo)}">
+                                                    <span>Resto al recoger</span>
+                                                    <strong>$<h:outputText value="#{a.saldo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </h:panelGroup>
+                                                <h:panelGroup layout="block" styleClass="mj-desglose-fila" rendered="#{a.entregado and a.conSaldo}">
+                                                    <span>Resto pagado al recoger</span>
+                                                    <strong>$<h:outputText value="#{a.saldo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText></strong>
+                                                </h:panelGroup>
+                                            </div>
+
+                                            <h:panelGroup layout="block" styleClass="mj-apartado-nota" rendered="#{a.pendiente}">
+                                                Para confirmarlo, paga #{a.conSaldo ? 'el anticipo de' : ''} $<h:outputText value="#{a.anticipo}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                                                en <h:outputText value="#{a.negocioNombre}"/> (efectivo, tarjeta o transferencia) y muestra este código.
+                                                Se libera en #{a.minutosParaVencer} min si no se paga.
+                                            </h:panelGroup>
+                                            <h:panelGroup layout="block" styleClass="mj-apartado-nota ok" rendered="#{a.pagado}">
+                                                #{a.conSaldo ? 'Anticipo recibido.' : 'Pago recibido.'} Estamos preparando tu pedido y te avisaremos aquí cuando esté listo.
+                                            </h:panelGroup>
+                                            <h:panelGroup layout="block" styleClass="mj-apartado-nota ok" rendered="#{a.listo}">
+                                                ¡Tu pedido está listo! Muestra el código <strong>#{a.codigoVisible}</strong> al recogerlo<h:outputText value=" y paga el resto." rendered="#{a.conSaldo}"/>
+                                            </h:panelGroup>
+
+                                            <div class="mj-ticket-acc">
+                                                <p:commandButton value="Cancelar apartado" styleClass="manjar-btn-peligro" rendered="#{a.pendiente}"
+                                                                 action="#{apartarBean.cancelar(a.id)}" process="@this"
+                                                                 update=":panelMis :panelCarta :panelContadores">
+                                                    <p:confirm header="Cancelar apartado" icon="ui-icon-alert"
+                                                               message="¿Cancelar el apartado #{a.codigoVisible}? Las porciones regresarán al menú."/>
+                                                </p:commandButton>
+                                            </div>
+                                        </article>
+                                    </ui:repeat>
+                                </div>
                             </h:form>
                         </h:panelGroup>
                     </section>

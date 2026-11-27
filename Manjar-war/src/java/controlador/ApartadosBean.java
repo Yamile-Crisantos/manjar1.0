@@ -42,6 +42,9 @@ public class ApartadosBean implements Serializable {
 
     /** Código que se escribe en cada apartado listo, para entregarlo (la llave es el id del apartado). */
     private final Map<Integer, String> codigos = new HashMap<>();
+    /** Cómo paga el cliente el resto al entregar y su referencia (la llave es el id del apartado). */
+    private final Map<Integer, String> metodosSaldo = new HashMap<>();
+    private final Map<Integer, String> referenciasSaldo = new HashMap<>();
 
     // Registro de pago (ventana)
     private ApartadoVista seleccionado;
@@ -90,7 +93,10 @@ public class ApartadosBean implements Serializable {
         try {
             ApartadoVista a = mApartado.registrarPago(sesion.getEstablecimientoId(), sesion.getUsuarioId(),
                     seleccionado.getId(), metodo, referencia);
-            Mensajes.info("Pago registrado: apartado " + a.getCodigoVisible() + ", $" + a.getTotal().setScale(2, RoundingMode.HALF_UP).toPlainString() + ".");
+            Mensajes.info((a.isConSaldo() ? "Anticipo registrado: apartado " : "Pago registrado: apartado ") + a.getCodigoVisible()
+                    + ", $" + a.getAnticipo().setScale(2, RoundingMode.HALF_UP).toPlainString()
+                    + (a.isConSaldo() ? ". El resto ($" + a.getSaldo().setScale(2, RoundingMode.HALF_UP).toPlainString()
+                            + ") se cobra al entregar." : "."));
             seleccionado = null;
         } catch (ReglaNegocioException e) {
             Mensajes.error(e.getMessage());
@@ -121,10 +127,14 @@ public class ApartadosBean implements Serializable {
 
     public void entregar(Integer apartadoId) {
         try {
+            String metodo = metodosSaldo.get(apartadoId);
             ApartadoVista a = mApartado.entregar(sesion.getEstablecimientoId(), sesion.getUsuarioId(), apartadoId,
-                    codigos.get(apartadoId));
-            Mensajes.info("Apartado " + a.getCodigoVisible() + " entregado.");
+                    codigos.get(apartadoId), metodo == null ? Constantes.METODO_EFECTIVO : metodo, referenciasSaldo.get(apartadoId));
+            Mensajes.info("Apartado " + a.getCodigoVisible() + " entregado"
+                    + (a.isConSaldo() ? "; se cobró el resto ($" + a.getSaldo().setScale(2, RoundingMode.HALF_UP).toPlainString() + ")." : "."));
             codigos.remove(apartadoId);
+            metodosSaldo.remove(apartadoId);
+            referenciasSaldo.remove(apartadoId);
         } catch (ReglaNegocioException e) {
             Mensajes.error(e.getMessage());
         }
@@ -166,6 +176,18 @@ public class ApartadosBean implements Serializable {
 
     public Map<Integer, String> getCodigos() {
         return codigos;
+    }
+
+    public Map<Integer, String> getMetodosSaldo() {
+        return metodosSaldo;
+    }
+
+    public Map<Integer, String> getReferenciasSaldo() {
+        return referenciasSaldo;
+    }
+
+    public int getPorcentajeAnticipo() {
+        return MApartado.ANTICIPO_PCT;
     }
 
     public ApartadoVista getSeleccionado() {

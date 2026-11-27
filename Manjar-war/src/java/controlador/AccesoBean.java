@@ -2,8 +2,6 @@ package controlador;
 
 import java.io.Serializable;
 import javax.ejb.EJB;
-import javax.faces.application.ProjectStage;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,9 +46,12 @@ public class AccesoBean implements Serializable {
         }
     }
 
-    /** Solo en etapa de desarrollo mostramos las cuentas de prueba. */
-    public boolean isModoDesarrollo() {
-        return FacesContext.getCurrentInstance().isProjectStage(ProjectStage.Development);
+    /**
+     * Los accesos rápidos con las cuentas de demostración solo se muestran si el servidor se arranca con
+     * -Dmanjar.demo=true (para revisar o presentar el sistema). Sin esa opción, la pantalla no los muestra nunca.
+     */
+    public boolean isModoDemo() {
+        return Boolean.getBoolean("manjar.demo");
     }
 
     public String getCorreo() {

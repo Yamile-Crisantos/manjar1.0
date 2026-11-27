@@ -45,6 +45,15 @@ public class PlatillosBean implements Serializable {
 
     private String nuevaCategoria;
 
+    /** Foto nueva que eligió el dueño ("data:image/jpeg;base64,..."): la reduce el navegador antes de enviarla. */
+    private String imagenArchivo;
+    /** true si el dueño pidió quitar la foto. */
+    private boolean quitarImagen;
+    /** La foto que ya tiene el platillo que se edita (para mostrarla); vacío si no tiene. */
+    private String imagenActual;
+    /** true si la foto actual es un enlace (se muestra en el campo del enlace); false si es una foto subida. */
+    private boolean imagenActualEsEnlace;
+
     @PostConstruct
     public void init() {
         cargar();
@@ -70,6 +79,7 @@ public class PlatillosBean implements Serializable {
         platillo.setCantidadRestante(0);
         categoriaId = categorias.isEmpty() ? null : categorias.get(0).getId();
         disponible = true;
+        reiniciarImagen(null);
     }
 
     public void editar(Platillo seleccionado) {
@@ -85,12 +95,28 @@ public class PlatillosBean implements Serializable {
         platillo = copia;
         categoriaId = seleccionado.getCategoriaid() == null ? null : seleccionado.getCategoriaid().getId();
         disponible = seleccionado.getEstado() != null && seleccionado.getEstado() == 1;
+        reiniciarImagen(seleccionado.getImagenurl());
+        // Un enlace se muestra en su campo; una foto subida solo se ve en la vista previa
+        copia.setImagenurl(imagenActualEsEnlace ? seleccionado.getImagenurl() : null);
+    }
+
+    private void reiniciarImagen(String actual) {
+        imagenArchivo = null;
+        quitarImagen = false;
+        imagenActual = actual == null || actual.trim().isEmpty() ? null : actual;
+        imagenActualEsEnlace = imagenActual != null && imagenActual.toLowerCase().startsWith("http");
     }
 
     public void guardar() {
         try {
             boolean eraNuevo = platillo.getId() == null;
-            mPlatillo.guardar(sesion.getEstablecimientoId(), sesion.getUsuarioId(), categoriaId, platillo, disponible);
+            boolean sinEnlace = platillo.getImagenurl() == null || platillo.getImagenurl().trim().isEmpty();
+            boolean sinArchivo = imagenArchivo == null || imagenArchivo.trim().isEmpty();
+            // Si tenía un enlace y lo dejó vacío (sin subir otra foto), es que quiere quitar la foto
+            boolean quitar = quitarImagen || (imagenActualEsEnlace && sinEnlace && sinArchivo);
+            mPlatillo.guardar(sesion.getEstablecimientoId(), sesion.getUsuarioId(), categoriaId, platillo, disponible,
+                    imagenArchivo, quitar);
+            reiniciarImagen(null);
             Mensajes.info(eraNuevo ? "Platillo agregado al menú." : "Platillo actualizado.");
             cargar();
         } catch (ReglaNegocioException e) {
@@ -190,6 +216,27 @@ public class PlatillosBean implements Serializable {
 
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
+    }
+
+    public String getImagenArchivo() {
+        return imagenArchivo;
+    }
+
+    public void setImagenArchivo(String imagenArchivo) {
+        this.imagenArchivo = imagenArchivo;
+    }
+
+    public boolean isQuitarImagen() {
+        return quitarImagen;
+    }
+
+    public void setQuitarImagen(boolean quitarImagen) {
+        this.quitarImagen = quitarImagen;
+    }
+
+    /** Foto que ya tiene el platillo en edición (enlace o ruta interna); null si no tiene. */
+    public String getImagenActual() {
+        return imagenActual;
     }
 
     public String getNuevaCategoria() {

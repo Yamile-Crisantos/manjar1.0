@@ -72,6 +72,15 @@ public final class Constantes {
     public static final String APARTADO_VENCIDO = "VENCIDO";
 
     public static final String PAGO_CONFIRMADO = "CONFIRMADO";
+    /** Lo que se paga al apartar (por omisión el 50 % del total). */
+    public static final String PAGO_ANTICIPO = "ANTICIPO";
+    /** El resto, que se cobra en caja al entregar el pedido. */
+    public static final String PAGO_SALDO = "SALDO";
+
+    /** El apartado se recoge para llevar. */
+    public static final String ENTREGA_LLEVAR = "LLEVAR";
+    /** El apartado se come en el negocio; no se asigna mesa. */
+    public static final String ENTREGA_AQUI = "AQUI";
 
     public static final String NOTIF_NUEVA = "PENDIENTE";
     public static final String NOTIF_LEIDA = "LEIDA";

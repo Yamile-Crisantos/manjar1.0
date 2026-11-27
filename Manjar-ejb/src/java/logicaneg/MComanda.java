@@ -58,7 +58,8 @@ public class MComanda {
     // ------------------------------------------------------------------
     /**
      * @param tipo   MESA o LLEVAR
-     * @param mesa   número o nombre de la mesa; en "para llevar" es el nombre de quien recoge (opcional)
+     * @param mesa   "mesa o nombre": en "comer aquí" (MESA) es obligatorio (el número de la mesa o el nombre de quien
+     *               pide); en "para llevar" es el nombre de quien recoge (opcional)
      * @param pedido lo que se pidió
      */
     public ComandaVista crear(Integer establecimientoId, Integer usuarioId, String tipo, String mesa,
@@ -73,10 +74,10 @@ public class MComanda {
         List<LineaPedido> lineas = unirLineas(pedido);
         String m = limpiar(mesa);
         if (Constantes.TIPO_MESA.equals(t) && m == null) {
-            throw new ReglaNegocioException("Escribe el número o nombre de la mesa.");
+            throw new ReglaNegocioException("Escribe la mesa o un nombre para identificar la comanda.");
         }
         if (m != null && m.length() > MESA_MAX) {
-            throw new ReglaNegocioException("El nombre de la mesa puede tener hasta " + MESA_MAX + " caracteres.");
+            throw new ReglaNegocioException("La mesa o el nombre puede tener hasta " + MESA_MAX + " caracteres.");
         }
 
         // Porciones totales por platillo; se descuentan en orden de id para no cruzar bloqueos entre meseros

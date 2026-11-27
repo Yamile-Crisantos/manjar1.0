@@ -3,7 +3,9 @@
  * (qrcode-generator, licencia MIT) a partir de:
  *   - la dirección del servidor (por defecto, la de esta misma página), y
  *   - la ruta del menú del negocio, que entrega el servidor en data-ruta.
- * Permite descargar la imagen en PNG e imprimir la hoja.
+ * Permite descargar la imagen en PNG, imprimir la hoja y copiar el enlace (mj-copiar.js).
+ * Si la dirección es la de la propia computadora (localhost), avisa que un celular no podrá abrirla y ofrece
+ * las direcciones de la computadora en la red local.
  */
 (function () {
     var COLOR_QR = '#2e2521';
@@ -97,8 +99,18 @@
         if (!campo) {
             return;
         }
-        campo.value = window.location.origin;
+        // Por omisión, la dirección pública configurada en el servidor (-Dmanjar.url.publica) o, si no hay, la de esta página
+        var base = el('mj-qr-datos').getAttribute('data-base');
+        campo.value = base || window.location.origin;
         campo.addEventListener('input', dibujar);
+        // Direcciones de la computadora en la red: un toque las pone en el campo
+        document.addEventListener('click', function (e) {
+            var b = e.target && e.target.closest ? e.target.closest('.mj-qr-red') : null;
+            if (b) {
+                campo.value = b.getAttribute('data-url');
+                dibujar();
+            }
+        });
         dibujar();
     });
 })();

@@ -70,6 +70,13 @@ public class Pago implements Serializable {
     @ManyToOne(optional = false)
     private Apartado apartadoid;
 
+    /** ANTICIPO (al apartar) o SALDO (el resto, al entregar). */
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 10)
+    @Column(name = "CONCEPTO")
+    private String concepto;
+
     /** Quién confirmó que el pago se recibió. */
     @JoinColumn(name = "REGISTRADOPORID", referencedColumnName = "ID")
     @ManyToOne
@@ -142,6 +149,14 @@ public class Pago implements Serializable {
 
     public void setApartadoid(Apartado apartadoid) {
         this.apartadoid = apartadoid;
+    }
+
+    public String getConcepto() {
+        return concepto;
+    }
+
+    public void setConcepto(String concepto) {
+        this.concepto = concepto;
     }
 
     public Usuario getRegistradoporid() {

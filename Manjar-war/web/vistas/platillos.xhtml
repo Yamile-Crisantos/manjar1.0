@@ -18,13 +18,15 @@
             </ui:define>
 
             <ui:define name="contenido">
+                <h:outputScript library="js" name="mj-foto.js"/>
                 <div class="mj-pagina-cab">
                     <div>
                         <p class="mj-eyebrow">#{sesion.establecimientoNombre}</p>
                         <h1>Administrar platillos</h1>
                         <p class="mj-lead">
-                            Crea y edita tus platillos. Si pones porciones del día, el platillo se marca
-                            como agotado solo cuando se terminan.
+                            Crea y edita tus platillos. Toca el recuadro de la columna Foto para ponerle o cambiarle
+                            la imagen a un platillo. Si pones porciones del día, el platillo se marca como agotado
+                            solo cuando se terminan.
                         </p>
                     </div>
                     <h:link value="Ver menú público" outcome="/vistas/menu" styleClass="manjar-btn manjar-btn-sec"/>
@@ -58,9 +60,25 @@
                 </h:form>
 
                 <h:form id="formTabla">
-                    <p:dataTable id="tabla" var="pl" value="#{platillosBean.platillos}" rowKey="#{pl.id}"
+                    <p:dataTable id="tabla" styleClass="mj-tabla-platillos" var="pl" value="#{platillosBean.platillos}" rowKey="#{pl.id}"
                                  paginator="true" rows="10" paginatorPosition="bottom"
                                  emptyMessage="Aún no hay platillos. Agrega el primero con “Nuevo platillo”.">
+
+                        <p:column headerText="Foto" styleClass="mj-col-foto">
+                            <p:commandLink styleClass="mj-foto-celda #{empty fmt.imagen(pl.imagenurl) ? 'sin-foto' : 'con-foto'}"
+                                           title="#{empty fmt.imagen(pl.imagenurl) ? 'Agregar foto' : 'Cambiar foto'}"
+                                           action="#{platillosBean.editar(pl)}" process="@this" resetValues="true"
+                                           update=":dlgPlatillo" oncomplete="PF('dlgPlatillo').show()">
+                                <h:panelGroup rendered="#{not empty fmt.imagen(pl.imagenurl)}">
+                                    <img class="mj-miniatura" src="#{fmt.imagen(pl.imagenurl)}" alt="Foto de #{pl.nombre}" loading="lazy"/>
+                                    <span class="mj-foto-cambiar">Cambiar</span>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{empty fmt.imagen(pl.imagenurl)}">
+                                    <i class="mj-ico i-camara" aria-hidden="true"></i>
+                                    <span class="mj-foto-agregar">Agregar foto</span>
+                                </h:panelGroup>
+                            </p:commandLink>
+                        </p:column>
 
                         <p:column headerText="Platillo" sortBy="#{pl.nombre}">
                             <strong>#{pl.nombre}</strong><br/>
@@ -103,9 +121,33 @@
                     </p:dataTable>
                 </h:form>
 
-                <p:dialog id="dlgPlatillo" widgetVar="dlgPlatillo" header="Platillo" modal="true"
-                          resizable="false" draggable="false" showEffect="fade" width="460">
+                <p:dialog id="dlgPlatillo" widgetVar="dlgPlatillo" header="Platillo y foto" modal="true"
+                          resizable="false" draggable="false" showEffect="fade" width="520" styleClass="mj-dialogo">
                     <h:form id="formPlatillo" styleClass="manjar-form">
+                        <!-- Foto (va primero para que se vea sin bajar): se elige, se arrastra, se pega o se escribe su enlace (mj-foto.js) -->
+                        <div class="manjar-field mj-foto #{empty fmt.imagen(platillosBean.imagenActual) ? '' : 'con-foto'}" data-mj-foto="true">
+                            <label>Foto del platillo <span class="manjar-muted">(opcional, pero hace que se antoje)</span></label>
+                            <div class="mj-foto-zona">
+                                <img class="mj-foto-vista #{empty fmt.imagen(platillosBean.imagenActual) ? 'oculto' : ''}"
+                                     src="#{fmt.imagen(platillosBean.imagenActual)}" alt="Vista previa de la foto"/>
+                                <div class="mj-foto-vacio #{empty fmt.imagen(platillosBean.imagenActual) ? '' : 'oculto'}">
+                                    <strong>Arrastra una foto aquí</strong>
+                                    <span class="manjar-muted">o pégala con Ctrl+V</span>
+                                </div>
+                            </div>
+                            <div class="mj-foto-botones">
+                                <label class="manjar-btn manjar-btn-sec mj-foto-elegir">Elegir foto
+                                    <input type="file" class="mj-foto-archivo" accept="image/*"/>
+                                </label>
+                                <button type="button" class="manjar-btn manjar-btn-sec mj-foto-quitar #{empty fmt.imagen(platillosBean.imagenActual) ? 'oculto' : ''}">Quitar foto</button>
+                            </div>
+                            <p:inputText id="enlaceFoto" value="#{platillosBean.platillo.imagenurl}" maxlength="500"
+                                         styleClass="mj-foto-enlace" placeholder="…o pega el enlace de una foto (https://…)"/>
+                            <span class="mj-ayuda">Se reduce sola para que cargue rápido. Con un enlace, la foto vive en el otro sitio: si la quitan de allá, dejará de verse.</span>
+                            <p class="manjar-aviso warn mj-foto-aviso oculto" role="alert"></p>
+                            <h:inputHidden id="fotoArchivo" value="#{platillosBean.imagenArchivo}"/>
+                            <h:inputHidden id="quitarFoto" value="#{platillosBean.quitarImagen}"/>
+                        </div>
                         <div class="manjar-field">
                             <p:outputLabel for="nombre" value="Nombre"/>
                             <p:inputText id="nombre" value="#{platillosBean.platillo.nombre}" maxlength="255"
@@ -154,6 +196,7 @@
                             <p:selectBooleanCheckbox id="disponible" value="#{platillosBean.disponible}"
                                                      itemLabel="Disponible en el menú"/>
                         </div>
+
                         <div class="manjar-form-actions fin">
                             <p:commandButton value="Cancelar" type="button" styleClass="manjar-btn-sec"
                                              onclick="PF('dlgPlatillo').hide()"/>

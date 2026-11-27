@@ -1,5 +1,6 @@
 package controlador;
 
+import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -34,6 +35,16 @@ public class QrBean {
     /** Ruta del menú en este servidor (el navegador le antepone su dirección para armar el enlace completo). */
     public String getRutaMenu() {
         return getCodigo() == null ? "" : Enlaces.rutaMenu(getCodigo());
+    }
+
+    /** Dirección pública configurada con -Dmanjar.url.publica (vacía si no hay): es la que el QR usa por omisión. */
+    public String getUrlPublica() {
+        return Enlaces.urlPublicaConfigurada();
+    }
+
+    /** Direcciones de esta computadora en la red local, para probar el QR con un celular. */
+    public List<String> getDireccionesRed() {
+        return Enlaces.direccionesRed();
     }
 
     /** Dirección completa del menú, para mostrarla como texto. */
